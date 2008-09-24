@@ -1,0 +1,33 @@
+.maingroup {
+	position: absolute;
+	width: 1024px;
+	height: 768px;
+	overflow: scroll;	
+}
+
+.maindiv {
+	position: relative;
+	width: 1024px;
+	height: 768px;
+	overflow: scroll;
+}
+
+.econode{
+	position:absolute;
+	text-overflow:clip;
+	text-align:center;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size:xx-small;
+	padding-top: 10px;
+}
+
+a.ecolink:visited {
+	text-decoration: none;	
+	color: black;
+}
+
+a.ecolink:hover {
+	text-decoration: underline;
+}
+
+.relative { position:relative; }

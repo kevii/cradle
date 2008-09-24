@@ -1,0 +1,246 @@
+/************************************************************/
+/**************            banner           *****************/
+/************************************************************/
+#banner {
+	background-color: #E5ECF9;
+	padding-bottom: 30px;
+	text-align: center;
+	color: #3366CC;
+	font-family: "Times New Roman", Times, serif;
+	font-size: 35px;
+	font-variant: small-caps;
+	padding: 10px 0 0 10px;
+	border-bottom: 2px solid;
+}
+
+#banner img {
+	float: left;
+}
+
+#banner * {
+	vertical-align: middle;
+}
+/************************************************************/
+/**************            navigation             ***********/
+/************************************************************/
+#navigation {
+	padding-left: 90px;
+	padding-top: 10px;
+	padding-bottom: 50px;
+
+}
+
+#menu {
+    float: left;
+	font-size: 15px;
+}
+
+#navigation-login {
+    float: right;
+    text-align: right;
+	font-family: "Times New Roman", Times, serif;
+	font-weight: bold;
+	font-size: 13px;	
+}
+/************************************************************/
+/**************         main text size             ***********/
+/************************************************************/
+#main {
+	font-size:13px;
+}
+
+
+select, input {
+	font-size:13px;
+}
+/************************************************************/
+/**************            notice           *****************/
+/************************************************************/
+#notice {
+    border: 3px solid #fad163;
+    color: green;
+    margin-top: 1em;
+    margin-bottom: 2em;
+    margin-left: 1.5em;
+    margin-right: 43em;
+    background-color: #fff7d7 ;
+    font: bold smaller sans-serif;
+	font-size: 13px;
+}
+
+#notice_err { 
+	border: 3px solid red;
+    color: black;
+    margin-top: 1em;
+    margin-bottom: 2em;
+    margin-left: 1.5em;
+    margin-right: 43em;
+    background-color: whitesmoke;
+    font: bold smaller sans-serif;
+	font-size: 13px;
+}
+/************************************************************/
+/**************         list table css      *****************/
+/************************************************************/
+.list table {
+	font: normal 85%/150% Verdana, Arial, Helvetica, sans-serif;
+	border-collapse: collapse;
+	border: 3px solid #f0f8ff;
+	border-top: 5px double #87CEFA;
+	border-bottom: 5px double #87CEFA;
+}
+
+.list th {
+	font: bold 1.1em/120% Verdana, Arial, Helvetica, sans-serif;
+	padding: 5px 10px;
+	font-variant: small-caps;
+	color: #047;
+	font-weight: bold;
+	text-align: center;
+	letter-spacing: -1px;
+}
+
+.list thead th {
+	border: 1px solid #87CEFA;
+	white-space: nowrap;
+	background: #F0F8FF;
+}
+
+.list tbody td {
+	padding: 5px 10px;
+	background: #fff;
+	color: #000;
+	text-align: left;
+}
+
+/*#list tbody th {
+	color: #047;
+	font-weight: normal;
+	font-variant: normal;
+	font-size: 1em;
+}*/
+
+.list tbody th {
+	border: 1px solid #87CEFA;
+/*	white-space: nowrap;*/
+	background: #F0F8FF;
+	text-align: left;
+}
+
+.list tbody tr:hover td { color: #000; background-color: LavenderBlush; }
+
+.list tbody tr.odd:hover td {color: #000; background-color: LavenderBlush; }
+
+.list tbody tr.odd {
+	border: 1px solid #87CEFA;
+}
+
+.list tbody tr.odd td, tbody tr.odd th {
+	background: #F0F8FF;
+	border-top: 1px solid #87CEFA;
+	border-bottom: 1px solid #87CEFA;
+}
+
+.list tfoot td, tfoot th {
+	border: none;
+	padding-top: 10px;
+}
+
+.list caption {
+	font-family: "Georgia", serif;
+	letter-spacing: 5px;
+	font-style: italic;
+	text-align: left;
+	text-indent: 2em;
+	text-transform: uppercase;
+	font-size: 150%;
+	padding: 10px 0;
+	color: #047;
+}
+
+.list table th a:link {
+	color: #047;
+	text-decoration: none;
+}
+
+.list tbody tr td a:link {
+	color: #DC143C;
+	text-decoration: none;
+}
+
+.list tbody tr td a:visited{
+	color: #DC143C;
+	text-decoration: none;
+}
+
+.list tbody tr td a:active{
+	color: #000;
+	text-decoration: none;
+}
+
+.list tbody tr td a:hover{
+	color: red;
+	text-decoration: underline;
+}
+
+
+
+.list tbody td.special{	border: 2px solid #87CEFA; }
+
+.list tbody tr:hover td.special{ color: #000; background-color: #FFF; }
+
+.list tbody tr.odd:hover td.special{ color: #000; background-color: #FFF; }
+/************************************************************/
+/**************            pagination       *****************/
+/************************************************************/
+.pagination {
+	padding: 0px;
+	margin: 0px;
+	font-size: 10px;
+}
+
+.pagination a {
+	padding: 1px 3px 1px 3px;
+	margin: 1px;
+	border: 1px solid #aaaadd;
+	text-decoration: none;
+	color: #000099;
+}
+
+.pagination a:hover, .pagination a:active {
+	border: 1px solid #000099;
+	color: #000;
+}
+
+.pagination span.current {
+	padding: 1px 3px 1px 3px;
+	margin: 1px;
+	border: 1px solid #000099;
+	font-weight: bold;
+	background-color: #000099;
+	color: #FFF;
+}
+
+.pagination span.disabled {
+	padding: 1px 3px 1px 3px;
+	margin: 1px;
+	border: 1px solid #eee;
+	color: #ddd;
+}
+/************************************************************/
+/**************            User-control     *****************/
+/************************************************************/
+.User-control fieldset{
+    background: #efe;
+}
+
+.User-control legend{
+    color: #dfd;
+    background: #141;
+    font-family: sans-serif;
+    padding: 0.2em 1em;
+}
+
+.property_list th {	font: bold 1.1em/120% sans-serif; text-align: left;}
+.property_list {border-collapse: collapse;}
+.property_list tbody tr:hover { color: #000; background-color: lavender; }
