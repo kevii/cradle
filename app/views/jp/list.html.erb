@@ -1,0 +1,206 @@
+<div style="margin-left:2%;" >
+	<div>
+		<% form_tag :action => 'list', :method => "post",
+									   :static_condition=>@pass[:static_condition],
+                                   	   :dynamic_lexeme_condition=>@pass[:dynamic_lexeme_condition],
+                                   	   :dynamic_synthetic_condition=>@pass[:dynamic_synthetic_condition],
+									   :show_conditions => @pass[:show_conditions]  do %>
+			表示件数：
+	        <select id="per_page" name="per_page" style="width: 80px">
+	        	<%= options_for_select(per_page_list, @pass[:per_page].to_s ) %>
+	        </select>
+	        <%= submit_tag "Review" %>
+			<span style="padding-left:30px;">
+				<% if @list.index("dictionary") != nil %>
+					<%= link_to_function "辞書<=>色", :onclick=>"if(Element.visible('field_list'))Effect.SlideUp('field_list');Effect.SlideDown('dictionary_list');" %>
+				<% end %>
+			</span>
+			<span style="padding-left:30px;">
+				<%= link_to_function "表示フィールド", :onclick=>"if(Element.visible('dictionary_list'))Effect.SlideUp('dictionary_list');Effect.SlideDown('field_list');" %>
+			</span>
+
+		<% end %>
+	</div>
+	<div id ="field_list" align=center onclick="Effect.SlideUp('field_list');" style='display:none;'>
+		<table>
+			<tr><td column=5 align="center">単語属性</td></tr>
+			<tr><td></td></tr>
+			<tr><td column=5 align="center">複合語属性</td></tr>		
+		</table>
+	</div>
+	<% if @list.index("dictionary") != nil %>
+		<div id ="dictionary_list" align=center onclick="Effect.SlideUp('dictionary_list');" style='display:none;'>
+			<table>
+				<tr height=30>
+					<% dicts = JpProperty.find(:all, :order=>"property_cat_id ASC", :conditions=>["property_string='dictionary' and property_cat_id > 0"]) %>
+					<% dicts.each{|dict| %>
+						<td><span style='<%= "background-color:#{dictionary_color[dict.property_cat_id]};" %>'>&nbsp;&nbsp;</span>&nbsp;<%= dict.tree_string %></td>
+						<% if dicts.index(dict) !=0 and (dicts.index(dict)+1) % 5 == 0 %>
+							</tr><tr height=30>
+						<% else %>
+							<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<% end %>
+					<% } %>
+				</tr>
+			</table>
+		</div>
+	<% end %>
+	
+
+	
+	<div style="padding-top:15px; padding-bottom:15px;">
+		<%= will_paginate @jplexemes, :params => { :per_page=>@pass[:per_page], 
+												   :static_condition=>@pass[:static_condition],
+			                                   	   :dynamic_lexeme_condition=>@pass[:dynamic_lexeme_condition],
+			                                   	   :dynamic_synthetic_condition=>@pass[:dynamic_synthetic_condition],
+												   :show_conditions => @pass[:show_conditions] } %>
+	</div>
+	<div class="list">
+		<table>
+			<thead>
+			    <tr>
+			        <th scope="row" align=left >条件:</th>
+	                <td colspan=<%= @list.size %>><%= @pass[:show_conditions] %></td>
+	                <th align="right" ><%= @jplexemes.total_entries %>&nbsp;&nbsp;&nbsp;Hits</th>
+		        </tr>
+		    </thead>
+		    <thead>
+		        <tr>
+		            <th></th>
+					<th>ID</th>
+		            <% @list.each{|item|
+						if not initial_property_name[item].blank? %>
+							<th><%= initial_property_name[item] %></th>
+						<% else %>
+							<th><%= JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %></th>
+						<% end %>
+		            <% } %>
+		        </tr>
+		    </thead>
+		
+		    <tbody>
+		        <% odd_or_even =0 %>
+				<% for lexeme in @jplexemes do
+		    		odd_or_even = 1 - odd_or_even %> 
+			        <tr <%= "class='odd'" if odd_or_even == 0 %> >
+			            <td width=25px >
+			                <%= link_to '詳細', :action => 'show', :id => lexeme.id %>
+			            </td>
+			            <td align="left" ><%= h(lexeme.id) %></td>
+						<% @list.each do |item|
+							if not initial_property_name[item].blank?
+								case item
+									when "surface" %>
+										<td><%= link_to( h(lexeme.surface), "http://www.google.co.jp/search?hl=ja&q=#{lexeme.surface}") %></td>
+									<% when "reading", "pronunciation", "log" %>
+										<td><%= h(lexeme[item]) %></td>
+									<% when "base_id" %>
+										<td>
+											<%= link_to( h(lexeme.base.surface), :action=>"search", :search_type=>"base", :base_id=>lexeme.base_id ) %>
+										</td>
+									<% when "root_id" %>
+										<td style="text-align:center;" >
+											<% unless lexeme.root_id.blank? %>
+												<% if lexeme.root_id =~ /^R/ %>
+													<%= link_to( "<span style='background-color:#047;'>&nbsp;&nbsp;</span>", :action=>"search", :search_type=>"root", :root_id=>lexeme.root_id ) %>
+												<% else %>
+													<%= link_to( h(lexeme.root.surface), :action=>"search", :search_type=>"root", :root_id=>lexeme.root_id )%>
+												<% end %>
+											<% end %>
+										</td>
+									<% when "pos", "ctype", "cform", "tagging_state" %>
+										<td>
+											<% unless lexeme[item].blank? or lexeme[item] == 0 %>
+												<%= h(eval('lexeme.'+item+'_item.tree_string')) %>
+											<% end %>
+										</td>
+									<% when "created_by", "modified_by" %>
+										<td>
+											<% unless lexeme[item].blank? %>
+												<%= h(User.find(lexeme[item].to_i).name) %>
+											<% end %>
+										</td>
+									<% when "updated_at" %>
+										<td>
+											<% unless lexeme.updated_at.blank? %>
+												<%= h(lexeme.updated_at.to_formatted_s(:db)) %>
+											<% end %>
+										</td>
+									<% when "dictionary" %>
+										<td style="text-align:center;" >
+											<%	temp = []
+												lexeme.dictionary_item.list.each{|dict| temp << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>" }
+											%>
+											<%= temp.join("  ") %>
+										</td>
+									<% when "sth_struct" %>
+										<td style="text-align:center;" >
+											<% unless lexeme.struct.blank? %>
+												<span style='background-color:#047;'>&nbsp;&nbsp;</span>
+											<% end %>
+										</td>
+									<% when "sth_tagging_state" %>
+										<td>
+											<% unless lexeme.struct.blank? %>
+												<%= h(lexeme.struct.sth_tagging_state_item.tree_string) %>
+											<% end %>
+										</td>
+									<% when "sth_log" %>
+										<td><%= h(lexeme.struct.log) unless lexeme.struct.blank? %></td>
+									<% when "sth_modified_by" %>
+										<td><%= h(lexeme.struct.annotator.name) unless lexeme.struct.blank? %></td>
+									<% when "sth_updated_at" %>
+										<td><%= h(lexeme.struct.updated_at.to_formatted_s(:db)) unless lexeme.struct.blank? %></td>
+								<% end
+							else
+								property = JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]) 
+								if property.section == "lexeme"
+									temp = eval 'lexeme.'+item
+								elsif property.section == "synthetic"
+									if lexeme.struct.blank?
+										temp = ""
+									else
+										temp = eval 'lexeme.struct.'+item
+									end
+								end
+								if temp.blank? %>
+									<td></td>
+								<% else
+									case property.type_field
+										when "category" %>
+											<td><%= h(JpProperty.find(:first, :conditions=>["property_string='#{item}' and property_cat_id=#{temp.category}"]).tree_string) %></td>
+										<% when "text" %>
+											<td><%= h(temp.text) %></td>
+										<% when "time" %>
+											<td><%= h(temp.time.to_formatted_s(:db)) %></td>
+									<% end
+								end										
+							end
+						end %>
+			        </tr>
+		        <% end %>
+		    </tbody>
+			
+		    <thead>
+		        <tr>
+		            <th></th>
+					<th>ID</th>
+		            <% @list.each{|item|
+						if not initial_property_name[item].blank? %>
+							<th><%= initial_property_name[item] %></th>
+						<% else %>
+							<th><%= JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %></th>
+						<% end %>
+		            <% } %>
+		        </tr>
+		    </thead>
+		</table>
+	</div>
+	<div style="padding-top:15px; padding-bottom:15px;">
+		<%= will_paginate @jplexemes, :params => { :per_page=>@pass[:per_page], 
+												   :static_condition=>@pass[:static_condition],
+			                                   	   :dynamic_lexeme_condition=>@pass[:dynamic_lexeme_condition],
+			                                   	   :dynamic_synthetic_condition=>@pass[:dynamic_synthetic_condition],
+												   :show_conditions => @pass[:show_conditions] } %>
+	</div>
+</div>

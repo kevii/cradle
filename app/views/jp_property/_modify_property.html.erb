@@ -1,0 +1,54 @@
+<% if not flash.now[:notice_err].blank? %>
+	<div id="notice_err" ><%= flash.now[:notice_err] %></div>
+<% end %>
+<fieldset id="property_field" align="left" style="padding-top:10px; margin-bottom:30px; background: lightgrey;">
+    <legend style="background: steelblue;">
+		<% case @type_field
+			when "category" %>
+				<%= modify_property.blank? ? "新規分類属性" : "分類属性編集" %>
+			<% when "text" %>
+				<%= modify_property.blank? ? "新規文字属性" : "文字属性編集" %>
+			<% when "time" %>
+				<%= modify_property.blank? ? "新規時間属性" : "時間属性編集" %>
+		<% end %>
+	</legend>
+	<% form_remote_tag :url => { :action => "create_or_update_property" } do %>
+		<table class="property_list">
+			<thead>
+				<tr>
+					<th style="text-align:center; width:10%;">
+						<%= submit_tag '保存' %>
+						<%= hidden_field_tag :type_field, @type_field %>
+						<%= hidden_field_tag :section, @section %>
+						<%= hidden_field_tag :id, modify_property.id unless modify_property.blank? %>
+					</th>
+					<th style="width:30%;">
+						保存用ID
+						<% if modify_property.blank? %>
+							<%= text_field "string", "value", {:value=>"英数字と_のみ", :onclick=>"clear()", :class=>'text-field'} %>
+						<% else %>
+							<%= text_field 'string', 'value', {"value"=>modify_property.property_string, :class=>'text-field' } %>
+						<% end %>
+					</th>
+					<th style="width:30%;">
+						表示用名前
+						<% if modify_property.blank? %>
+							<%= text_field "human_name", "value", {:class=>'text-field'} %>
+						<% else %>
+							<%= text_field 'human_name', 'value', {"value"=>modify_property.human_name, :class=>'text-field' } %>
+						<% end %>
+					</th>
+					<th style="width:30%;">
+						記述
+						<% if modify_property.blank? %>
+							<%= text_field "desc", "value", {:class=>'text-field'} %>
+						<% else %>
+							<%= text_field 'desc', 'value', {"value"=>modify_property.description, :class=>'text-field' } %>
+						<% end %>
+					</th>
+				</tr>
+			</thead>
+		</table>
+	<% end %>
+</fieldset>
+<%= javascript_tag render(:update) { |page| page['property_field'].visual_effect :highlight } %>

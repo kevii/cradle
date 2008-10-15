@@ -1,7 +1,48 @@
 /************************************************************/
+/**************            error box        *****************/
+/************************************************************/
+.fieldWithErrors {
+	padding: 2px;
+	background-color: red;
+	display: table;
+}
+#errorExplanation {
+	width: 400px;
+	border: 2px solid red;
+	padding: 7px;
+	padding-bottom: 12px;
+	margin-bottom: 20px;
+	background-color: #f0f0f0 ;
+}
+#errorExplanation h2 {
+	text-align: left;
+	font-weight: bold;
+	padding: 5px 5px 5px 15px;
+	Report erratum
+	Prepared exclusively for Leah Halperin
+	THE FULL DEPOT APPLICATION 682
+	font-size: 12px;
+	margin: -7px;
+	background-color: #c00 ;
+	color: #fff ;
+}
+#errorExplanation p {
+	color: #333 ;
+	margin-bottom: 0;
+	padding: 5px;
+}
+#errorExplanation ul li {
+	font-size: 12px;
+	list-style: square;
+}
+
+
+
+/************************************************************/
 /**************            banner           *****************/
 /************************************************************/
 #banner {
+	padding-left:10%;
 	background-color: #E5ECF9;
 	padding-bottom: 30px;
 	text-align: center;
@@ -9,12 +50,8 @@
 	font-family: "Times New Roman", Times, serif;
 	font-size: 35px;
 	font-variant: small-caps;
-	padding: 10px 0 0 10px;
+	padding: 10px 10px 0 10px;
 	border-bottom: 2px solid;
-}
-
-#banner img {
-	float: left;
 }
 
 #banner * {
@@ -242,5 +279,20 @@ select, input {
 }
 
 .property_list th {	font: bold 1.1em/120% sans-serif; text-align: left;}
-.property_list {border-collapse: collapse;}
+.property_list {border-collapse: collapse; width:100%;}
 .property_list tbody tr:hover { color: #000; background-color: lavender; }
+
+
+/************************************************************/
+/**************          Other              *****************/
+/************************************************************/
+
+.text-field{
+	border: 1px solid #999999;
+	height:20px;
+	padding:2px;
+}
+
+input[type="text"]:hover, input[type="password"]:hover, textarea:hover{
+    border-color:#06c;
+}

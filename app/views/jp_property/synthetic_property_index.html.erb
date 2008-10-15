@@ -1,0 +1,89 @@
+<div class="User-control"  style="margin-left:2%; margin-right:2%;">
+    <fieldset align="left" style="padding-top:10px; margin-bottom:30px; background: #f7faff;">
+        <legend style="background: #1e2078;">複合語属性</legend>
+		<table style="width:100%; border-collapse: collapse;">
+			<tr valign=top>
+				<td style="width:33%; padding-left:10px; padding-right:10px; border-right:1px solid;">
+					<table style="width:100%;">
+						<tr><th align=center colspan=3>分類属性</th></tr>
+						<% @synthetic_cat_property.each{|item| %>
+							<tr>
+								<td style="width:40%;">
+									<%= link_to_remote( item[1], :update =>"show_property",
+																 :url =>{ :action => :show_category_item, :string => item[0]},
+																 :before => "Element.show('spinner');",
+																 :complete => "Element.hide('spinner');" ) %>
+								</td>
+								<td style="text-align:center; padding-left:5px; padding-right:5px; width:20%;">
+									<% temp = JpNewProperty.find(:first, :conditions=>["property_string=?",item[0]]) %>
+									<% unless temp.blank? %>
+										<%= link_to_remote(image_tag("less.gif", :border=>0), :url => {:action => :delete_property, :type_field=>"category", :id=>temp.id}, :confirm => "削除しますか?" ) %>
+										&nbsp;&nbsp;&nbsp;&nbsp;
+										<%= link_to_remote(image_tag("plus.gif", :border=>0), :update => "show_property", :url => {:action => :modify_property, :type_field=>"category", :id=>temp.id}) %>
+									<% end %>
+								</td>
+								<td style="width:40%;"><%= h(item[2]) %></td>
+							</tr>
+						<% } %>
+					</table>
+				</td>
+				<td style="width:33%; padding-left:10px; padding-right:10px; border-left:1px solid; border-right:1px solid;">
+					<table style="width:100%;">
+						<tr><th align=center colspan=3>文字属性</th></tr>
+						<% @synthetic_text_property.each{|item| %>
+							<tr>
+								<td style="width:40%;"><%= h(item[1]) %></td>
+								<td style="text-align:center; padding-left:5px; padding-right:5px; width:20%;">
+									<% temp = JpNewProperty.find(:first, :conditions=>["property_string=?",item[0]]) %>
+									<% unless temp.blank? %>
+										<%= link_to_remote(image_tag("less.gif", :border=>0), :url => {:action => :delete_property, :type_field=>"text", :id=>temp.id}, :confirm => "削除しますか?") %>
+										&nbsp;&nbsp;&nbsp;&nbsp;
+										<%= link_to_remote(image_tag("plus.gif", :border=>0), :update => "show_property", :url => {:action => :modify_property, :type_field=>"text", :id=>temp.id}) %>
+									<% end %>
+								</td>
+								<td style="width:40%;"><%= h(item[2]) %></td>
+							</tr>
+						<% } %>
+					</table>
+				</td>
+				<td style="width:33%; padding-left:10px; padding-right:10px; border-left:1px solid;">
+					<table style="width:100%;">
+						<tr><th align=center colspan=3>時間属性</th></tr>
+						<% @synthetic_time_property.each{|item| %>
+							<tr>
+								<td style="width:40%;"><%= h(item[1]) %></td>
+								<td style="text-align:center; padding-left:5px; padding-right:5px; width:20%;">
+									<% temp = JpNewProperty.find(:first, :conditions=>["property_string=?",item[0]]) %>
+									<% unless temp.blank? %>
+										<%= link_to_remote(image_tag("less.gif", :border=>0), :url => {:action => :delete_property, :type_field=>"time", :id=>temp.id}, :confirm => "削除しますか?") %>
+										&nbsp;&nbsp;&nbsp;&nbsp;
+										<%= link_to_remote(image_tag("plus.gif", :border=>0), :update => "show_property", :url => {:action => :modify_property, :type_field=>"time", :id=>temp.id, :section=>@section}) %>
+									<% end %>
+								</td>
+								<td style="width:40%;"><%= h(item[2]) %></td>
+							</tr>
+						<% } %>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td align=center style="padding-left:10px; padding-right:10px; border-right:1px solid;">
+					<%= button_to_remote("新規", :update => "show_property", :url => {:action => :modify_property, :type_field=>"category", :section=>@section})%>
+				</td>
+				<td align=center style="padding-left:10px; padding-right:10px; border-left:1px solid; border-right:1px solid;">
+					<%= button_to_remote("新規", :update => "show_property", :url => {:action => :modify_property, :type_field=>"text", :section=>@section})%>
+				</td>
+				<td align=center style="padding-left:10px; padding-right:10px; border-left:1px solid;">
+					<%= button_to_remote("新規", :update => "show_property", :url => {:action => :modify_property, :type_field=>"time", :section=>@section})%>					
+				</td>
+			</tr>
+		</table>
+    </fieldset>
+	<a id="top" name="top" href="#" STYLE="text-decoration:none"></a>
+	<div id='spinner' style="display:none;"><img src="/images/load.gif" /></div>
+	<div id="show_property">
+		<% if not flash.now[:special].blank? %>
+			<div id="notice" ><%= flash.now[:special] %></div>
+		<% end %>
+	</div>
+</div>

@@ -35,14 +35,14 @@ with(milonic=new menuname("Main Menu")){
 alwaysvisible=1;
 orientation="horizontal";
 style=menuStyle;
-aI("showmenu=jp;text=日本語辞書;url=http://dahlia.naist.jp:3000/jp/index;");
-aI("showmenu=cn;text=汉语辞典;url=http://dahlia.naist.jp:3000/cn/index;");
+aI("showmenu=jp;text=日本語辞書;url=http://dahlia.naist.jp:3000/jp;");
+aI("showmenu=cn;text=汉语辞典;url=http://dahlia.naist.jp:3000/cn;");
 }
 
 with(milonic=new menuname("jp")){
 overflow="scroll";
 style=menuStyle;
-aI("text=Top;url=http://dahlia.naist.jp:3000/jp/index;")
+aI("text=Top;url=http://dahlia.naist.jp:3000/jp;")
 aI("text=新規単語;url=http://dahlia.naist.jp:3000/jp/new;")
 aI("text=ルート編集;url=http://dahlia.naist.jp:3000/jp/define_root;")
 aI("showmenu=property;text=属性管理;url=http://dahlia.naist.jp:3000/jp_property/lexeme_property_index;")
@@ -57,10 +57,9 @@ aI("text=複合語属性;url=http://dahlia.naist.jp:3000/jp_property/synthetic_p
 
 with(milonic=new menuname("cn")){
 style=menuStyle;
-aI("text=Top;url=http://dahlia.naist.jp:3000/cn/index;")
+aI("text=Top;url=http://dahlia.naist.jp:3000/cn;")
 aI("text=新建词汇;url=http://dahlia.naist.jp:3000/cn/new;");
 aI("text=词性表;url=;");
 }
 
 drawMenus();
-

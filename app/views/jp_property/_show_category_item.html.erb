@@ -1,0 +1,62 @@
+<div id="modify_category_item">
+	<% if not flash.now[:notice].blank? %>
+		<div id="notice" ><%= flash.now[:notice] %></div>
+	<% end %>
+</div>
+<fieldset align="left" style="width:960px; padding-top:10px; margin-bottom:30px; background: lightgrey;">
+    <legend style="background: steelblue;"><%= h(@human_name) %></legend>
+		<table class="property_list">
+			<thead>
+				<tr>
+					<th width=80px style="text-align:center;"><%= button_to_remote("新規", :update => "modify_category_item", :url => {:action => :modify_category_item, :human_name=>@human_name, :string=>@string})%></th>
+					<th width=50px></th>
+					<th><%= h(@desc) %></th>
+					<th width=50px></th>
+					<th>
+						<% if JpProperty.exists?(:property_string=>@string)
+							seperator = JpProperty.find(:first, :conditions=>["property_string=?", @string]).seperator %>	
+							<% form_remote_tag :url => { :action => :change_category_seperator, :human_name=>@human_name, :string=>@string, :desc=>@desc } do %>
+								区切り符号:
+								<%= seperator.blank? ? 'なし' : seperator %>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								変更：
+								<%= text_field "seperator", "value", :style=>"width:100px;", :class=>'text-field' %>
+								<%= submit_tag '変更' %>
+							<% end %>
+						<% else %>
+							一つ新規してから、区切り符号の変更ができます
+						<% end %>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% count = 1 %>
+				<% JpProperty.find(:all, :conditions=>["property_string=? and parent_id is null", @string], :order=>"id ASC").each{|root|
+					root.sub_tree_items.each{|item| %>
+						<tr>
+							<td style="text-align:center;">
+								<% unless item.tree_string == 'NEW' and ( @string=='tagging_state' or @string=='sth_tagging_state' ) %>
+			                        <%= link_to_remote(image_tag("less.gif", :border=>0),
+														:url =>{:action => 'delete_category_item', :id => item.id, :human_name=>@human_name, :desc=>@desc, :string=>@string},
+														:confirm => "削除しますか?",
+														:complete=> "document.getElementById('top').focus();") %>
+									&nbsp;&nbsp;&nbsp;
+									<%= link_to_remote(image_tag("plus.gif", :border=>0), :update => "modify_category_item", :url => {:action => :modify_category_item, :id=>item.id, :human_name=>@human_name, :desc=>@desc, :string=>@string})%>
+								<% end %>
+							</td>
+							<% if not show_category_item.blank? and item.id == show_category_item %>
+								<td style="background-color:red;">
+							<% else %>
+								<td>
+							<% end %>
+							<%= count %></td>
+							<td><%= h(item.tree_string) %></td>
+						</tr>
+						<% count = count + 1 %>
+					<% }
+				} %>
+			</tbody>
+		</table>
+</fieldset>
+
+<%= javascript_tag render(:update) { |page| page['top'].focus } %>

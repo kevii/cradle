@@ -1,0 +1,63 @@
+<% form_remote_tag :url => { :action => :save_category_item } do %>
+	<a id="top" name="top" href="#" STYLE="text-decoration:none"></a>
+	<fieldset id="category_item" align="left" style="width:960px; padding-top:10px; margin-bottom:10px; background: lightgrey;">
+	    <legend style="background: steelblue;">
+			<% if @property_id == 0 %>
+				新規<%= h(@human_name) %>
+			<% else %>
+				<%= h(@human_name) %>編集
+			<% end %>
+		</legend>
+		<table style="width:100%;">
+			<tr>
+				<td width=80px style="text-align:center;">
+					<%= submit_tag '保存' %>
+					<%= hidden_field_tag :id, @property_id %>
+					<%= hidden_field_tag :seperator, @seperator %>
+					<%= hidden_field_tag :string, @string %>
+					<%= hidden_field_tag :human_name, @human_name %>
+					<%= hidden_field_tag :desc, @desc %>
+				</td>
+				<td>
+					<% if @property_id == 0 %>
+						<% if @seperator.blank? %>
+							区切り符号指定してから、多段入力できます。
+						<% else %>
+							<input type="button" value="フィールド追加" onclick="addField('level_area','level', '<%= @string %>');" />
+						<% end %>
+					<% else %>
+						<% temp = JpProperty.find(@property_id).sub_tree_items.size %>
+						<% if temp > 1 %>
+							フィールドを変更すると、このitem以下の
+							<span style="color:red;"><%= temp %>個</span>
+							のitemをすべて変更します。
+						<% end %>
+					<% end %>
+				</td>
+			</tr>
+		</table>
+		<table style="width:100%;">
+			<tr>
+
+				<td id='level_area' align="left">
+					<% if @property_id == 0 %>
+						<span style="padding-left:10px; padding-right:7px;">
+							<input id="level1" class="text-field" type="text" value="" style="width: 18%;" name="<%= @string %>[level1]"/>
+						</span>
+					<% else %>
+						<% for index in 0..@property_item.size-1 %>
+							<span style="padding-left:10px; padding-right:7px;">
+								<input id=<%= 'level'+(index+1).to_s %> class="text-field" type="text" value=<%= @property_item[index] %> style="width: 18%;" name=<%= @string+'[level'+(index+1).to_s+"]" %> <%= 'DISABLED' if index+1<@property_item.size %>/>
+							</span>
+							<% if (index+1)%4==0 %>
+								<p>
+							<% end %>
+						<% end %>
+					<% end %>
+				</td>
+			</tr>
+		</table>
+	</fieldset>
+<% end %>
+<%= javascript_tag render(:update) { |page| page['top'].focus } %>
+<%= javascript_tag render(:update) { |page| page['category_item'].visual_effect :highlight } %>
