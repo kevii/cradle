@@ -261,6 +261,14 @@ module ApplicationHelper
   end
   
   private
+  def cradle_button_to_function(name, function, html_options = {})
+    html_options.symbolize_keys!
+    tag(:input, html_options.merge({
+    :type => "button", :value => name,
+    :onclick => (html_options[:onclick] ? "#{html_options[:onclick]}; " : "") + "#{function};"
+    }))
+  end
+  
   def first_html_list_for_mdification(roots=nil, type="", prefix="", domain="", option="", level=1)
     html_string = ""
     name = "level"+level.to_s

@@ -7,7 +7,7 @@ class JpController < ApplicationController
   
   def index
     if session[:jp_section_list].blank?
-      session[:jp_section_list] = ['01_surface', '02_reading', '03_pronunciation', '04_base_id', '05_root_id', '06_dictionary', '07_pos', '08_ctype', '09_cform']
+      session[:jp_section_list] = ['1_surface', '2_reading', '3_pronunciation', '4_base_id', '5_root_id', '6_dictionary', '7_pos', '8_ctype', '9_cform']
     end
   end
   
@@ -70,11 +70,12 @@ class JpController < ApplicationController
       else
         dynamic_ids = dynamic_lexeme_ids & dynamic_synthetic_refs
       end
-
       if params[:static_condition].blank?
         collection = install_by_dividing(:ids=>dynamic_ids, :domain=>'jp')
       else
-        JpLexeme.find(:all, :conditions=>params[:static_condition]).each{|lexeme| collection << lexeme if dynamic_ids.include?(lexeme.id)}
+        static_ids = JpLexeme.find(:all, :select=>"jp_lexemes.id", :include=>[:struct], :conditions=>params[:static_condition], :order => " jp_lexemes.id ASC ").map{|item| item.id}
+        final_ids = static_ids & dynamic_ids
+        collection = JpLexeme.find(:all, :conditions=>["id in (#{final_ids.join(',')})"])
       end
       @jplexemes = collection.paginate(:page=>page, :per_page=>per_page)
     end
@@ -87,18 +88,26 @@ class JpController < ApplicationController
     @list = session[:jp_section_list]
   end
 
+  def load_section_list
+    if params[:state] == "false"
+      render(:update){|page|
+        page[:field_list].replace_html :partial=>"field_list", :object=>session[:jp_section_list]
+        page[:field_list].visual_effect :slide_down
+      }
+    end
+  end
+
   def change_section_list
     section_list = []
     params.each{|key, value|
       case key
-        when "commit", "authenticity_token", "controller", "action", "search_type"
+        when "commit", "authenticity_token", "controller", "action"
           next
         else
           section_list << key if value == "true"
       end
     }
     session[:jp_section_list] = section_list.sort{|a,b| a.split('_')[0].to_i<=>b.split('_')[0].to_i}
-    session[:jp_section_list].delete_at(0)
     render(:update) { |page| page.call 'location.reload' }
   end
 
