@@ -12,30 +12,82 @@
 	        <%= submit_tag "Review" %>
 			<span style="padding-left:30px;">
 				<% if @list.index("dictionary") != nil %>
-					<%= link_to_function "辞書<=>色", :onclick=>"if(Element.visible('field_list'))Effect.SlideUp('field_list');Effect.SlideDown('dictionary_list');" %>
+					<%= button_to_function "辞書<=>色", :onclick=>"if(Element.visible('field_list'))Effect.SlideUp('field_list');Effect.SlideDown('dictionary_list');" %>
 				<% end %>
 			</span>
 			<span style="padding-left:30px;">
-				<%= link_to_function "表示フィールド", :onclick=>"if(Element.visible('dictionary_list'))Effect.SlideUp('dictionary_list');Effect.SlideDown('field_list');" %>
+				<%= button_to_function "表示フィールド", :onclick=>"if(Element.visible('dictionary_list'))Effect.SlideUp('dictionary_list');Effect.SlideDown('field_list');" %>
 			</span>
 
 		<% end %>
 	</div>
 	<div id ="field_list" align=center onclick="Effect.SlideUp('field_list');" style='display:none;'>
-		<table>
-			<tr><td column=5 align="center">単語属性</td></tr>
-			<tr><td></td></tr>
-			<tr><td column=5 align="center">複合語属性</td></tr>		
-		</table>
+		<% form_remote_tag  :url => {:action => :change_section_list} do %>
+			<table align="left">
+				<tr height=30><td column=5 align="center">単語属性</td></tr>
+				<tr height=30>
+					<td><%= check_box_tag '0_id', 'true', true, :disabled => true %><%= initial_property_name['id'] %></td>
+					<td><%= check_box_tag '1_surface', 'true', @list.include?('surface')?true:false %><%= initial_property_name['surface'] %></td>
+					<td><%= check_box_tag '2_reading', 'true' %><%= initial_property_name['reading'] %></td>
+					<td><%= check_box_tag '3_pronunciation', 'true' %><%= initial_property_name['pronunciation'] %></td>
+					<td><%= check_box_tag '4_base_id', 'true' %><%= initial_property_name['base_id'] %></td>
+				</tr>
+				<tr height=30>
+					<td><%= check_box_tag '5_root_id', 'true' %><%= initial_property_name['root_id'] %></td>
+					<td><%= check_box_tag '6_pos', 'true' %><%= initial_property_name['pos'] %></td>
+					<td><%= check_box_tag '7_ctype', 'true' %><%= initial_property_name['ctype'] %></td>
+					<td><%= check_box_tag '8_cform', 'true' %><%= initial_property_name['cform'] %></td>
+					<td><%= check_box_tag '9_dictionary', 'true' %><%= initial_property_name['dictionary'] %></td>
+				</tr>
+				<% if User.find_by_id(session[:user_id]) %>
+					<tr height=30>
+						<td><%= check_box_tag '10_tagging_state', 'true' %><%= initial_property_name['tagging_state'] %></td>
+						<td><%= check_box_tag '11_log', 'true' %><%= initial_property_name['log'] %></td>
+						<td><%= check_box_tag '12_created_by', 'true' %><%= initial_property_name['created_by'] %></td>
+						<td><%= check_box_tag '13_modified_by', 'true' %><%= initial_property_name['modified_by'] %></td>
+						<td><%= check_box_tag '14_updated_at', 'true' %><%= initial_property_name['updated_at'] %></td>
+					</tr>
+				<% end %>
+				<tr height=30>
+					<% JpNewProperty.find(:all, :order=>"id ASC" ,:conditions=>["section=?", 'lexeme']).each_with_index{|property, index| %>
+						<td><%= check_box_tag (15+index).to_s+'_'+property.property_string, 'true' %><%= property.human_name %></td>
+						<% if (index+1) % 5 == 0 %>
+							</tr><tr height=30>
+						<% end %>
+					<% } %>
+				</tr>
+				<tr height=30><td column=5 align="center">複合語属性</td></tr>
+				<tr height=30>
+					<% if User.find_by_id(session[:user_id]) %>
+						<td><%= check_box_tag '100_sth_struct', 'true' %><%= initial_property_name['sth_struct'] %></td>
+						<td><%= check_box_tag '101_sth_tagging_state', 'true' %><%= initial_property_name['sth_tagging_state'] %></td>
+						<td><%= check_box_tag '102_sth_log', 'true' %><%= initial_property_name['log'] %></td>
+						<td><%= check_box_tag '103_sth_modified_by', 'true' %><%= initial_property_name['modified_by'] %></td>
+						<td><%= check_box_tag '104_sth_updated_at', 'true' %><%= initial_property_name['updated_at'] %></td>
+					<% else %>
+						<td colspan=5><%= check_box_tag '100_sth_struct', 'true' %><%= initial_property_name['sth_struct'] %></td>
+					<% end %>
+				</tr>
+				<tr height=30>
+					<% JpNewProperty.find(:all, :order=>"id ASC" ,:conditions=>["section=?", 'synthetic']).each_with_index{|property, index| %>
+						<td><%= check_box_tag (105+index).to_s+'_'+property.property_string, 'true' %><%= property.human_name %></td>
+						<% if (index+1) % 5 == 0 %>
+							</tr><tr height=30>
+						<% end %>
+					<% } %>
+				</tr>
+			</table>
+			<%= submit_tag "保存" %>
+        <% end %>
 	</div>
 	<% if @list.index("dictionary") != nil %>
 		<div id ="dictionary_list" align=center onclick="Effect.SlideUp('dictionary_list');" style='display:none;'>
 			<table>
 				<tr height=30>
 					<% dicts = JpProperty.find(:all, :order=>"property_cat_id ASC", :conditions=>["property_string='dictionary' and property_cat_id > 0"]) %>
-					<% dicts.each{|dict| %>
+					<% dicts.each_with_index{|dict, index| %>
 						<td><span style='<%= "background-color:#{dictionary_color[dict.property_cat_id]};" %>'>&nbsp;&nbsp;</span>&nbsp;<%= dict.tree_string %></td>
-						<% if dicts.index(dict) !=0 and (dicts.index(dict)+1) % 5 == 0 %>
+						<% if (index+1) % 5 == 0 %>
 							</tr><tr height=30>
 						<% else %>
 							<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -68,16 +120,23 @@
 		        <tr>
 		            <th></th>
 					<th>ID</th>
-		            <% @list.each{|item|
-						if not initial_property_name[item].blank? %>
-							<th><%= initial_property_name[item] %></th>
-						<% else %>
+		            <% @list.each{|ordered_item|
+						item = ordered_item.gsub("^\d+_", "")
+						if not initial_property_name[item].blank?
+							case item
+								when "sth_log", "sth_modified_by", "sth_updated_at" %>
+									<th>構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
+								<% when "sth_tagging_state" %>
+									<th>構造<%= initial_property_name[item] %></th>
+								<% else %>
+									<th><%= initial_property_name[item] %></th>
+							<% end
+						else %>
 							<th><%= JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %></th>
-						<% end %>
-		            <% } %>
+						<% end
+		            } %>
 		        </tr>
 		    </thead>
-		
 		    <tbody>
 		        <% odd_or_even =0 %>
 				<% for lexeme in @jplexemes do
@@ -87,7 +146,8 @@
 			                <%= link_to '詳細', :action => 'show', :id => lexeme.id %>
 			            </td>
 			            <td align="left" ><%= h(lexeme.id) %></td>
-						<% @list.each do |item|
+						<% @list.each do |ordered_item|
+							item = ordered_item.gsub("^\d+_", "")
 							if not initial_property_name[item].blank?
 								case item
 									when "surface" %>
@@ -180,18 +240,25 @@
 			        </tr>
 		        <% end %>
 		    </tbody>
-			
 		    <thead>
 		        <tr>
 		            <th></th>
 					<th>ID</th>
-		            <% @list.each{|item|
-						if not initial_property_name[item].blank? %>
-							<th><%= initial_property_name[item] %></th>
-						<% else %>
+		            <% @list.each{|ordered_item|
+						item = ordered_item.gsub("^\d+_", "")
+						if not initial_property_name[item].blank?
+							case item
+								when "sth_log", "sth_modified_by", "sth_updated_at" %>
+									<th>構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
+								<% when "sth_tagging_state" %>
+									<th>構造<%= initial_property_name[item] %></th>
+								<% else %>
+									<th><%= initial_property_name[item] %></th>
+							<% end
+						else %>
 							<th><%= JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %></th>
-						<% end %>
-		            <% } %>
+						<% end
+		            } %>
 		        </tr>
 		    </thead>
 		</table>

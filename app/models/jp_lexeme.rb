@@ -100,6 +100,11 @@ class JpLexeme < ActiveRecord::Base
   end
   
   ######################################################
+  ##### validation
+  ######################################################
+  validates_presence_of :id, :base_id, :dictionary, :tagging_state, :created_by
+  
+  ######################################################
   ##### method
   ######################################################
   def self.verify_dictionary(dic="")
@@ -107,6 +112,166 @@ class JpLexeme < ActiveRecord::Base
       return true
     else
       return false
+    end
+  end
+  
+  def self.exist_when_new(lexeme={})
+    conditions = []
+    lexeme["surface"].blank? ? conditions << "surface is NULL" : conditions << "surface = '"+lexeme["surface"]+"'"
+    lexeme["reading"].blank? ? conditions << "reading is NULL" : conditions << "reading = '"+lexeme["reading"]+"'"
+    lexeme["pronunciation"].blank? ? conditions << "pronunciation is NULL" : conditions << "pronunciation = '"+lexeme["pronunciation"]+"'"
+    lexeme["pos"].blank? ? conditions << "pos is NULL" : conditions << "pos = "+lexeme["pos"].to_s
+    lexeme["ctype"].blank? ? conditions << "ctype is NULL" : conditions << "ctype = "+lexeme["ctype"].to_s
+    lexeme["cform"].blank? ? conditions << "cform is NULL" : conditions << "cform = "+lexeme["cform"].to_s
+    maybe_exists = find(:all, :conditions=>conditions.join(' and '))
+    unless maybe_exists.blank?
+      maybe_exists.each{|temp_lexeme|
+        same = []
+        lexeme.each{|key, value|
+          case key
+            when "surface", "reading", "pronunciation", "pos", "ctype", "cform"
+              next
+            when "base_id", "dictionary", "log", "id", "root_id", "tagging_state"
+              next
+            else
+              if value == (eval "temp_lexeme."+key) or ( JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"]).type_field == "time" and (eval "not temp_lexeme."+key+".blank?")  and value==(eval "temp_lexeme."+key+".to_formatted_s(:db)") )
+                same << true
+              else 
+                same << false
+              end
+          end
+        }
+        if same.size == 0 or (same.size > 0 and same.include?(false) == false and temp_lexeme.id != lexeme["id"])
+          return [true, temp_lexeme.id]
+        end
+      }
+    end
+    return [false, 0]
+  end
+
+  def self.findWordsInSeries( lexeme = {} )
+    newLexemes = Array.new
+    newLexemes << lexeme
+ 
+    # save single word which does not have cform or ctype
+    if lexeme["cform"] == nil or lexeme["ctype"] == nil
+    # return type 1 means base is itself
+      return newLexemes, 1 
+    end
+    
+    # save word which has cform and ctype
+    seeds = JpCtypeCformSeed.find(:all, :conditions => [" ctype=? and cform=? ", lexeme["ctype"], lexeme["cform"]] )
+    if seeds.size == 0
+      # save single word that can not find a match in the list of  cform_seed table
+      # return type 1 means base is itself
+      return newLexemes, 1
+    elsif seeds.size >= 1
+      # save word series that list in the cform_seed table
+      seed_found = find_seed(seeds, lexeme["surface"])
+
+      # return type -1 means that can not find a match in the list against input's surface
+      if seed_found == nil
+        return newLexemes, -1
+      elsif seed_found.surface_end == "*"
+        surface_head = lexeme["surface"]
+        reading_head = lexeme["reading"]
+        pronunciation_head = lexeme["pronunciation"]
+      else
+        lexeme["surface"] =~ /#{seed_found.surface_end}$/
+        surface_head = $`
+        # return type -2 means that can not find a match in the list against input's reading
+        if (lexeme["reading"] =~ /#{seed_found.reading_end}$/) == nil
+          return newLexemes, -2
+        end 
+        reading_head = $`
+        # return type -3 means that can not find a match in the list against input's pronunciation
+        if (lexeme["pronunciation"] =~ /#{seed_found.pronunciation_end}$/) == nil
+          return newLexemes, -3
+        end
+        pronunciation_head = $` 
+      end
+
+      series = JpCtypeCformSeed.find(:all, :conditions => " ctype = '#{seed_found.ctype}' and id != '#{seed_found.id}' ")
+      if series.size == 0     # return if only have itself in the list
+        return newLexemes, 1
+      end
+
+      series.sort{ |x,y| x[:cform]<=>y[:cform] }.each {|kind|
+        temp_lexeme = {}
+        lexeme.each{|key, value|
+          case key
+            when "cform"
+              temp_lexeme[key] = kind.cform
+            when "surface", "reading", "pronunciation"
+              if kind.surface_end == "*"
+                temp_lexeme[key] = eval key+"_head"
+              else
+                temp_lexeme[key] = (eval key+"_head") + (eval "kind."+key+"_end")
+              end
+            else
+              temp_lexeme[key] = value
+          end
+        }
+        newLexemes << temp_lexeme
+      }
+      # return type 2 means base is the word which in newLexemes
+      return newLexemes, 2
+    end
+  end
+  
+  def self.delete_lexeme(lexeme)
+    JpLexeme.transaction do
+      JpLexemeNewPropertyItem.transaction do
+        property = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
+        unless property.blank?
+          property.each{|item|
+            temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id='#{item.property_id}' and ref_id=#{lexeme.id}"])
+            temp.destroy unless temp.blank?
+          }
+        end
+      end
+      JpSynthetic.transaction do
+        JpSynthetic.find(:all, :conditions=>["sth_ref_id=#{lexeme.id}"]).each{|sub|
+          JpSyntheticNewPropertyItem.transaction do
+            JpNewProperty.find(:all, :conditions=>["section='synthetic'"]).each{|property|
+              temp = JpSyntheticNewPropertyItem.find(:first, :conditions=>["property_id='#{property.property_id}' and ref_id=#{sub.id}"])
+              temp.destroy unless temp.blank?
+            }
+          end
+          sub.destroy
+        }
+      end
+      lexeme.destroy
+    end
+  end
+  
+  
+  private
+  def self.find_seed(array = [], string ="")
+    return array[0] if array.size == 1 and (string =~ /#{array[0].surface_end}$/) != nil
+    result = nil
+    asterid_seed = nil
+    array.each { |seed|
+      if seed.surface_end =="*"
+        asterid_seed = seed
+        next
+      end
+      if (string =~ /#{seed.surface_end}$/) != nil
+        result = seed
+        break
+      end       
+    }
+    # nil means that can not find a match in the list against input's surface
+    # asterid_seed means that can find a match in the list which does not have a suffix in surface
+    # result means means that can find a normal match in the list which have a suffix in surface
+    if result.blank?
+      if asterid_seed.blank?
+        return nil
+      else
+        return asterid_seed
+      end
+    else
+      return result
     end
   end
   

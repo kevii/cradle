@@ -1,56 +1,11 @@
 # Methods added to this helper will be available to all templates in the application.
 module ApplicationHelper
-  def cradle_button_to_function(name, function, html_options = {})
-    html_options.symbolize_keys!
-    tag(:input, html_options.merge({
-    :type => "button", :value => name,
-    :onclick => (html_options[:onclick] ? "#{html_options[:onclick]}; " : "") + "#{function};"
-    }))
-  end
-
   def button_to_remote(name, options = {}, html_options = {})
     cradle_button_to_function(name, remote_function(options), html_options)
   end
 
   def cradle_button_to(name, url, html_options = {})
     cradle_button_to_function(name, "window.location='" + url_for(url) + "';", html_options)
-  end
-  
-  def first_html_list_for_mdification(roots=nil, type="", prefix="", domain="", option="", level=1)
-    html_string = ""
-    name = "level"+level.to_s
-    html_string << "<span id='#{prefix}#{type}_#{name}_list' >\n"
-    level == 1 ? id = 0 : id = roots[level-2].id
-    ajax_string = remote_function(:url=>{:controller=>domain, :action=>'update_property_list',  :type=>type, :domain=>domain, :prefix=>prefix, :state=>'modify', :id=>id, :level=>level, :option=>option}, :with=>"'#{name}='+value")
-    html_string << "<select id='#{prefix}#{type}_#{name}' name='#{prefix}#{type}[#{name}]' onchange=\"#{ajax_string}\" #{option}>\n"
-    if level==1
-      case domain
-        when "jp"
-          class_name = "JpProperty"
-        when "cn"
-          class_name = "CnProperty"
-        when "en"
-          class_name = "EnProperty"
-      end
-      collection = eval(class_name+".find(:all, :conditions=>['property_string = ? and parent_id is null', type], :order=>'property_cat_id ASC')"+".map{|item| item.value}")
-      unless collection.include?("") or ["tagging_state", "sth_tagging_state"].include?(type)
-        html_string << "  <option value=''></option>\n"
-      end
-    else
-      collection = roots[level-2].children.map{|item| item.value}
-      if roots[level-2].property_cat_id > 0
-        html_string << "  <option value=''></option>\n"
-      end
-    end
-    html_string << options_for_select(collection, roots[level-1].value)
-    html_string << "</select>\n"
-    if level < roots.size
-      html_string << first_html_list_for_mdification(roots, type, prefix, domain, option, level+1)
-    else
-      html_string << "<span id='#{prefix}#{type}_level#{(level+1).to_s}_list' >\n"
-    end
-    html_string << "</span>\n"
-    return html_string
   end
   
   ## type: property_string
@@ -132,7 +87,7 @@ module ApplicationHelper
   ##  state:   search, new, modify
   def customize_field_html(field={})
     state = field[:state]
-    field[:id].blank? ? id = nil : id = field[:id]
+    field[:id].blank? ? id=nil : id=field[:id]
     domain = field[:domain]
     section = field[:section]
     field[:prefix].blank? ? prefix = "" : prefix = field[:prefix]+"_"
@@ -269,7 +224,188 @@ module ApplicationHelper
     { 1=>"①", 2=>"②", 3=>"③", 4=>"④", 5=>"⑤", 6=>"⑥", 7=>"⑦", 8=>"⑧", 9=>"⑨", 10=>"⑩"}  
   end
   
+  def generate_tree_view( root = 0, ids="", class_name="" )
+    root = fields[:root]
+    ids = fields[:ids]
+    case fields[:domain]
+      when "jp"
+        title = "ツリー構造"
+        error_message = "下の単語の内部構造定義があるので、そちらを使ってツリーを定義してください："
+        class_name = "JpLexeme"
+      when "cn"
+        title = "内部构造"
+        error_message = "下面的单词的内部结构定义已经存在，请使用该结构重新组织构造树："
+        class_name = "CnLexeme"
+      when "en"
+    end
+    id_tree, surface_tree = get_node_id_and_surface(get_id_array(ids), root, class_name)
+    node_tree = get_whole_tree(id_tree, surface_tree)
+    temp = get_tree_script(node_tree, 0, -1, class_name)
+    html_string = "<span style='color:#dfd; background: #1e2078; font-family:sans-serif; padding:0.2em 1em;'>#{title}</span>\n<p>\n"
+    unless temp[2].blank?
+      html_string << error_message
+      html_string << "<ul>#{temp[2]}</ul>"
+    end
+    html_string << "<script>\n  var myTree = null;\n  function CreateTree() {\n"
+    html_string << "    myTree=new ECOTree('myTree','myTreeContainer');\n"
+    html_string << "    myTree.config.linkColor = 'black';\n"
+    html_string << "    myTree.config.nodeBorderColor = 'black';\n"
+    html_string << "    myTree.config.colorStyle = ECOTree.CS_NODE;\n"
+    html_string << "    myTree.config.nodeFill = ECOTree.NF_FLAT;\n"
+    html_string << "    myTree.config.nodeColor = '#89bfe5';\n"
+    html_string << "    myTree.config.nodeSelColor = 'LavenderBlush';\n"
+    html_string << temp[0]
+    html_string << "    myTree.UpdateTree();\n"
+    html_string << "  }\n</script>\n"
+    return html_string
+  end
   
+  private
+  def first_html_list_for_mdification(roots=nil, type="", prefix="", domain="", option="", level=1)
+    html_string = ""
+    name = "level"+level.to_s
+    html_string << "<span id='#{prefix}#{type}_#{name}_list' >\n"
+    level == 1 ? id = 0 : id = roots[level-2].id
+    ajax_string = remote_function(:url=>{:controller=>domain, :action=>'update_property_list',  :type=>type, :domain=>domain, :prefix=>prefix, :state=>'modify', :id=>id, :level=>level, :option=>option}, :with=>"'#{name}='+value")
+    html_string << "<select id='#{prefix}#{type}_#{name}' name='#{prefix}#{type}[#{name}]' onchange=\"#{ajax_string}\" #{option}>\n"
+    if level==1
+      case domain
+        when "jp"
+          class_name = "JpProperty"
+        when "cn"
+          class_name = "CnProperty"
+        when "en"
+          class_name = "EnProperty"
+      end
+      collection = eval(class_name+".find(:all, :conditions=>['property_string = ? and parent_id is null', type], :order=>'property_cat_id ASC')"+".map{|item| item.value}")
+      unless collection.include?("") or ["tagging_state", "sth_tagging_state"].include?(type)
+        html_string << "  <option value=''></option>\n"
+      end
+    else
+      collection = roots[level-2].children.map{|item| item.value}
+      if roots[level-2].property_cat_id > 0
+        html_string << "  <option value=''></option>\n"
+      end
+    end
+    html_string << options_for_select(collection, roots[level-1].value)
+    html_string << "</select>\n"
+    if level < roots.size
+      html_string << first_html_list_for_mdification(roots, type, prefix, domain, option, level+1)
+    else
+      html_string << "<span id='#{prefix}#{type}_level#{(level+1).to_s}_list' >\n"
+    end
+    html_string << "</span>\n"
+    return html_string
+  end
   
+  def get_id_array(ids="", level=1)
+    id_array = []
+    ids.split('*'+'+'*level+'*').each{|item|
+      if item.include?('*')
+        id_array << get_id_array(item, level+1)
+      else
+        id_array << item.to_i
+      end
+    }
+    return id_array
+  end
   
+  def get_node_id_and_surface (id_array=[], root = 0, class_name="" )
+    id_tree = Array.new
+    surface_tree = Array.new
+    if root != 0
+      id_tree << root
+      surface_tree << (eval class_name+'.find(root).surface')
+    else
+      id_tree << '-'
+      surface_tree << ""
+    end
+    for index in 0..id_array.size-1
+      begin
+        id_array[index].last
+      rescue
+        lexeme = eval class_name+'.find(id_array[index])'
+        if lexeme.struct.blank?
+          id_tree << id_array[index]
+          surface_tree << (eval class_name+'.find(id_array[index]).surface')
+        else
+          sub_array = eval '['+lexeme.struct.sth_struct+']'
+          temp = get_node_id_and_surface(sub_array, id_array[index], class_name)
+          id_tree << temp[0]
+          surface_tree << temp[1]
+        end
+      else
+        temp = get_node_id_and_surface(id_array[index], 0, class_name)
+        id_tree << temp[0]
+        surface_tree << temp[1]
+      end
+    end
+    if surface_tree[0].blank?
+      dummy_node_surface = ""
+      surface_tree[1..surface_tree.size-1].each{|item|
+        begin
+          item.chomp
+        rescue
+          dummy_node_surface << item[0]
+        else
+          dummy_node_surface << item
+        end
+      }
+      surface_tree[0] = dummy_node_surface
+    end
+    return id_tree, surface_tree
+  end
+
+  def get_whole_tree(id_tree=[], surface_tree=[])
+    whole_tree = []
+    for index in 0..id_tree.size-1
+      begin
+        surface_tree[index].chomp
+      rescue
+        whole_tree << get_whole_tree(id_tree[index], surface_tree[index])
+      else
+        whole_tree << ["leaf",id_tree[index], surface_tree[index]]
+      end
+    end
+    return whole_tree
+  end
+  
+  def get_tree_script( node_tree = [], number = 0, parent = -1, class_name="" )
+    script = String.new
+    message = String.new
+    for index in 0..node_tree.size-1
+      if node_tree[index][0] == "leaf"
+        surface = node_tree[index][2]
+        length = (surface.length/3)*20+15
+        if node_tree[index][1] == '-'
+          case class_name
+            when "JpLexeme"
+              existing_lexemes = JpLexeme.find(:all, :conditions=>["surface='#{surface}'"])
+              unless existing_lexemes.blank?
+                existing_lexemes.each{|lexeme| message << '<li>【'+surface+'】</li>' if JpSynthetic.exists?(:sth_ref_id=>lexeme.id) }
+              end
+            when "CnLexeme"
+              existing_lexemes = CnLexeme.find(:all, :conditions=>["surface='#{surface}'"])
+              unless existing_lexemes.blank?
+                existing_lexemes.each{|lexeme| message << '<li>【'+surface+'】</li>' if CnSynthetic.exists?(:sth_ref_id=>lexeme.id) }
+              end
+          end
+          script << "    myTree.add(#{number}, #{parent}, '#{surface}', #{length});\n"
+          script << "    myTree.setNodeTarget(#{number}, '', false);\n" 
+        else
+          ajax_string = remote_function(:url=>{:controller=>'jp', :action=>'show_desc', :id=>node_tree[index][1]})
+          script << "    myTree.add(#{number}, #{parent}, '#{surface}', #{length}, '', '', '', \"#{ajax_string}\");\n"
+        end
+        parent = number if index == 0
+        number = number + 1
+      else
+        temp = get_tree_script(node_tree[index], number, parent, class_name)
+        sub_script = temp[0]
+        number = temp[1]
+        message << temp[2]
+        script << sub_script
+      end
+    end
+    return script, number, message
+  end
 end
