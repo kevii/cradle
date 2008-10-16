@@ -33,6 +33,7 @@ module ApplicationHelper
         class_name["LexemeNewPropertyItem"] = "EnLexemeNewPropertyItem"
         class_name["SyntheticNewPropertyItem"] = "EnSyntheticNewPropertyItem"
     end
+    return class_name
   end
   
   ## type: property_string
@@ -231,9 +232,9 @@ module ApplicationHelper
 
   ### :original_lexeme_id, :meta, :level, :domain
   def get_formatted_ids_and_chars(fields={})
-    original_lexeme_id = fields["original_lexeme_id"]
-    fields["meta"].blank? ? meta=0 : meta=fields["meta"]
-    fields["level"].blank? ? level=1 : level = fields["level"]
+    original_lexeme_id = fields[:original_lexeme_id]
+    fields[:meta].blank? ? meta=0 : meta=fields[:meta]
+    fields[:level].blank? ? level=1 : level = fields[:level]
     lexeme_class = verify_domain(fields[:domain])["Lexeme"]
     synthetic_class = verify_domain(fields[:domain])["Synthetic"]
     ids = []

@@ -157,10 +157,10 @@ class ApplicationController < ActionController::Base
 
   ### :ids, :chars, :count, :level
   def get_meta_structures(fields={})
-    ids = fields["ids"]
-    chars = fields["chars"]
-    fields["count"].blank? ? count=0 : count=fields["count"]
-    fields["level"].blank? ? level=1 : level = fields["level"]
+    ids = fields[:ids]
+    chars = fields[:chars]
+    fields[:count].blank? ? count=0 : count=fields[:count]
+    fields[:level].blank? ? level=1 : level = fields[:level]
     meta_ids = {}
     meta_chars = {}
     temp_ids = ids.split('*'+'+'*level+'*')

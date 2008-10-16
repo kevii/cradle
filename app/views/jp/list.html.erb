@@ -146,8 +146,8 @@
 											</td>
 									<% end
 								elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item)
-									case item %>
-										<% when "sth_log" %>
+									case item
+										when "sth_log" %>
 											<td><%= h(lexeme.struct.log) unless lexeme.struct.blank? %></td>
 										<% when "sth_modified_by" %>
 											<td><%= h(lexeme.struct.annotator.name) unless lexeme.struct.blank? %></td>

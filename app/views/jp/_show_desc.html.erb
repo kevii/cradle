@@ -2,10 +2,11 @@
 	<table style="text-align:right;">
         <% odd_or_even =1
 		list = ["id"].concat(session[:jp_section_list].map{|item| item.gsub(/^\d+_/, "")}) %>
+			<tr><td colspan=6 style="text-align:center;"><strong>単語詳細</strong></td></tr>
 			<tr>
 			<% for index in 0..list.size-1 do
 				item = list[index]
-				if (index+1)%3 == 0
+				if index % 3 == 0
 					odd_or_even = 1 - odd_or_even %>
 					</tr><tr <%= "class='odd'" if odd_or_even == 0 %> >
 				<% end 
