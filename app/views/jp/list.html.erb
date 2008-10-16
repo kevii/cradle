@@ -66,16 +66,11 @@
 						<th>ID</th>
 			            <% @list.each{|ordered_item|
 							item = ordered_item.gsub(/^\d+_/, "")
-							if not initial_property_name[item].blank?
-								case item
-									when "sth_log", "sth_modified_by", "sth_updated_at" %>
-										<th>構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
-									<% when "sth_tagging_state" %>
-										<th>構造<%= initial_property_name[item] %></th>
-									<% else %>
-										<th><%= initial_property_name[item] %></th>
-								<% end
-							else %>
+							if not initial_property_name[item].blank? %>
+								<th><%= item=="sth_tagging_state" ? "構造"+initial_property_name[item] : initial_property_name[item] %></th>
+							<% elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item) %>
+								<th>構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
+							<% else %>
 								<th><%= JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %></th>
 							<% end
 			            } %>
@@ -149,6 +144,9 @@
 													<%= h(lexeme.struct.sth_tagging_state_item.tree_string) %>
 												<% end %>
 											</td>
+									<% end
+								elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item)
+									case item %>
 										<% when "sth_log" %>
 											<td><%= h(lexeme.struct.log) unless lexeme.struct.blank? %></td>
 										<% when "sth_modified_by" %>
@@ -178,7 +176,7 @@
 											<% when "time" %>
 												<td><%= h(temp.to_formatted_s(:db)) %></td>
 										<% end
-									end										
+									end
 								end
 							end %>
 				        </tr>
@@ -190,16 +188,11 @@
 						<th>ID</th>
 			            <% @list.each{|ordered_item|
 							item = ordered_item.gsub(/^\d+_/, "")
-							if not initial_property_name[item].blank?
-								case item
-									when "sth_log", "sth_modified_by", "sth_updated_at" %>
-										<th>構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
-									<% when "sth_tagging_state" %>
-										<th>構造<%= initial_property_name[item] %></th>
-									<% else %>
-										<th><%= initial_property_name[item] %></th>
-								<% end
-							else %>
+							if not initial_property_name[item].blank? %>
+								<th><%= item=="sth_tagging_state" ? "構造"+initial_property_name[item] : initial_property_name[item] %></th>
+							<% elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item) %>
+								<th>構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
+							<% else %>
 								<th><%= JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %></th>
 							<% end
 			            } %>

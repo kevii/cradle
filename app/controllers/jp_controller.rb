@@ -128,6 +128,13 @@ class JpController < ApplicationController
     end
   end
 
+  def show_desc
+    render :update do |page|
+      page["show_desc"].replace :partial=>"show_desc", :object=>JpLexeme.find(params[:id].to_i)
+      page["show_desc"].visual_effect :slide_down
+    end
+  end
+
   def input_base
     unless params[:base_type].blank?
       render :partial => 'input_base', :locals => { :message => "", :base_type => params[:base_type] }
@@ -192,8 +199,7 @@ class JpController < ApplicationController
           when "surface", "reading", "pronunciation", "log"
             value.blank? ? lexeme[key]=nil : lexeme[key]=value
           when "pos", "ctype", "cform"
-            section_strings = get_ordered_string_from_params(value.dup)
-            temp = JpProperty.find_item_by_tree_string_or_array(key, section_strings)
+            temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(value.dup))
             temp.blank? ? lexeme[key] = nil : lexeme[key] = temp.property_cat_id
           when "dictionary"
             lexeme[key]=value.join(',')
@@ -201,8 +207,7 @@ class JpController < ApplicationController
           else
             case JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"]).type_field
               when "category"
-                section_strings = get_ordered_string_from_params(value.dup)
-                temp = JpProperty.find_item_by_tree_string_or_array(key, section_strings)
+                temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(value.dup))
                 temp.blank? ? lexeme[key] = nil : lexeme[key] = temp.property_cat_id
               when "text"
                 value.blank? ? lexeme[key]=nil : lexeme[key]=value
@@ -456,6 +461,329 @@ class JpController < ApplicationController
     end
   end
 
+  def edit
+    if request.post?
+      if params[:surface].blank? or params[:reading].blank? or params[:pronunciation].blank?
+        flash.now[:notice_err] = "<ul><li>単語、読み、発音は必須属性なので、全部入力してください！</li><ul>"
+        render :partial=>"preview_edit"
+        return
+      end
+      #############################################################################
+      #tidy up the input properties
+      params.delete("commit")
+      params.delete("authenticity_token")
+      params.delete("action")
+      params.delete("controller")
+      lexeme = {"id"=>params[:id].to_i}
+      params.each{|key,value|
+        case key
+          when "surface", "reading", "pronunciation", "log"
+            value.blank? ? lexeme[key]=nil : lexeme[key]=value
+          when "pos", "ctype", "cform", "tagging_state"
+            temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(value.dup))
+            temp.blank? ? lexeme[key] = nil : lexeme[key] = temp.property_cat_id
+            if key=="tagging_state" and lexeme["tagging_state"].blank?
+              flash.now[:notice_err] = "<ul><li>単語の状態は必須なので、空に設定しないでください！</li><ul>"
+              render :partial=>"preview_edit"
+              return
+            end
+          when "dictionary"
+            lexeme[key]=value.join(',')
+          when  "base_type", "base", "base_ok", "base_id", "id"
+            next
+          else
+            case JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"]).type_field
+              when "category"
+                temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(value.dup))
+                temp.blank? ? lexeme[key] = nil : lexeme[key] = temp.property_cat_id
+              when "text"
+                value.blank? ? lexeme[key]=nil : lexeme[key]=value
+              when "time"
+                if value.values.join("").blank?
+                  lexeme[key]=nil
+                elsif (value.has_key?("section(1i)") and (value["section(1i)"]=="" or value["section(2i)"]=="" or value["section(3i)"]=="")) or (value.has_key?("year") and (value["year"]=="" or value["month"]=="" or value["day"]==""))
+                  flash.now[:notice_err] = "<ul><li>時間を最低日まで指定して下さい！</li></ul>"
+                  render :partial=>"preview_edit"
+                  return
+                else
+                  begin
+                    if value.has_key?("section(1i)")
+                      lexeme[key]=DateTime.civil(value["section(1i)"].to_i, value["section(2i)"].to_i, value["section(3i)"].to_i, value["section(4i)"].to_i, value["section(5i)"].to_i).to_formatted_s(:db)
+                    elsif value.has_key?("year")
+                      lexeme[key]=DateTime.civil(value["year"].to_i, value["month"].to_i, value["day"].to_i, value["hour"].to_i, value["minite"].to_i).to_formatted_s(:db)
+                    end
+                  rescue
+                    flash.now[:notice_err] = "<ul><li>時間を正しく指定して下さい！</li></ul>"
+                    render :partial=>"preview_edit"
+                    return
+                  end
+                end
+            end
+        end
+      }
+      if params["base_ok"] == "true"
+        lexeme["base_id"] = params["base_id"]
+        lexeme["root_id"] = JpLexeme.find(params["base_id"].to_i).root_id
+      else
+        lexeme["base_id"] = params["id"]
+        lexeme["root_id"] = nil
+      end
+      original = JpLexeme.find(params["id"].to_i)
+      if original.id == original.base_id and original.same_base_lexemes.size != 1 and original.base_id != lexeme["base_id"].to_i
+        series_change = "true"
+      else
+        series_change = "false"
+      end
+      #############################################################################
+      
+      #############################################################################
+      #see if this word has already been registered
+      if JpLexeme.exist_when_new(lexeme)[0] == true
+        flash.now[:notice_err] = "<ul><li>単語　#{lexeme['surface']}　はすでに辞書に保存している</li></ul>"
+        render :partial=>"preview_edit"
+        return
+      end
+      #############################################################################
+      render :partial=>"preview_edit", :object=>lexeme, :locals=> { :series_change => series_change }
+    else
+      @lexeme = JpLexeme.find(params[:id])
+    end
+  end
+
+  def update
+    series_change = ""
+    original_id = 0
+    lexeme = {}
+    customize_property = [{}, {}, {}]
+    params.each{|key, value|
+      case key
+        when "series_change"
+          series_change = value
+        when "id"
+          original_id = value.to_i
+        when "commit", "authenticity_token", "action", "controller"
+          next
+        when "surface", "reading", "pronunciation", "dictionary", "log", "root_id"
+          params[key].blank? ? lexeme[key] = nil : lexeme[key] = value
+        when "pos", "ctype", "cform", "base_id", "tagging_state"
+          params[key].blank? ? lexeme[key] = nil : lexeme[key] = value.to_i
+        else
+          case JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"]).type_field
+            when "category"
+              customize_property[0][key] = value.to_i
+            when "text"
+              customize_property[1][key] = value
+            when "time"
+              customize_property[2][key] = value
+          end
+      end
+    }
+    begin
+      JpLexeme.transaction do
+        original_lexeme = JpLexeme.find(original_id)
+        lexeme.each{|key, value| original_lexeme[key]=value }
+        original_lexeme.modified_by = session[:user_id]
+        if original_lexeme.save!
+          save_series_aux_properties_core(customize_property, original_id)
+        end
+        if series_change == "true"
+          JpLexeme.find(:all, :conditions=>["base_id=#{original_id}"]).each{|item|
+            next if item.id == original_id
+            item.base_id = original_lexeme.base_id
+            item.root_id = original_lexeme.root_id
+            item.save!
+          }
+        end
+      end
+    rescue Exception => e
+      flash[:notice_err] = "<ul><li>問題が発生しました、単語を更新できません</li></ul>"
+      flash[:notice_err] = "<ul><li>#{e}</li></ul>"
+      redirect_to :action => 'edit', :id=>JpLexeme.find(original_id)
+    else
+      flash[:notice] = "<ul><li>単語を更新しました！</li></ul>"
+      if series_change == "true"
+        redirect_to :action => "search", :search_type => "base", :base_id => lexeme["base_id"]
+      else
+        redirect_to :action => "show", :id => original_id
+      end
+    end
+  end
+
+  def define_root
+    if request.post?
+      case params[:type]
+        when "define"
+          input_id_list = params[:id_list].split(/\t|\s/).join("").split(',')
+          is_number = true
+          input_id_list.each{|id| is_number = false if (id =~ /^\d*$/) == nil }
+          if input_id_list.blank? or is_number == false
+            flash.now[:notice_err] = "<ul><li>同じRoot系列に指定したい単語リストを正しく入力してください</li></ul>"
+            render :partial=>"preview_same_root"
+          elsif not params[:option_real_root].blank? and (params[:option_real_root] =~ /^\d*$/) == nil
+            flash.now[:notice_err] = "<ul><li>Root単語のIDを正しく入力してください</li></ul>"
+            render :partial=>"preview_same_root"
+          else
+            root_list = []
+            base_list = []
+            input_id_list.each{|id|
+              lexeme = JpLexeme.find(id.to_i)
+              base_list << lexeme.base_id unless lexeme.base_id.blank?
+              root_list << lexeme.root_id unless lexeme.root_id.blank?
+            }
+            root_list = root_list.uniq.sort
+            root_list.blank? ? new_root = "NEW" : new_root = root_list.map{|item| item if item=~/^R/}.compact.sort{|a,b| a.gsub(/^R/, "")<=>b.gsub(/^R/, "")}[0]
+            root_list.each{|root| JpLexeme.find(:all, :conditions=>["root_id=?",root]).each{|lexeme| base_list << lexeme.base_id unless base_list.include?(lexeme.base_id)}}
+            base_list = base_list.uniq.sort
+            if params[:option_real_root].blank?
+              render :partial=>"preview_same_root", :object=>[base_list, []], :locals=>{:type=>params[:type], :new_root=>new_root}
+            else
+              temp = JpLexeme.find(params[:option_real_root].to_i)
+              if base_list.include?(temp.base_id) and temp.id == temp.base_id
+                render :partial=>"preview_same_root", :object=>[base_list, root_list], :locals=>{:type=>params[:type], :new_root=>params[:option_real_root]}
+              else
+                if temp.id != temp.base_id
+                  flash.now[:notice_err] = "<ul><li>【Root単語】になれるのは【Base単語】のみなので、【Base単語】のIDを入力してください！</li></ul>"
+                elsif not base_list.include?(temp.base_id)
+                  flash.now[:notice_err] = "<ul><li>指定した【Root単語】は入力した【同じRoot系列にしたい単語リスト】に含めていないので、もう一度入力してください！</li></ul>"
+                end
+                render :partial=>"preview_same_root"
+              end
+            end
+          end
+        when "destroy"
+          temp = JpLexeme.find(params[:destroy_root])
+          if temp.root_id.blank?
+            flash.now[:notice_err] = "<ul><li>入力した単語がRootを持っていないまた、操作はできない</li></ul>"
+            render :partial=>"preview_same_root"
+          else
+            base_list = []
+            temp.same_root_lexemes.each{|item| base_list << item.base_id unless base_list.include?(item.base_id)}
+            old_base_list = base_list.uniq.sort
+            base_list.delete(temp.base_id)
+            base_list = base_list.uniq.sort
+            if not base_list.blank? and temp.base_id == temp.root_id.to_i
+              flash.now[:notice_err] = "<ul><li>外したいBase系列の【Base単語】はRoot系列の【Root単語】になっているので、操作を続くには、まずRoot系列の【Root単語】を変更してください</li></ul>"
+              render :partial=>"preview_same_root"
+            else
+              render :partial=>"preview_same_root", :object=>[base_list, old_base_list],
+                     :locals=>{:type=>params[:type], :new_root=>temp.root_id, :deleted=>temp.same_base_lexemes.size}
+            end
+          end
+      end
+    end
+  end
+
+  def save_roots
+    case params[:type]
+      when "define"
+        new_root_id = nil
+        begin
+          JpLexeme.transaction do
+            if params[:new_root]=="NEW"
+              max = JpLexeme.maximum('id')
+              new_root_id = "R"+max.to_s
+              while(JpLexeme.exists?(:root_id=>temp_string))
+                new_root_id = "R"+(rand(max)+1).to_s
+              end
+            else
+              new_root_id = params[:new_root]
+            end
+            params[:base_list].split(',').each{|base| JpLexeme.find(base.to_i).same_base_lexemes.each{|lexeme| lexeme.update_attributes!(:root_id=>new_root_id)}}
+          end
+        rescue Exception => e
+          flash[:notice_err] = "<ul><li>問題が発生しました、Root系列指定できません</li></ul>"
+          flash[:notice_err] << "<ul><li>#{e}</li></ul>"
+          redirect_to :action => "define_root"
+          return
+        else
+          flash[:notice] = "<ul><li>Root系列を指定しました！</li></ul>"
+          redirect_to :action => "search", :search_type=>"root", :root_id=>new_root_id
+          return
+        end
+      when "destroy"
+        begin
+          if params[:base_list].blank?
+            JpLexeme.transaction do
+              JpLexeme.find(:all, :conditions=>["root_id=?",params[:new_root]]).each{|lexeme| lexeme.update_attributes!(:root_id => nil)}
+            end
+          else
+            old_base_list = params[:old_base_list].split(',')
+            base_list = params[:base_list].split(',')
+            deleted_base_list = old_base_list - base_list
+            JpLexeme.transaction do
+              deleted_base_list.each{|base| JpLexeme.find(base.to_i).same_base_lexemes.each{|lexeme| lexeme.update_attributes!(:root_id => nil)}}
+            end
+          end
+        rescue Exception => e
+          flash[:notice_err] = "<ul><li>問題が発生しました、Root系列から外されません。</li></ul>"
+          flash[:notice_err] << "<ul><li>#{e}</li></ul>"
+          redirect_to :action => "define_root"
+          return
+        else
+          flash[:notice] = "<ul><li>Root系列から外しました！</li></ul>"
+          if params[:base_list].blank?
+            redirect_to :action => "index"  
+          else
+            redirect_to :action => "search", :search_type=>"root", :root_id=>params[:new_root]
+          end
+          return
+        end
+    end  
+  end
+
+
+  def split_word
+    @jplexemes_left = JpLexeme.find(:all, :include=>[:struct], :conditions=>["surface='#{params[:left]}'"], :order=>"id ASC")
+    @jplexemes_right = JpLexeme.find(:all, :include=>[:struct], :conditions => ["surface='#{params[:right]}'"], :order=>"id ASC")
+    @temp = [@jplexemes_left, @jplexemes_right]
+    if params[:type] == "modify"
+      ids_array = swap_idsarray_and_ids(params[:ids],[])
+      indexes = params[:ids_section].split(',')
+      prev_id = ""
+      next_id = ""
+      if indexes.size == 1
+        prev_id = '['+(indexes[0].to_i-1).to_s+']'
+        next_id = '['+indexes[0]+']'
+      else
+        for index_item in 0..indexes.size-1
+          if index_item == indexes.size-1
+            prev_id << '['+(indexes[index_item].to_i-1).to_s+']'
+            next_id << '['+indexes[index_item]+']'
+          else
+            prev_id << '['+indexes[index_item]+']'
+            next_id << '['+indexes[index_item]+']'
+          end
+        end
+      end
+      left_id = eval 'ids_array'+prev_id
+      right_id = eval 'ids_array'+next_id
+      begin
+        left_id.chomp
+      rescue
+        left_id = nil
+      end
+      begin
+        right_id.chomp
+      rescue
+        right_id = nil
+      end
+    else params[:type] == "new"
+      left_id = nil
+      right_id = nil
+    end
+    render :update do |page|
+      page.replace_html "candidate", :partial=>"left_or_right", :object => @temp,  
+                                     :locals => { :left=>params[:left],        :left_id=>left_id,
+                                                  :right=>params[:right],      :right_id=>right_id,
+                                                  :ids=>params[:ids],          :chars=>params[:chars],
+                                                  :level=>params[:level],      :type=>params[:type],
+                                                  :from=>params[:from],        :original_id => params[:original_id],
+                                                  :chars_index=>params[:chars_index],     :ids_section=>params[:ids_section],
+                                                  :divide_type=>params[:divide_type]}
+    end
+  end
+
+
   private
   def set_title
     @page_title = "Cradle--茶筌辞書管理システム"
@@ -545,8 +873,7 @@ class JpController < ApplicationController
               when "pos", "ctype", "cform", "tagging_state", "sth_tagging_state"
                 values = params[key].dup
                 values.delete("operator")
-                section_strings = get_ordered_string_from_params(values)
-                temp = JpProperty.find_item_by_tree_string_or_array(key, section_strings)
+                temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(values))
                 case params[key][:operator]
                   when "in", "not in"
                     unless temp.blank?
@@ -624,8 +951,7 @@ class JpController < ApplicationController
               when "category"
                 values = params[key].dup
                 values.delete("operator")
-                section_strings = get_ordered_string_from_params(values)
-                temp = JpProperty.find_item_by_tree_string_or_array(key, section_strings)
+                temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(values))
                 case params[key][:operator]
                   when "in", "not in"
                     unless temp.blank?
@@ -718,30 +1044,35 @@ class JpController < ApplicationController
     existed_lexeme.modified_by = session[:user_id]
     existed_lexeme.root_id = nil
     if existed_lexeme.save!
-      JpLexemeNewPropertyItem.transaction do
-        new_field = []
-        property_ary[0].each{|key,value|
-          temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id=? and ref_id=?", key, existed_lexeme.id])
-          temp.blank? ? JpLexemeNewPropertyItem.create!(:property_id=>key, :ref_id=>existed_lexeme.id, :category=>value) : temp.update_attributes!(:category=>value)
-          new_field << key
-        }
-        property_ary[1].each{|key,value|
-          temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id=? and ref_id=?", key, existed_lexeme.id])
-          temp.blank? ? JpLexemeNewPropertyItem.create!(:property_id=>key, :ref_id=>existed_lexeme.id, :text=>value) : temp.update_attributes!(:text=>value)
-          new_field << key
-        }
-        property_ary[2].each{|key,value|
-          temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id=? and ref_id=?", key, existed_lexeme.id])
-          temp.blank? ? JpLexemeNewPropertyItem.create!(:property_id=>key, :ref_id=>existed_lexeme.id, :time=>value) : temp.update_attributes!(:time=>value)
-          new_field << key
-        }
-        JpNewProperty.find(:all, :conditions=>["section='lexeme'"]).each{|item|
-          unless new_field.include?(item.id)
-            temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id=? and ref_id=?", item.id, existed_lexeme.id])
-            temp.destroy unless temp.blank?
-          end
-        }
-      end
+      save_series_aux_properties_core(property_ary, existed_lexeme.id)
     end
   end
+  
+  def save_series_aux_properties_core(property_ary=[], id=nil)
+    JpLexemeNewPropertyItem.transaction do
+      new_field = []
+      property_ary[0].each{|key,value|
+        temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id=? and ref_id=?", key, id])
+        temp.blank? ? JpLexemeNewPropertyItem.create!(:property_id=>key, :ref_id=>id, :category=>value) : temp.update_attributes!(:category=>value)
+        new_field << key
+      }
+      property_ary[1].each{|key,value|
+        temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id=? and ref_id=?", key, id])
+        temp.blank? ? JpLexemeNewPropertyItem.create!(:property_id=>key, :ref_id=>id, :text=>value) : temp.update_attributes!(:text=>value)
+        new_field << key
+      }
+      property_ary[2].each{|key,value|
+        temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id=? and ref_id=?", key, id])
+        temp.blank? ? JpLexemeNewPropertyItem.create!(:property_id=>key, :ref_id=>id, :time=>value) : temp.update_attributes!(:time=>value)
+        new_field << key
+      }
+      JpNewProperty.find(:all, :conditions=>["section='lexeme'"]).each{|item|
+        unless new_field.include?(item.id)
+          temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id=? and ref_id=?", item.id, id])
+          temp.destroy unless temp.blank?
+        end
+      }
+    end
+  end
+  
 end

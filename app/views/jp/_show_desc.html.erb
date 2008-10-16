@@ -1,0 +1,107 @@
+<div id='show_desc' align="center" class="list" onclick="Effect.SlideUp('show_desc')" style="padding-bottom:20px;">
+	<table style="text-align:right;">
+        <% odd_or_even =1
+		list = ["id"].concat(session[:jp_section_list].map{|item| item.gsub(/^\d+_/, "")}) %>
+			<tr>
+			<% for index in 0..list.size-1 do
+				item = list[index]
+				if (index+1)%3 == 0
+					odd_or_even = 1 - odd_or_even %>
+					</tr><tr <%= "class='odd'" if odd_or_even == 0 %> >
+				<% end 
+				if not initial_property_name[item].blank? %>
+					<th><%= item=="sth_tagging_state" ? "構造"+initial_property_name[item] : initial_property_name[item] %></th>
+					<% case item
+						when "id", "surface", "reading", "pronunciation", "log" %>
+							<td><%= h(show_desc[item]) %></td>
+						<% when "base_id" %>
+							<td>
+								<%= link_to( h(show_desc.base.surface), :action=>"search", :search_type=>"base", :base_id=>show_desc.base_id ) %>
+							</td>
+						<% when "root_id" %>
+							<td style="text-align:center;" >
+								<% unless show_desc.root_id.blank? %>
+									<% if show_desc.root_id =~ /^R/ %>
+										<%= link_to( "<span style='background-color:#047;'>&nbsp;&nbsp;</span>", :action=>"search", :search_type=>"root", :root_id=>show_desc.root_id ) %>
+									<% else %>
+										<%= link_to( h(show_desc.root.surface), :action=>"search", :search_type=>"root", :root_id=>show_desc.root_id )%>
+									<% end %>
+								<% end %>
+							</td>
+						<% when "pos", "ctype", "cform", "tagging_state" %>
+							<td>
+								<% unless show_desc[item].blank? or show_desc[item] == 0 %>
+									<%= h(eval('show_desc.'+item+'_item.tree_string')) %>
+								<% end %>
+							</td>
+						<% when "created_by", "modified_by" %>
+							<td>
+								<% unless show_desc[item].blank? %>
+									<%= User.find(show_desc[item].to_i).name %>
+								<% end %>
+							</td>
+						<% when "updated_at" %>
+							<td>
+								<% unless show_desc.updated_at.blank? %>
+									<%= show_desc.updated_at.to_formatted_s(:db) %>
+								<% end %>
+							</td>
+						<% when "dictionary" %>
+							<td style="text-align:center;" >
+								<%	temp = []
+									show_desc.dictionary_item.list.each{|dict| temp << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>" }
+								%>
+								<%= temp.join("  ") %>
+							</td>
+						<% when "sth_struct" %>
+							<td style="text-align:center;" >
+								<% unless show_desc.struct.blank? %>
+									<span style='background-color:#047;'>&nbsp;&nbsp;</span>
+								<% end %>
+							</td>
+						<% when "sth_tagging_state" %>
+							<td>
+								<% unless show_desc.struct.blank? %>
+									<%= h(show_desc.struct.sth_tagging_state_item.tree_string) %>
+								<% end %>
+							</td>
+					<% end
+				elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item) %>
+					<th>構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
+					<% case item
+						when "sth_log" %>
+							<td><%= show_desc.struct.sth_log unless show_desc.struct.blank? %></td>
+						<% when "sth_modified_by" %>
+							<td><%= show_desc.struct.annotator.name unless show_desc.struct.blank? %></td>
+						<% when "sth_updated_at" %>
+							<td><%= show_desc.struct.updated_at.to_formatted_s(:db) unless show_desc.struct.blank? %></td>
+					<% end
+				else %>
+					<th><%= JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %></th>
+					<% property = JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]) 
+					if property.section == "lexeme"
+						temp = eval 'show_desc.'+item
+					elsif property.section == "synthetic"
+						if lexeme.struct.blank?
+							temp = ""
+						else
+							temp = eval 'show_desc.struct.'+item
+						end
+					end
+					if temp.blank? %>
+						<td></td>
+					<% else
+						case property.type_field
+							when "category" %>
+								<td><%= h(JpProperty.find(:first, :conditions=>["property_string='#{item}' and property_cat_id=#{temp}"]).tree_string) %></td>
+							<% when "text" %>
+								<td><%= h(temp) %></td>
+							<% when "time" %>
+								<td><%= h(temp.to_formatted_s(:db)) %></td>
+						<% end
+					end
+				end
+			end %>
+		</tr>
+	</table>	
+</div>

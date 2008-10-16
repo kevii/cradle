@@ -1,0 +1,70 @@
+<div  id='synthetic_struct'>
+	<% if not flash.now[:notice].blank? %>
+		<div id="notice" ><%= flash.now[:notice] %></div>
+	<% elsif not flash.now[:notice_err].blank? %>
+		<div id="notice_err" ><%= flash.now[:notice_err] %></div>
+	<% elsif not flash[:notice].blank? %>
+		<div id="notice" ><%= flash[:notice] %></div>
+	<% elsif not flash[:notice_err].blank? %>
+		<div id="notice_err" ><%= flash[:notice_err] %></div>
+    <% end %>
+	<div align="center">
+		<table>
+			<tr>
+				<td><strong>内部構造：</strong></td>
+				<td>
+					<table style="border: 3px solid #f0f8ff;">
+						<tr>
+							<% if ids = "" %>
+								<%= show_internal_structure(show_internal_structure, true, 1) %>
+							<% else %>
+								<%= show_internal_structure(show_internal_structure, false, 1) %>
+							<% end %>
+		
+						</tr>
+					</table>
+				</td>
+				<td>
+					<% form_remote_tag :url => { :action => "modify_structure",
+												 :ids => show_internal_structure["ids"], :original_id => show_internal_structure["original_id"],
+												 :chars => show_internal_structure["chars"], :from=>show_internal_structure["from"] } do %>
+						<span><%= submit_tag '確認' %></span>
+						<% if show_internal_structure["from"] == "new" %>
+							<%= button_to_remote("リセット", :url => {:action => :define_internal_structure, :type=>"define", :original_id=>show_internal_structure["original_id"], :from=>show_internal_structure["from"]}) %>
+						<% elsif show_internal_structure["from"] == "modify" %>
+							<% ids, chars = get_formatted_ids_and_chars(:original_lexeme_id=>show_internal_structure["original_id"].to_i, :domain=>'jp') %>
+							<%= button_to_remote("リセット", :url => {:action => :define_internal_structure, :type=>"define", :ids=>ids, :chars=>chars, :original_id=>show_internal_structure["original_id"], :from=>show_internal_structure["from"]}) %>
+						<% end %>
+					<% end %>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3><%= get_showing_string(show_internal_structure["ids"], show_internal_structure["chars"]) %></td>
+			</tr>
+		</table>
+		<div id="candidate" style="text-align:left;padding-left:5%;padding-top:50px;">
+			<table>
+				<tr>
+					<td><%= image_tag("internal-horizontal.jpg", :border=>0) %></td>
+					<td><span style="padding-left:10px;">： 同じレベルで分割する</span></td>
+				</tr>
+				<tr>
+					<td><%= image_tag("internal-vertical.jpg", :border=>0) %></td>
+					<td><span style="padding-left:10px;">： 下のレベルに分割する</span></td>
+				</tr>
+				<tr>
+					<td>①②③</td>
+					<td><span style="padding-left:10px;">： Nodeのレベルを表示する</span></td>
+				</tr>
+				<tr>
+					<td><%= image_tag("internal-plus.jpg", :border=>0) %></td>
+					<td><span style="padding-left:10px;">： Nodeの左右を編集する</span></td>
+				</tr>
+				<tr>
+					<td><%= image_tag("internal-minus.jpg", :border=>0) %></td>
+					<td><span style="padding-left:10px;">： Node下の構造を削除する</span></td>
+				</tr>
+			</table>
+		</div>	
+	</div>
+</div>
