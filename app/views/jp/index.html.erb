@@ -175,35 +175,45 @@
 			<tr>
 				<td colspan=2>
 					<table>
+						<tr>
+							<td><%= initial_property_name['sth_struct'] %></td>
+							<td>
+				                <select id="operator_sth_struct" name="sth_struct[operator]" style="width:100%;">
+				                    <option selected value='like'>include</option>
+				                </select>
+							</td>
+							<td><%= text_field :sth_struct, :value, {:style=>"width:100%;", :class=>'text-field'}%></td>
+							<td></td>
 						<% if User.find_by_id(session[:user_id]) %>
-							<tr>
-								<td><%= initial_property_name['sth_tagging_state'] %></td>
-								<td>
-					                <select id="operator_sth_tagging_state" name="sth_tagging_state[operator]" style="width:100%;">
-					                    <%= options_for_select(operator2, "=") %>
-					                </select>
-								</td>
-								<td><%= display_property_list(:type=>"sth_tagging_state", :domain=>"jp", :state=>"search") %></td>
-								<td></td>
-								<td><%= initial_property_name['modified_by'] %></td>
-								<td>
-					                <select id="operator_sth_modified_by" name="sth_modified_by[operator]" style="width:100%;">
-					                    <%= options_for_select(operator3, "=") %>
-					                </select>
-								</td>
-								<td><%= collection_select("sth_modified_by", "value", User.find(:all), :id, :name, {:include_blank => true}) %></td>
-							</tr>
-							<tr>
-								<td><%= initial_property_name['updated_at'] %></td>
-								<td>
-									<select id='operator_sth_updated_at' name='sth_updated_at[operator]' style='width:100%;'>\n"
-			      						<%= options_for_select(operator4, "<=") %>
-									</select>
-								</td>
-								<td>
-									<%= datetime_select("sth_updated_at", "section", {:use_month_numbers => true, :include_blank => true}) %>
-								</td>
-							</tr>
+							<td><%= initial_property_name['sth_tagging_state'] %></td>
+							<td>
+				                <select id="operator_sth_tagging_state" name="sth_tagging_state[operator]" style="width:100%;">
+				                    <%= options_for_select(operator2, "=") %>
+				                </select>
+							</td>
+							<td><%= display_property_list(:type=>"sth_tagging_state", :domain=>"jp", :state=>"search") %></td>
+						</tr>
+						<tr>
+							<td><%= initial_property_name['modified_by'] %></td>
+							<td>
+				                <select id="operator_sth_modified_by" name="sth_modified_by[operator]" style="width:100%;">
+				                    <%= options_for_select(operator3, "=") %>
+				                </select>
+							</td>
+							<td><%= collection_select("sth_modified_by", "value", User.find(:all), :id, :name, {:include_blank => true}) %></td>
+							<td></td>
+							<td><%= initial_property_name['updated_at'] %></td>
+							<td>
+								<select id='operator_sth_updated_at' name='sth_updated_at[operator]' style='width:100%;'>\n"
+		      						<%= options_for_select(operator4, "<=") %>
+								</select>
+							</td>
+							<td>
+								<%= datetime_select("sth_updated_at", "section", {:use_month_numbers => true, :include_blank => true}) %>
+							</td>
+						</tr>
+						<% else %>
+						</tr>
 						<% end %>
 						
 						<% unless JpNewProperty.find(:all, :conditions=>["section='synthetic'"]).blank? %>

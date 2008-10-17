@@ -57,7 +57,7 @@ namespace :cradle do
         
       begin
         ## create new dictionary item
-        dict_id = JpProperty.save_property_tree("dictionary", [dictionary["name"], dictionary["version"]], JpProperty.find(:first, :conditions=>["property_string='dictionary'"]).seperator).property_cat_id
+        dict_id = '-'+JpProperty.save_property_tree("dictionary", [dictionary["name"], dictionary["version"]], JpProperty.find(:first, :conditions=>["property_string='dictionary'"]).seperator).property_cat_id.to_s+'-'
 
         ## create new lexeme property items
         text_feature_name.each{|key, value|
@@ -82,13 +82,13 @@ namespace :cradle do
             temp[11].blank? ? reading = "" : reading = NKF.nkf('-h2 --utf8', temp[11])
             new_id = JpLexeme.maximum('id')+1
             new_lexeme = JpLexeme.new(:surface=>temp[0], :reading=>reading, :base_id=>new_id, :pos=>odinary_pos,
-                                      :dictionary=>dict_id.to_s, :tagging_state=>tagging_state_new, :created_by=>1)
+                                      :dictionary=>dict_id, :tagging_state=>tagging_state_new, :created_by=>1)
             new_lexeme.id = new_id
             new_lexeme.save!
             new_lexeme_id = new_lexeme.id
           elsif candidates.size == 1
             updated_lexeme_records << candidates[0]
-            new_dic_string = [candidates[0].dictionary.to_i, dict_id].sort.join(",")
+            new_dic_string = [candidates[0].dictionary, dict_id].sort.join(",")
             candidates[0].update_attributes!(:dictionary=>new_dic_string)
             new_lexeme_id = candidates[0].id
           elsif candidates.size > 1
@@ -106,12 +106,12 @@ namespace :cradle do
             end
             if first_match == candidates.size
               updated_lexeme_records << candidates[0]
-              new_dic_string = [candidates[0].dictionary.to_i, dict_id].sort.join(",")
+              new_dic_string = [candidates[0].dictionary, dict_id].sort.join(",")
               candidates[0].update_attributes!(:dictionary=>new_dic_string)
               new_lexeme_id = candidates[0].id
             else
               updated_lexeme_records << candidates[first_match]
-              new_dic_string = [candidates[first_match].dictionary.to_i, dict_id].sort.join(",")
+              new_dic_string = [candidates[first_match].dictionary, dict_id].sort.join(",")
               candidates[first_match].update_attributes!(:dictionary=>new_dic_string)
               new_lexeme_id = candidates[first_match].id
             end

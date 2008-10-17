@@ -240,6 +240,7 @@ module ApplicationHelper
     ids = []
     chars = []
     temp_struct = eval(synthetic_class+'.find(:first, :conditions=>["sth_ref_id=#{original_lexeme_id} and sth_meta_id=#{meta}"]).sth_struct')
+    temp_struct = temp_struct.split(',').map{|item| item.delete('-')}.join(',')
     if temp_struct.include?('meta')
       temp_struct.split(',').each{|item|
         if (item =~ /^meta_(\d*)$/) != nil
@@ -295,7 +296,7 @@ module ApplicationHelper
     return html_string
   end
 
-  def show_internal_structure(field={}, first_time=false, level=0)
+  def show_internal_structure(field={}, first_time=false, level=0, domain=nil)
     part = field["part"]
     html_string = ""
     if part.include?("*") == false  # do not include *
@@ -320,7 +321,8 @@ module ApplicationHelper
                                                                                                                   :original_id=>field["original_id"],
                                                                                                                   :from=>field["from"],
                                                                                                                   :chars_index=>field["start_index"].to_s+","+(field["start_index"]+inner_array.to_s.size-1).to_s,
-                                                                                                                  :ids_section=>field["ids_section"] })
+                                                                                                                  :ids_section=>field["ids_section"],
+                                                                                                                  :domain=>domain })
             elsif first_time == false
               html_string << link_to_remote(image_tag("internal-horizontal.jpg", :border=>0), :update=>"candidates", :url=>{  :action=>"split_word",
                                                                                                                               :level => level-1,
@@ -333,7 +335,8 @@ module ApplicationHelper
                                                                                                                               :original_id=>field["original_id"],
                                                                                                                               :from=>field["from"],
                                                                                                                               :chars_index=>field["start_index"].to_s+","+(field["start_index"]+inner_array.to_s.size-1).to_s,
-                                                                                                                              :ids_section=>field["ids_section"] })
+                                                                                                                              :ids_section=>field["ids_section"],
+                                                                                                                              :domain=>domain })
               html_string << '<br/>'
               html_string << link_to_remote(image_tag("internal-vertical.jpg", :border=>0), :update=>"candidates", :url=>{  :action=>"split_word",
                                                                                                                             :level => level,
@@ -346,7 +349,8 @@ module ApplicationHelper
                                                                                                                             :original_id=>field["original_id"],
                                                                                                                             :from=>field["from"],
                                                                                                                             :chars_index=>field["start_index"].to_s+","+(field["start_index"]+inner_array.to_s.size-1).to_s,
-                                                                                                                            :ids_section=>field["ids_section"] })
+                                                                                                                            :ids_section=>field["ids_section"],
+                                                                                                                            :domain=>domain })
             end
             html_string << "</td>\n"
           else
@@ -384,7 +388,8 @@ module ApplicationHelper
                                                                                                                    :original_id => field["original_id"],
                                                                                                                    :from=>field["from"],
                                                                                                                    :chars_index=>(transition_index-(2+1*level)-sections[index-1].size).to_s+","+(transition_index+sections[index].size).to_s,
-                                                                                                                   :ids_section=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s })
+                                                                                                                   :ids_section=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s,
+                                                                                                                   :domain=>domain})
           html_string << struct_level[level]+"\n"
           html_string << link_to_remote(image_tag("internal-minus.jpg", :border=>0, :style=>"vertical-align: middle;"), :url=>{ :action=>"define_internal_structure",
                                                                                              :level => level,
@@ -394,7 +399,8 @@ module ApplicationHelper
                                                                                              :original_id => field["original_id"],
                                                                                              :from=>field["from"],
                                                                                              :chars_index=>(transition_index-(2+1*level)-sections[index-1].size).to_s+","+(transition_index+sections[index].size).to_s,
-                                                                                             :ids_section=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s })
+                                                                                             :ids_section=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s,
+                                                                                             :domain=>domain })
           html_string << "</td>\n"
         end
         html_string << show_internal_structure( {"part"=>sections[index],       "ids"=>field["ids"],
@@ -402,7 +408,8 @@ module ApplicationHelper
                                                  "from"=>field["from"],         "start_index"=>transition_index,
                                                  "ids_section"=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s},
                                                  false,
-                                                 level+1)
+                                                 level+1,
+                                                 domain)
         transition_index = transition_index+(2+1*level)+sections[index].size
       end
     end

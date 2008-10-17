@@ -11,29 +11,54 @@
 	<div align="center">
 		<table>
 			<tr>
-				<td><strong>内部構造：</strong></td>
+				<td>
+					<strong>
+						<% case domain
+							when "jp" %>
+								内部構造：
+							<% when "cn" %>
+								内部构造：
+							<% when "en" %>
+								Internal structure:
+						<% end %>
+					</strong>
+				</td>
 				<td>
 					<table style="border: 3px solid #f0f8ff;">
 						<tr>
 							<% if ids = "" %>
-								<%= show_internal_structure(show_internal_structure, true, 1) %>
+								<%= show_internal_structure(show_internal_structure, true, 1, domain) %>
 							<% else %>
-								<%= show_internal_structure(show_internal_structure, false, 1) %>
+								<%= show_internal_structure(show_internal_structure, false, 1, domain) %>
 							<% end %>
 		
 						</tr>
 					</table>
 				</td>
 				<td>
-					<% form_remote_tag :url => { :action => "modify_structure",
-												 :ids => show_internal_structure["ids"], :original_id => show_internal_structure["original_id"],
-												 :chars => show_internal_structure["chars"], :from=>show_internal_structure["from"] } do %>
-						<span><%= submit_tag '確認' %></span>
+					<% form_remote_tag :url=>{:action=>"modify_structure", :ids=>show_internal_structure["ids"], :original_id=>show_internal_structure["original_id"],
+											  :chars=>show_internal_structure["chars"], :from=>show_internal_structure["from"], :domain=>domain } do %>
+						<span>
+							<% case domain
+								when "jp" %>
+									<% temp_string = "リセット" %>
+									<%= submit_tag '確認' %>
+								<% when "cn" %>
+									<% temp_string = "重置" %>
+									<%= submit_tag '确认' %>
+								<% when "en" %>
+									<% temp_string = "Reset" %>
+									<%= submit_tag 'Confirm' %>
+							<% end %>
+						</span>
 						<% if show_internal_structure["from"] == "new" %>
-							<%= button_to_remote("リセット", :url => {:action => :define_internal_structure, :type=>"define", :original_id=>show_internal_structure["original_id"], :from=>show_internal_structure["from"]}) %>
+							<%= button_to_remote(temp_string, :url => {:action => :define_internal_structure, :type=>"define", :original_id=>show_internal_structure["original_id"],
+																	   :from=>show_internal_structure["from"], :domain=>domain}) %>
 						<% elsif show_internal_structure["from"] == "modify" %>
-							<% ids, chars = get_formatted_ids_and_chars(:original_lexeme_id=>show_internal_structure["original_id"].to_i, :domain=>'jp') %>
-							<%= button_to_remote("リセット", :url => {:action => :define_internal_structure, :type=>"define", :ids=>ids, :chars=>chars, :original_id=>show_internal_structure["original_id"], :from=>show_internal_structure["from"]}) %>
+							<% ids, chars = get_formatted_ids_and_chars(:original_lexeme_id=>show_internal_structure["original_id"].to_i, :domain=>domain) %>
+							<%= button_to_remote(temp_string, :url => {:action => :define_internal_structure, :type=>"define", :ids=>ids, :chars=>chars,
+																	   :original_id=>show_internal_structure["original_id"], :from=>show_internal_structure["from"],
+																	   :domain=>domain}) %>
 						<% end %>
 					<% end %>
 				</td>
@@ -46,23 +71,78 @@
 			<table>
 				<tr>
 					<td><%= image_tag("internal-horizontal.jpg", :border=>0) %></td>
-					<td><span style="padding-left:10px;">： 同じレベルで分割する</span></td>
+					<td>
+						<span style="padding-left:10px;">
+							<% case domain
+								when "jp" %>
+									：同じレベルで分割する
+								<% when "cn" %>
+									：同层分割
+								<% when "en" %>
+									:divide on the same level
+							<% end %>
+						</span>
+					</td>
 				</tr>
 				<tr>
 					<td><%= image_tag("internal-vertical.jpg", :border=>0) %></td>
-					<td><span style="padding-left:10px;">： 下のレベルに分割する</span></td>
+					<td>
+						<span style="padding-left:10px;">
+							<% case domain
+								when "jp" %>
+									：下のレベルに分割する
+								<% when "cn" %>
+									：下层分割
+								<% when "en" %>
+									:create new level
+							<% end %>
+						</span>
+					</td>
 				</tr>
 				<tr>
 					<td>①②③</td>
-					<td><span style="padding-left:10px;">： Nodeのレベルを表示する</span></td>
+					<td>
+						<span style="padding-left:10px;">
+							<% case domain
+								when "jp" %>
+									：分割ポイントのレベルを表示する
+								<% when "cn" %>
+									：表示各个分割点的层次
+								<% when "en" %>
+									:indicate the level of dividing point
+							<% end %>
+						</span>
+					</td>
 				</tr>
 				<tr>
 					<td><%= image_tag("internal-plus.jpg", :border=>0) %></td>
-					<td><span style="padding-left:10px;">： Nodeの左右を編集する</span></td>
+					<td>
+						<span style="padding-left:10px;">
+							<% case domain
+								when "jp" %>
+									：分割ポイントの左右を編集する
+								<% when "cn" %>
+									：编辑分割点左右的字符
+								<% when "en" %>
+									:edit left and right part of dividing point
+							<% end %>
+						</span>
+					</td>
 				</tr>
 				<tr>
 					<td><%= image_tag("internal-minus.jpg", :border=>0) %></td>
-					<td><span style="padding-left:10px;">： Node下の構造を削除する</span></td>
+					<td>
+						<span style="padding-left:10px;">
+							<% case domain
+								when "jp" %>
+									：分割ポイントを削除する
+								<% when "cn" %>
+									：删除分割点
+								<% when "en" %>
+									:delete dividing point
+							<% end %>
+						</span>
+					</td>
 				</tr>
 			</table>
 		</div>	

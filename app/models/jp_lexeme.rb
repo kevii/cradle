@@ -108,7 +108,7 @@ class JpLexeme < ActiveRecord::Base
   ##### method
   ######################################################
   def self.verify_dictionary(dic="")
-    if JpLexeme.exists?(["dictionary rlike '^#{dic}$|^#{dic},|,#{dic}$|,#{dic},'"])
+    if JpLexeme.exists?([%Q|dictionary like "%-#{dic}-%"|])
       return true
     else
       return false

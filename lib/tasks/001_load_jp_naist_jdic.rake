@@ -240,13 +240,14 @@ namespace :cradle do
                                           #{temp[6]},
                                           #{temp[7]},
                                           #{temp[8]},
-                                          1,
+                                          '-1-',
                                           #{temp[1]},
                                           1 )
               ENB
 
               ## internal struct
               unless temp[11] == "" or temp[11] == nil
+                temp[11] = temp[11].split(',').map{|item| '-'+item+'-'}.join(',')
                 unless problem_lexeme_ids.include?(temp[0]) == true
                   ## internal struct tagging state not null
                   if original_synthetic_tagging_states.key?(temp[12])

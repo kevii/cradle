@@ -1,6 +1,6 @@
 # Filters added to this controller apply to all controllers in the application.
 # Likewise, all the methods added will be available for all controllers.
-
+require 'date'
 class ApplicationController < ActionController::Base
   helper :all # include all helpers, all the time
   ### Pick a unique cookie name to distinguish our session data from others
@@ -44,10 +44,277 @@ class ApplicationController < ActionController::Base
     render :update do |page|
       page["synthetic_struct"].replace :partial=>"synthetic/show_internal_structure",
                                        :object=>{"ids"=>ids, "chars"=>chars, "part"=>chars, "original_id"=>params[:original_id],
-                                                 "from"=>params[:from], "start_index"=>0, "ids_section"=>""}
+                                                 "from"=>params[:from], "start_index"=>0, "ids_section"=>"", "domain"=>params[:domain]}
+    end
+  end
+
+  def split_word
+    class_name = verify_domain(params[:domain])['Lexeme']
+    lexemes_left = eval(class_name+%Q|.find(:all, :include=>[:struct], :conditions=>["surface='#{params[:left]}'"], :order=>"id ASC")|)
+    lexemes_right = eval(class_name+%Q|.find(:all, :include=>[:struct], :conditions => ["surface='#{params[:right]}'"], :order=>"id ASC")|)
+    if params[:type] == "modify"
+      ids_array = swap_idsarray_and_ids(params[:ids],[])
+      indexes = params[:ids_section].split(',')
+      prev_id = ""
+      next_id = ""
+      if indexes.size == 1
+        prev_id = '['+(indexes[0].to_i-1).to_s+']'
+        next_id = '['+indexes[0]+']'
+      else
+        for index_item in 0..indexes.size-1
+          if index_item == indexes.size-1
+            prev_id << '['+(indexes[index_item].to_i-1).to_s+']'
+            next_id << '['+indexes[index_item]+']'
+          else
+            prev_id << '['+indexes[index_item]+']'
+            next_id << '['+indexes[index_item]+']'
+          end
+        end
+      end
+      left_id = eval 'ids_array'+prev_id
+      right_id = eval 'ids_array'+next_id
+      begin
+        left_id.chomp
+      rescue
+        left_id = nil
+      end
+      begin
+        right_id.chomp
+      rescue
+        right_id = nil
+      end
+    else params[:type] == "new"
+      left_id = nil
+      right_id = nil
+    end
+    render :update do |page|
+      page.replace_html "candidate", :partial=>"synthetic/left_or_right", :object => [lexemes_left, lexemes_right],  
+                                     :locals => { :left=>params[:left],        :left_id=>left_id,
+                                                  :right=>params[:right],      :right_id=>right_id,
+                                                  :ids=>params[:ids],          :chars=>params[:chars],
+                                                  :level=>params[:level],      :type=>params[:type],
+                                                  :from=>params[:from],        :original_id => params[:original_id],
+                                                  :chars_index=>params[:chars_index],     :ids_section=>params[:ids_section],
+                                                  :divide_type=>params[:divide_type],     :domain=>params[:domain]}
+    end
+  end
+
+  def modify_structure  ##params:  ids, from, chars, original_id, domain
+    if params[:ids].blank? or params[:ids].include?("-")
+      case params[:domain]
+        when "jp"
+          flash[:notice_err] = "<ul><li>内部構造の各部分を確実に存在している単語に指定してください！</li></ul>"
+        when "cn"
+          flash[:notice_err] = "<ul><li>内部构造的各个部分必须为实际存在的单词！</li></ul>"
+        when "en"
+          flash[:notice_err] = "<ul><li>Every part of internal structure should be lexeme actually registered in dictioanry!</li></ul>"
+      end
+      redirect_to :action=>"define_internal_structure", :type=>"define", :from=>params[:from],
+                  :original_id=>params[:original_id], :ids=>params[:ids], :chars=>params[:chars], :domain=>params[:domain]
+      return
+    end
+    meta_ids, meta_chars = get_meta_structures(params[:ids], params[:chars])
+    meta_show_chars = meta_chars.dup
+    indexes = meta_show_chars.size - 1
+    while(indexes >= 0) do
+      if meta_show_chars['meta_'+indexes.to_s].include?('meta')
+        temp = []
+        meta_show_chars['meta_'+indexes.to_s].split(',').each{|item| item.include?('meta') ? temp << meta_show_chars[item].split(',').join("") : temp << item}
+        meta_show_chars['meta_'+indexes.to_s] = temp.join(',')
+      end
+      indexes = indexes - 1
+    end
+    if params[:from] == "new"
+      object = ""
+    elsif params[:from] == "modify"
+      class_name = verify_domain(params[:domain])['Synthetic']
+      structs = eval(class_name+%Q|.find(:all, :conditions=>["sth_ref_id=?", params[:original_id].to_i])|)
+      object = {}
+      structs.each{|substruct| object['meta_'+substruct.sth_meta_id.to_s]=substruct }
+    end
+    render :update do |page|
+      page["synthetic_struct"].replace :partial=>"synthetic/modify_internal_struct", :object=>object,
+                                       :locals=>{ :ids=>params[:ids],   :chars=>params[:chars], :original_id=>params[:original_id],
+                                                  :from=>params[:from], :meta_ids=>meta_ids,  :meta_chars=>meta_chars,
+                                                  :meta_show_chars=>meta_show_chars, :domain=>params[:domain] }
     end
   end
   
+  def save_internal_struct
+    class_name = verify_domain(params[:domain])['Synthetic']
+    property_class_name = verify_domain(params[:domain])['Property']
+    new_property_class_name = verify_domain(params[:domain])['NewProperty']
+    item_class_name = verify_domain(params[:domain])['SyntheticNewPropertyItem']
+    case params[:domain]
+      when "jp"
+        alert_string_1 = "<ul><li>時間を最低日まで指定して下さい！</li></ul>"
+        alert_string_2 = "<ul><li>時間を正しく指定して下さい！</li></ul>"
+        alert_string_3 = "<ul><li>問題が発生しました、構造を新規できません</li></ul>"
+        success_string = "<ul><li>構造を新規しました！</li></ul>"
+      when "cn"
+        alert_string_1 = "<ul><li>时间最少需要指定到日！</li></ul>"
+        alert_string_2 = "<ul><li>请正确指定时间！</li></ul>"
+        alert_string_3 = "<ul><li>问题发生，不能创建内部结构</li></ul>"
+        success_string = "<ul><li>内部结构已创建！</li></ul>"
+      when "en"
+        alert_string_1 = "<ul><li>At least specify the time to day please!</li></ul>"
+        alert_string_2 = "<ul><li>Please specify the time correctly!</li></ul>"
+        alert_string_3 = "<ul><li>Problem occurred, cannot create internal structure</li></ul>"
+        success_string = "<ul><li>Internal structure created!</li></ul>"
+    end
+    
+    internal_structure = {}
+    customize_category = {}
+    customize_text = {}
+    customize_time = {}
+    for indexes in 0..(params[:meta_size].to_i-1)
+      key = 'meta_'+indexes.to_s
+      internal_structure[key] = params[key]
+      customize_category[key] = {}
+      customize_text[key] = {}
+      customize_time[key] = {}
+      eval(new_property_class_name+%Q|.find(:all, :conditions=>["section='synthetic'"])|).each{|property|
+        case property.type_field
+          when 'category'
+            unless params[key+'_'+property.property_string].blank? or params[key+'_'+property.property_string][:level1].blank?
+              temp = eval(property_class_name+%Q|.find_item_by_tree_string_or_array(property.property_string, get_ordered_string_from_params(params[key+'_'+property.property_string].dup))|)
+              customize_category[key][property.id] = temp.property_cat_id unless temp.blank?
+            end
+          when 'text'
+            unless params[key+'_'+property.property_string].blank?
+              customize_text[key][property.id] = params[key+'_'+property.property_string]
+            end
+          when 'time'
+            unless params[key+'_'+property.property_string].blank? or params[key+'_'+property.property_string].values.join("").blank?
+              value = params[key+'_'+property.property_string]
+              if (value.has_key?("section(1i)") and (value["section(1i)"]=="" or value["section(2i)"]=="" or value["section(3i)"]=="")) or (value.has_key?("year") and (value["year"]=="" or value["month"]=="" or value["day"]==""))
+                flash[:notice_err] = alert_string_1
+                temp = get_formatted_ids_and_chars(:original_lexeme_id=>params[:sth_ref_id], :domain=>params[:domain])
+                redirect_to :action => "modify_structure", :from=>params[:from], :original_id=>params[:sth_ref_id], :ids=>temp[0], :chars=>temp[1], :domain=>params[:domain]
+                return
+              else
+                begin
+                  if value.has_key?("section(1i)")
+                    customize_time[key][property.id] = DateTime.civil( value["section(1i)"].to_i, value["section(2i)"].to_i, value["section(3i)"].to_i, value["section(4i)"].to_i, value["section(5i)"].to_i).to_formatted_s(:db)
+                  elsif value.has_key?("year")
+                    customize_time[key][property.id] = DateTime.civil( value["year"].to_i, value["month"].to_i, value["day"].to_i, value["hour"].to_i, value["minite"].to_i).to_formatted_s(:db)
+                  end
+                rescue
+                  flash[:notice_err] = alert_string_2
+                  temp = get_formatted_ids_and_chars(:original_lexeme_id=>params[:sth_ref_id], :domain=>params[:domain])
+                  redirect_to :action => "modify_structure", :from=>params[:from], :original_id => params[:sth_ref_id], :ids => temp[0], :chars=>temp[1], :domain=>params[:domain]
+                  return
+                end
+              end
+            end
+        end
+      }
+    end
+    sth_ref_id = params[:sth_ref_id].to_i
+    log = params[:log]
+    
+    if params[:from] == "new"
+      sth_tagging_state = eval(property_class_name+%Q|.find_item_by_tree_string_or_array("sth_tagging_state", "NEW").property_cat_id|)
+      begin
+        eval(class_name+'.transaction') do
+          for indexes in 0..(params[:meta_size].to_i-1)
+            temp_struct_string = internal_structure['meta_'+indexes.to_s].split(',').map{|item| '-'+item+'-'}.join(',')
+            sub_structure = eval(class_name+%Q|.new(:sth_ref_id=>sth_ref_id, :sth_meta_id=>indexes, :sth_struct=>temp_struct_string, :sth_tagging_state=>sth_tagging_state, :modified_by=>session[:user_id])|)
+            sub_structure.log = log if indexes == 0
+            if sub_structure.save!
+              eval(item_class_name+'.transaction') do
+                customize_category['meta_'+indexes.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :category=>value)') }
+                customize_text['meta_'+indexes.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :text=>value)') }
+                customize_time['meta_'+indexes.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :time=>value)') }
+              end
+            end
+          end
+        end
+      rescue Exception => e
+        flash[:notice_err] = alert_string_3+"<ul><li>#{e}</li></ul>"
+      else
+        flash[:notice] = success_string
+      end
+      render(:update) { |page| page.call 'location.reload' }
+    elsif params[:from] == "modify"
+      sth_tagging_state = eval(property_class_name+%Q|.find_item_by_tree_string_or_array("sth_tagging_state", get_ordered_string_from_params(params[:sth_tagging_state].dup)).property_cat_id|)
+      begin
+        if params[:changed].blank?
+          eval(class_name+'.transaction') do
+            for index in 0..(params[:meta_size].to_i-1)
+              sub_structure = eval(class_name+%Q|.find(:first, :conditions=>["sth_ref_id=? and sth_meta_id=?", sth_ref_id, index])|)
+              index == 0 ? temp_log = log : temp_log = nil
+              if sub_structure.update_attributes!(:sth_tagging_state=>sth_tagging_state, :modified_by=>session[:user_id], :log=>temp_log)
+                eval(item_class_name+'.transaction') do
+                  eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub_structure.id])|).each{|item| item.destroy}
+                  customize_category['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :category=>value)') }
+                  customize_text['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :text=>value)') }
+                  customize_time['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :time=>value)') }
+                end
+              end
+            end
+          end
+        elsif params[:changed] == 'true'
+          eval(class_name+'.transaction') do
+            eval(class_name+'.find(:all, :conditions=>["sth_ref_id=?", sth_ref_id])').each{|sub|
+              eval(item_class_name+'.transaction') do
+                eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub.id])|).each{|item| item.destroy}
+              end
+              sub.destroy
+            }
+            for index in 0..(params[:meta_size].to_i-1)
+              temp_struct_string = internal_structure['meta_'+index.to_s].split(',').map{|item| '-'+item+'-'}.join(',')
+              sub_structure = eval(class_name+%Q|.new(:sth_ref_id=>sth_ref_id, :sth_meta_id=>index, :sth_struct=>temp_struct_string, :sth_tagging_state=>sth_tagging_state, :modified_by=>session[:user_id] )|)
+              sub_structure.log = log if index == 0
+              if sub_structure.save!
+                eval(item_class_name+'.transaction') do
+                  customize_category['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :category=>value)') }
+                  customize_text['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :text=>value)') }
+                  customize_time['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :time=>value)') }
+                end
+              end
+            end
+          end
+        end
+      rescue Exception => e
+        flash[:notice_err] = alert_string_3+"<ul><li>#{e}</li></ul>"
+      else
+        flash[:notice] = success_string
+      end
+      render(:update) { |page| page.call 'location.reload' }
+    end
+  end
+  
+  def destroy_struct
+    class_name = verify_domain(params[:domain])['Synthetic']
+    item_class_name = verify_domain(params[:domain])['SyntheticNewPropertyItem']
+    case params[:domain]
+      when "jp"
+        alert_string = "<ul><li>問題が発生しました、構造を削除できません！</li></ul>"
+        success_string = "<ul><li>構造を削除しました！</li></ul>"
+      when "cn"
+        alert_string = "<ul><li>问题发生，不能删除内部结构！</li></ul>"
+        success_string = "<ul><li>内部结构已删除！</li></ul>"
+      when "en"
+        alert_string = "<ul><li>Problem occurred, cannot delete internal structure!</li></ul>"
+        success_string = "<ul><li>Internal structure deleted!</li></ul>"
+    end
+    begin
+      eval(class_name+'.transaction') do
+        eval(class_name+'.find(:all, :conditions=>["sth_ref_id=?", params[:id].to_i])').each{|sub|
+          eval(item_class_name+'.transaction') do
+            eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub.id])|).each{|item| item.destroy}
+          end
+          sub.destroy
+        }
+      end
+    rescue Exception => e
+      flash[:notice_err] = alert_string+"<ul><li>#{e}</li></ul>"
+    else
+      flash[:notice] = success_string
+    end
+    redirect_to :action => 'show', :id => params[:id]
+  end
   
   # See ActionController::RequestForgeryProtection for details
   # Uncomment the :secret if you're not using the cookie session store
@@ -187,7 +454,15 @@ class ApplicationController < ActionController::Base
     return meta_ids, meta_chars, count
   end
 
-  ### :type, :ids, :left_id, :right_id, :left, :right, :ids_section, :level, :chars_index, :chars, :domain
+  ### :chars_index, :chars, 
+  ### :domain  jp, cn, en
+  ### :type    new, modify, delete
+  ### :ids     aaa*++*bbb*+*ccc*++*ddd
+  ### :left_id, :right_id  the left lexeme_id and right lexeme_id after new divide
+  ### :left, :right        the left and right part characters after new divide
+  ### :level               the new dividing level
+  ### :ids_section         the indexes of the character on the left of dividing point.  Format:  level_1_index,level_2_index,level_3_index,....
+  
   def get_ids_and_chars(field={})
     synthetic_class = verify_domain(fields[:domain])['Synthetic']
     case field[:type]

@@ -308,8 +308,10 @@ class JpController < ApplicationController
       unless params["lexeme"+indexes.to_s].blank?
         params["lexeme1"].each{|key, value|
           case key
-            when "surface", "reading", "pronunciation", "dictionary", "log"
+            when "surface", "reading", "pronunciation", "log"
               original_property[key] = params["lexeme"+indexes.to_s][key]
+            when "dictionary"
+              original_property[key] = params["lexeme"+indexes.to_s][key].split(',').map{|item| item.to_i}.sort.map{|item| '-'+item+'-'}.join(',')
             when "pos", "ctype", "cform", "base_id"
               original_property[key] = params["lexeme"+indexes.to_s][key].to_i
             else
@@ -424,7 +426,7 @@ class JpController < ApplicationController
     lexeme = JpLexeme.find(params[:id])
     base = lexeme.base
     begin
-      if JpSynthetic.exists?(["sth_struct rlike '^#{params[:id]},|,#{params[:id]}$|,#{params[:id]},'"])
+      if JpSynthetic.exists?([%Q|sth_struct like "%-#{params[:id]}-%"|])
         flash[:notice_err] = "<ul><li>ほかの単語の内部構造になるので、削除できません！</li></ul>"
       else
         if lexeme.id != base.id  #word is in base series, but is not base
@@ -563,8 +565,10 @@ class JpController < ApplicationController
           original_id = value.to_i
         when "commit", "authenticity_token", "action", "controller"
           next
-        when "surface", "reading", "pronunciation", "dictionary", "log", "root_id"
+        when "surface", "reading", "pronunciation", "log", "root_id"
           params[key].blank? ? lexeme[key] = nil : lexeme[key] = value
+        when "dictionary"
+          params[key].blank? ? lexeme[key] = nil : lexeme[key] = value.split(',').map{|item| item.to_i}.sort.map{|item| '-'+item+'-'}.join(',')
         when "pos", "ctype", "cform", "base_id", "tagging_state"
           params[key].blank? ? lexeme[key] = nil : lexeme[key] = value.to_i
         else
@@ -808,20 +812,23 @@ class JpController < ApplicationController
               when "character_number"
                 unless params[key][:value].blank?
                   result << "#{initial_property_name[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
-                  temp = params[key][:value].to_i*3
-                  case params[key][:operator]
-                    when ">="
-                      regexp = "^.{#{temp},}$"
-                    when ">"
-                      regexp = "^.{#{temp+3},}$"
-                    when "="
-                      regexp = "^.{#{temp},#{temp}}$"
-                    when "<="
-                      regexp = "^.{0,#{temp}}$"
-                    when "<"
-                      regexp = "^.{0,#{temp-3}}$"
+                  condition[0]<<" char_length(jp_lexemes.surface) #{params[key][:operator]} #{params[key][:value].to_i} "
+                end
+              when "sth_struct"
+                unless params[key][:value].blank?
+                  temp = JpLexeme.find(:all, :select=>"id", :conditions=>["surface=?", params[key][:value]])
+                  unless temp.blank?
+                    temp = temp.map{|item| item.id}
+                    temp_lexeme_id = []
+                    temp.each{|temp_id|
+                      temp_structs = JpSynthetic.find(:all, :select=>"sth_ref_id", :conditions=>[%Q|sth_struct like "%-#{temp_id}-%"|])
+                      temp_lexeme_id.concat(temp_structs.map{|item| item.sth_ref_id}.uniq) unless temp_structs.blank?
+                    }
+                    unless temp_lexeme_id.blank?
+                      result << "#{initial_property_name[key]}include#{params[key][:value]}"
+                      condition[0] << " jp_lexemes.id in (#{temp_lexeme_id.uniq.join(',')}) "
+                    end
                   end
-                  condition[0]<<" jp_lexemes.surface REGEXP '#{regexp}' "
                 end
               when "id"
                 unless params[key][:value].blank?
@@ -916,11 +923,18 @@ class JpController < ApplicationController
                   dic_num = []
                   params[key][:value].each{|item|
                     dic_names_array << JpProperty.find(:first, :conditions=>["property_string='dictionary' and property_cat_id=?", item.to_i]).tree_string
-                    dic_num << item
+                    dic_num << item.to_i
                   }
                   result << "#{initial_property_name[key]}:(#{dic_names_array.join(operator0[params[key][:operator]])})"
                   temp_section = []
-                  dic_num.each{|num| temp_section << " jp_lexemes.dictionary rlike '^#{num}$|^#{num},|,#{num}$|,#{num},' " }
+                  if params[key][:operator] == "and"
+                    dic_num.sort.each{|num| temp_section << "%-#{num.to_s}-%"}
+                    condition[0] << %Q| jp_lexemes.dictionary like "#{temp_section.join(',')}" |
+                  elsif params[key][:operator] == "or"
+                    dic_num.each{|num| temp_section << %Q| jp_lexemes.dictionary like "%-#{num}-%" |}
+                  end
+                  
+                  dic_num.each{|num| temp_section << %Q| jp_lexemes.dictionary like "%-#{num}-%" |}
                   condition[0] << " ("+temp_section.join(' '+params[key][:operator]+' ')+") "
                 end
               when "updated_at", "sth_updated_at"

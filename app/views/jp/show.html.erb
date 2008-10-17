@@ -113,9 +113,8 @@
 			    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;text-align:center">
 					<legend style="background: #1e2078;">構造詳細</legend>
 					<% if User.find_by_id(session[:user_id]) %>
-						<%= link_to_remote "指定", :url => { :action => "define_internal_structure", 
-															:type => "define",
-															:original_id => @lexeme.id, :from=>"new" } %>
+						<%= link_to_remote "指定", :url => { :action => "define_internal_structure", :type => "define",
+															:original_id => @lexeme.id, :from=>"new", :domain=>"jp" } %>
 					<% end %>
 			    </fieldset>
 			</div>
@@ -147,13 +146,10 @@
 				        </div>
 				    </fieldset>
 				    <p>
-					<%= link_to_remote "編集", :url => { :action => "modify_structure", 
-														:from => "modify",
-														:original_id => @lexeme.id,
-														:ids => @ids,
-														:chars => @chars} %>
+					<%= link_to_remote "編集", :url => { :action => "modify_structure", :from => "modify", :original_id => @lexeme.id,
+														:ids => @ids, :chars => @chars, :domain=>'jp' } %>
 					&nbsp | &nbsp
-				    <%= link_to '削除', { :action => 'destroy_struct', :id => @lexeme.id }, :confirm => 'Are you sure?', :post => true %>
+				    <%= link_to '削除', { :action => 'destroy_struct', :id => @lexeme.id, :domain=>'jp' }, :confirm => 'Are you sure?', :post => true %>
 				<% end %>
 				<% for index in 0..(JpSynthetic.find(:all, :conditions=>["sth_ref_id=#{@lexeme.id}"]).size-1)
 					sub_structure = JpSynthetic.find(:first, :conditions=>["sth_ref_id=#{@lexeme.id} and sth_meta_id=#{index}"])
