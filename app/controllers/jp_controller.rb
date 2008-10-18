@@ -445,7 +445,7 @@ class JpController < ApplicationController
     base = lexeme.base
     begin
       if JpSynthetic.exists?([%Q|sth_struct like "%-#{params[:id]}-%"|])
-        flash[:notice_err] = "<ul><li>ほかの単語の内部構造になるので、削除できません！</li></ul>"
+        flash[:notice_err] = "<ul><li>ほかの単語の内部構造になっているので、削除できません！</li></ul>"
       else
         if lexeme.id != base.id  #word is in base series, but is not base
           JpLexeme.delete_lexeme(lexeme)
