@@ -52,8 +52,9 @@
 						<%= "<th>#{initial_property_name['log']}</th>" unless preview_news[0]["log"].blank? %>
 						<% properties = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
 						unless properties.blank?
-							properties.each{|item| %>
-								<%= "<th>#{item.human_name}</th>" unless preview_news[0][item.property_string].blank? %>
+							properties.each{|item|
+								temp_string = item.human_name.scan(/./).size > 5 ? "style='width:70px;'" : "style='white-space:nowrap;'" %>
+								<%= %Q|<th #{temp_string}>#{item.human_name}</th>| unless preview_news[0][item.property_string].blank? %>
 							<% }
 						end %>
 					</tr>
@@ -185,8 +186,9 @@
 						<%= "<th>#{initial_property_name['log']}</th>" unless preview_news[0]["log"].blank? %>
 						<% properties = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
 						unless properties.blank?
-							properties.each{|item| %>
-								<%= "<th>#{item.human_name}</th>" unless preview_news[0][item.property_string].blank? %>
+							properties.each{|item|
+								temp_string = item.human_name.scan(/./).size > 5 ? "style='width:70px;'" : "style='white-space:nowrap;'" %>
+								<%= %Q|<th #{temp_string}>#{item.human_name}</th>| unless preview_news[0][item.property_string].blank? %>
 							<% }
 						end %>
 					</tr>

@@ -114,7 +114,7 @@ module ApplicationHelper
     field[:prefix].blank? ? prefix = "" : prefix = field[:prefix]+"_"
      
     html_string = ""
-    class_name = verify_domain(domain)["Lexeme"]
+    section == "lexeme" ? class_name = verify_domain(domain)["Lexeme"] : class_name = verify_domain(domain)["Synthetic"]
     property_class_name = verify_domain(domain)["Property"]
     section == "lexeme" ? item_class_name = verify_domain(domain)["LexemeNewPropertyItem"] : item_class_name = verify_domain(domain)["SyntheticNewPropertyItem"]
     properties = eval(verify_domain(domain)["NewProperty"]+'.find(:all, :conditions=>["section=?", section])')
@@ -142,9 +142,9 @@ module ApplicationHelper
           prefix = prefix[0..-2] unless prefix.blank?
           case state
             when "search", "new"
-              display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>prefix, :state=>state)
+              html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>prefix, :state=>state)
             when "modify"
-              display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>prefix, :state=>state, :id=>(eval class_name+".find(id)."+item.property_string))
+              html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>prefix, :state=>state, :id=>(eval class_name+".find(id)."+item.property_string))
           end
           html_string << "</td>\n"
         when "text"
@@ -250,18 +250,28 @@ module ApplicationHelper
           chars << temp[1]
         else
           ids << item
-          chars << eval(lexeme_class+'.find(item.to_i).surface.split("").join("-")')
+          temp_lexeme = eval(lexeme_class+'.find(item.to_i)')
+          if temp_lexeme.struct.blank?
+            chars << temp_lexeme.surface.split("").join("-")
+          else
+            chars << temp_lexeme.surface
+          end
         end
       }
     else
       temp_struct.split(',').each{|item|
         ids << item
-        chars << eval(lexeme_class+'.find(item.to_i).surface.split("").join("-")')
+        temp_lexeme = eval(lexeme_class+'.find(item.to_i)')
+        if temp_lexeme.struct.blank?
+          chars << temp_lexeme.surface.split("").join("-")
+        else
+          chars << temp_lexeme.surface
+        end
       }
     end
     return ids.join('*'+'+'*level+'*'), chars.join('*'+'+'*level+'*')
   end
-
+    
   def generate_tree_view(fields={})
     root = fields[:root]
     ids = fields[:ids]
@@ -503,7 +513,8 @@ module ApplicationHelper
           id_tree << id_array[index]
           surface_tree << (eval class_name+'.find(id_array[index]).surface')
         else
-          sub_array = eval '['+lexeme.struct.sth_struct+']'
+#          sub_array = eval '['+lexeme.struct.sth_struct+']'
+          sub_array = eval '['+lexeme.struct.sth_struct.delete('-')+']'
           temp = get_node_id_and_surface(sub_array, id_array[index], domain)
           id_tree << temp[0]
           surface_tree << temp[1]
@@ -554,14 +565,14 @@ module ApplicationHelper
         surface = node_tree[index][2]
         length = (surface.length/3)*20+15
         if node_tree[index][1] == '-'
-          existing_lexemes = eval(lexeme_class+'.find(:all, :conditions=>["surface=?", surface]')
+          existing_lexemes = eval(lexeme_class+'.find(:all, :conditions=>["surface=?", surface])')
           unless existing_lexemes.blank?
             existing_lexemes.each{|lexeme| message << '<li>【'+surface+'】</li>' if eval(synthetic_class+'.exists?(:sth_ref_id=>lexeme.id)')}
           end
           script << "    myTree.add(#{number}, #{parent}, '#{surface}', #{length});\n"
           script << "    myTree.setNodeTarget(#{number}, '', false);\n" 
         else
-          ajax_string = remote_function(:url=>{:controller=>'jp', :action=>'show_desc', :id=>node_tree[index][1]})
+          ajax_string = remote_function(:url=>{:controller=>'jp', :action=>'show_desc', :id=>node_tree[index][1]}, :with=>"'state='+Element.visible('show_desc')")
           script << "    myTree.add(#{number}, #{parent}, '#{surface}', #{length}, '', '', '', \"#{ajax_string}\");\n"
         end
         parent = number if index == 0

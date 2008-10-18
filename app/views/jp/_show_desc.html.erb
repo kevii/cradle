@@ -1,3 +1,4 @@
+<script>if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();</script>
 <div id='show_desc' align="center" class="list" onclick="Effect.SlideUp('show_desc')" style="padding-bottom:20px;">
 	<table style="text-align:right;">
         <% odd_or_even =1
@@ -11,7 +12,7 @@
 					</tr><tr <%= "class='odd'" if odd_or_even == 0 %> >
 				<% end 
 				if not initial_property_name[item].blank? %>
-					<th><%= item=="sth_tagging_state" ? "構造"+initial_property_name[item] : initial_property_name[item] %></th>
+					<th style="width:70px;"><%= item=="sth_tagging_state" ? "構造"+initial_property_name[item] : initial_property_name[item] %></th>
 					<% case item
 						when "id", "surface", "reading", "pronunciation", "log" %>
 							<td><%= h(show_desc[item]) %></td>
@@ -68,7 +69,7 @@
 							</td>
 					<% end
 				elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item) %>
-					<th>構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
+					<th style="width:70px;">構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
 					<% case item
 						when "sth_log" %>
 							<td><%= show_desc.struct.sth_log unless show_desc.struct.blank? %></td>
@@ -78,7 +79,7 @@
 							<td><%= show_desc.struct.updated_at.to_formatted_s(:db) unless show_desc.struct.blank? %></td>
 					<% end
 				else %>
-					<th><%= JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %></th>
+					<th style="width:70px;"><%= JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %></th>
 					<% property = JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]) 
 					if property.section == "lexeme"
 						temp = eval 'show_desc.'+item

@@ -116,6 +116,7 @@ namespace :cradle do
               new_lexeme_id = candidates[first_match].id
             end
           end
+          
           text_feature_id.each{|col_num, property_id|
             unless temp[col_num].blank?
               JpLexemeNewPropertyItem.create!(:ref_id=>new_lexeme_id, :property_id=>property_id, :text=>temp[col_num])

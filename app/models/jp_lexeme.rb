@@ -99,6 +99,9 @@ class JpLexeme < ActiveRecord::Base
     end
   end
   
+  has_many :sub_structs,  :class_name=>"JpSynthetic", :foreign_key=>"sth_ref_id"
+  has_many :dynamic_properties,  :class_name=>"JpLexemeNewPropertyItem", :foreign_key=>"ref_id"
+  has_many :dynamic_struct_properties, :through=>:sub_structs, :source=>:other_properties
   ######################################################
   ##### validation
   ######################################################

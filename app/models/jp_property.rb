@@ -39,6 +39,7 @@ class JpProperty < ActiveRecord::Base
         else
           type_id = 0
         end
+        seperator = nil if seperator.blank?
         parent_item = JpProperty.create!( :property_string=>type,
                                           :property_cat_id=>type_id,
                                           :parent_id=>parent_item_id,

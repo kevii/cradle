@@ -139,7 +139,6 @@ select, input {
 
 .list thead th {
 	border: 1px solid #87CEFA;
-	white-space: nowrap;
 	background: #F0F8FF;
 }
 

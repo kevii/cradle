@@ -20,8 +20,11 @@ class JpController < ApplicationController
         return
       end
       static_condition = search_conditions[0].join(" and ")
-      dynamic_lexeme_condition = search_conditions[1].join(" and ")
-      dynamic_synthetic_condition = search_conditions[2].join(" and ")
+      simple_search = "true"
+      dynamic_lexeme_condition = search_conditions[1].join(" **and** ")
+      simple_search = "false" if search_conditions[1].size > 1
+      dynamic_synthetic_condition = search_conditions[2].join(" **and** ")
+      simple_search = "false" if search_conditions[2].size > 1
     elsif params[:search_type] == "base"
       show_conditions = "Base="+JpLexeme.find(params[:base_id].to_i).surface
       static_condition = " jp_lexemes.base_id = #{params[:base_id]} "
@@ -40,6 +43,7 @@ class JpController < ApplicationController
       flash[:notice] = flash[:notice]
     end
     redirect_to :action => "list", :static_condition=>static_condition,
+                                   :simple_search=>simple_search,
                                    :dynamic_lexeme_condition=>dynamic_lexeme_condition,
                                    :dynamic_synthetic_condition=>dynamic_synthetic_condition,
                                    :show_conditions => show_conditions
@@ -50,8 +54,18 @@ class JpController < ApplicationController
     params[:per_page].blank? ? per_page = 10 : per_page = params[:per_page].to_i
     if params[:dynamic_lexeme_condition].blank? and params[:dynamic_synthetic_condition].blank?
       @jplexemes = JpLexeme.paginate( :select=>" jp_lexemes.* ",   :conditions => params[:static_condition],
-                                      :include => [:struct],       :order => " jp_lexemes.id ASC ",
+                                      :include => [:sub_structs],  :order => " jp_lexemes.id ASC ",
                                       :per_page => per_page,       :page => page )
+    elsif params[:simple_search] == "true"
+      mysql_condition_string = [params[:static_condition].gsub('jp_synthetics', 'dynamic_struct_properties_jp_lexemes_join'),params[:dynamic_lexeme_condition],params[:dynamic_synthetic_condition]]
+      mysql_condition_string.delete("")
+      mysql_string = %Q| SELECT DISTINCT jp_lexemes.* | +
+                     %Q| FROM jp_lexemes LEFT OUTER JOIN jp_lexeme_new_property_items ON jp_lexeme_new_property_items.ref_id = jp_lexemes.id | +
+                     %Q| LEFT OUTER JOIN jp_synthetics dynamic_struct_properties_jp_lexemes_join ON (jp_lexemes.id = dynamic_struct_properties_jp_lexemes_join.sth_ref_id) | +
+                     %Q| LEFT OUTER JOIN jp_synthetic_new_property_items ON (jp_synthetic_new_property_items.ref_id = dynamic_struct_properties_jp_lexemes_join.id) | +
+                     %Q| WHERE | + mysql_condition_string.join(' and ') +
+                     %Q| ORDER BY  jp_lexemes.id ASC |
+      @jplexemes = JpLexeme.paginate_by_sql(mysql_string, :per_page => per_page, :page => page )  
     else
       dynamic_lexeme_ids = []
       dynamic_synthetic_refs = []
@@ -68,16 +82,16 @@ class JpController < ApplicationController
       elsif params[:dynamic_lexeme_condition].blank?
         dynamic_ids = dynamic_synthetic_refs
       else
-        dynamic_ids = dynamic_lexeme_ids & dynamic_synthetic_refs
+        dynamic_lexeme_ids.size >= dynamic_synthetic_refs.size ? dynamic_ids = dynamic_synthetic_refs & dynamic_lexeme_ids : dynamic_ids = dynamic_lexeme_ids & dynamic_synthetic_refs
       end
       if params[:static_condition].blank?
         collection = install_by_dividing(:ids=>dynamic_ids, :domain=>'jp')
+        @jplexemes = collection.paginate(:page=>page, :per_page=>per_page)
       else
-        static_ids = JpLexeme.find(:all, :select=>"jp_lexemes.id", :include=>[:struct], :conditions=>params[:static_condition], :order => " jp_lexemes.id ASC ").map{|item| item.id}
-        final_ids = static_ids & dynamic_ids
-        collection = JpLexeme.find(:all, :conditions=>["id in (#{final_ids.join(',')})"])
+        static_ids = JpLexeme.find(:all, :select=>" jp_lexemes.id ", :conditions => params[:static_condition], :include => [:sub_structs], :order => " jp_lexemes.id ASC ").map{|item| item.id}
+        static_ids.size >= dynamic_ids.size ? final_ids = dynamic_ids & static_ids : final_ids = static_ids & dynamic_ids
+        @jplexemes = JpLexeme.paginate(:all, :conditions=>["id in (#{final_ids.join(',')})"], :page=>page, :per_page=>per_page)
       end
-      @jplexemes = collection.paginate(:page=>page, :per_page=>per_page)
     end
     if @jplexemes.total_entries == 0
       flash[:notice] = '<ul><li>単語は見つかりませんでした！</li></ul>'
@@ -131,7 +145,11 @@ class JpController < ApplicationController
   def show_desc
     render :update do |page|
       page["show_desc"].replace :partial=>"show_desc", :object=>JpLexeme.find(params[:id].to_i)
-      page["show_desc"].visual_effect :slide_down
+      if params[:state] == "false"
+        page["show_desc"].visual_effect :slide_down
+      else
+        page["show_desc"].visual_effect :highlight
+      end
     end
   end
 
@@ -311,7 +329,7 @@ class JpController < ApplicationController
             when "surface", "reading", "pronunciation", "log"
               original_property[key] = params["lexeme"+indexes.to_s][key]
             when "dictionary"
-              original_property[key] = params["lexeme"+indexes.to_s][key].split(',').map{|item| item.to_i}.sort.map{|item| '-'+item+'-'}.join(',')
+              original_property[key] = params["lexeme"+indexes.to_s][key].split(',').map{|item| item.to_i}.sort.map{|item| '-'+item.to_s+'-'}.join(',')
             when "pos", "ctype", "cform", "base_id"
               original_property[key] = params["lexeme"+indexes.to_s][key].to_i
             else
@@ -568,17 +586,18 @@ class JpController < ApplicationController
         when "surface", "reading", "pronunciation", "log", "root_id"
           params[key].blank? ? lexeme[key] = nil : lexeme[key] = value
         when "dictionary"
-          params[key].blank? ? lexeme[key] = nil : lexeme[key] = value.split(',').map{|item| item.to_i}.sort.map{|item| '-'+item+'-'}.join(',')
+          params[key].blank? ? lexeme[key] = nil : lexeme[key] = value.split(',').map{|item| item.to_i}.sort.map{|item| '-'+item.to_s+'-'}.join(',')
         when "pos", "ctype", "cform", "base_id", "tagging_state"
           params[key].blank? ? lexeme[key] = nil : lexeme[key] = value.to_i
         else
-          case JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"]).type_field
+          property = JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"])
+          case property.type_field
             when "category"
-              customize_property[0][key] = value.to_i
+              customize_property[0][property.id] = value.to_i
             when "text"
-              customize_property[1][key] = value
+              customize_property[1][property.id] = value
             when "time"
-              customize_property[2][key] = value
+              customize_property[2][property.id] = value
           end
       end
     }
@@ -735,59 +754,6 @@ class JpController < ApplicationController
     end  
   end
 
-
-  def split_word
-    @jplexemes_left = JpLexeme.find(:all, :include=>[:struct], :conditions=>["surface='#{params[:left]}'"], :order=>"id ASC")
-    @jplexemes_right = JpLexeme.find(:all, :include=>[:struct], :conditions => ["surface='#{params[:right]}'"], :order=>"id ASC")
-    @temp = [@jplexemes_left, @jplexemes_right]
-    if params[:type] == "modify"
-      ids_array = swap_idsarray_and_ids(params[:ids],[])
-      indexes = params[:ids_section].split(',')
-      prev_id = ""
-      next_id = ""
-      if indexes.size == 1
-        prev_id = '['+(indexes[0].to_i-1).to_s+']'
-        next_id = '['+indexes[0]+']'
-      else
-        for index_item in 0..indexes.size-1
-          if index_item == indexes.size-1
-            prev_id << '['+(indexes[index_item].to_i-1).to_s+']'
-            next_id << '['+indexes[index_item]+']'
-          else
-            prev_id << '['+indexes[index_item]+']'
-            next_id << '['+indexes[index_item]+']'
-          end
-        end
-      end
-      left_id = eval 'ids_array'+prev_id
-      right_id = eval 'ids_array'+next_id
-      begin
-        left_id.chomp
-      rescue
-        left_id = nil
-      end
-      begin
-        right_id.chomp
-      rescue
-        right_id = nil
-      end
-    else params[:type] == "new"
-      left_id = nil
-      right_id = nil
-    end
-    render :update do |page|
-      page.replace_html "candidate", :partial=>"left_or_right", :object => @temp,  
-                                     :locals => { :left=>params[:left],        :left_id=>left_id,
-                                                  :right=>params[:right],      :right_id=>right_id,
-                                                  :ids=>params[:ids],          :chars=>params[:chars],
-                                                  :level=>params[:level],      :type=>params[:type],
-                                                  :from=>params[:from],        :original_id => params[:original_id],
-                                                  :chars_index=>params[:chars_index],     :ids_section=>params[:ids_section],
-                                                  :divide_type=>params[:divide_type]}
-    end
-  end
-
-
   private
   def set_title
     @page_title = "Cradle--茶筌辞書管理システム"
@@ -929,13 +895,11 @@ class JpController < ApplicationController
                   temp_section = []
                   if params[key][:operator] == "and"
                     dic_num.sort.each{|num| temp_section << "%-#{num.to_s}-%"}
-                    condition[0] << %Q| jp_lexemes.dictionary like "#{temp_section.join(',')}" |
+                    condition[0] << %Q| jp_lexemes.dictionary like '#{temp_section.join(",")}' |
                   elsif params[key][:operator] == "or"
-                    dic_num.each{|num| temp_section << %Q| jp_lexemes.dictionary like "%-#{num}-%" |}
+                    dic_num.each{|num| temp_section << " jp_lexemes.dictionary like '%-#{num}-%' "}
+                    condition[0] << " ("+temp_section.join(' '+params[key][:operator]+' ')+") "
                   end
-                  
-                  dic_num.each{|num| temp_section << %Q| jp_lexemes.dictionary like "%-#{num}-%" |}
-                  condition[0] << " ("+temp_section.join(' '+params[key][:operator]+' ')+") "
                 end
               when "updated_at", "sth_updated_at"
                 temp = params[key].dup
@@ -993,7 +957,7 @@ class JpController < ApplicationController
               when "text"
                 unless params[key][:value].blank?
                   result << "#{property.human_name}#{operator0[params[key][:operator]]}#{params[key][:value]}"
-                  params[key][:operator] == "=~" ? regexp="%" : regexp=""
+                  params[key][:operator] == "like" ? regexp="%" : regexp=""
                   case property.section
                     when "synthetic"
                       condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.text #{params[key][:operator]} '#{regexp}#{params[key][:value]}#{regexp}' "

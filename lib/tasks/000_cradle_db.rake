@@ -95,7 +95,7 @@ namespace :cradle do
           property_string   varchar(255)   not null,
           property_cat_id   int unsigned not null,
           parent_id         int,
-          seperator         varchar(64),
+          seperator         varchar(64) default null,
           value             varchar(255) not null,
           lock_vertion      int default 0,
           

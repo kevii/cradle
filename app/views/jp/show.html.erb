@@ -1,6 +1,6 @@
 <div id='synthetic_struct'>
 	<div style="margin-left:2%; float:left;width:48%;">
-		<div id='show_desc'></div>
+		<div id='show_desc' style='display:none;'></div>
 		<div class="User-control" style="float:left; width:48%;">
 		    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;">
 		        <legend style="background: #1e2078;">単語詳細</legend>
@@ -114,7 +114,8 @@
 					<legend style="background: #1e2078;">構造詳細</legend>
 					<% if User.find_by_id(session[:user_id]) %>
 						<%= link_to_remote "指定", :url => { :action => "define_internal_structure", :type => "define",
-															:original_id => @lexeme.id, :from=>"new", :domain=>"jp" } %>
+															:original_id => @lexeme.id, :from=>"new", :domain=>"jp" },
+												  :before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
 					<% end %>
 			    </fieldset>
 			</div>
@@ -147,7 +148,8 @@
 				    </fieldset>
 				    <p>
 					<%= link_to_remote "編集", :url => { :action => "modify_structure", :from => "modify", :original_id => @lexeme.id,
-														:ids => @ids, :chars => @chars, :domain=>'jp' } %>
+														:ids => @ids, :chars => @chars, :domain=>'jp' },
+											  :before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
 					&nbsp | &nbsp
 				    <%= link_to '削除', { :action => 'destroy_struct', :id => @lexeme.id, :domain=>'jp' }, :confirm => 'Are you sure?', :post => true %>
 				<% end %>
@@ -199,4 +201,6 @@
 			</div>
 		<% end %>
 </div>
-<script>window.onload=CreateTree();</script>
+<% unless @lexeme.struct.blank? %>
+	<script>window.onload=CreateTree();</script>
+<% end %>

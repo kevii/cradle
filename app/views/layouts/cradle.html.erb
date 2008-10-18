@@ -65,7 +65,7 @@
 	</div>
 	<div id="main">
 		<% if not flash.now[:notice].blank? %>
-			<div id="notice" ><%= flash.now[:notice] %></div>
+			<div id="notice"><%= flash.now[:notice] %></div>
 		<% elsif not flash.now[:notice_err].blank? %>
 			<div id="notice_err" ><%= flash.now[:notice_err] %></div>
 		<% elsif not flash[:notice].blank? %>

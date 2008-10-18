@@ -88,14 +88,14 @@ class ApplicationController < ActionController::Base
       right_id = nil
     end
     render :update do |page|
-      page.replace_html "candidate", :partial=>"synthetic/left_or_right", :object => [lexemes_left, lexemes_right],  
-                                     :locals => { :left=>params[:left],        :left_id=>left_id,
-                                                  :right=>params[:right],      :right_id=>right_id,
-                                                  :ids=>params[:ids],          :chars=>params[:chars],
-                                                  :level=>params[:level],      :type=>params[:type],
-                                                  :from=>params[:from],        :original_id => params[:original_id],
-                                                  :chars_index=>params[:chars_index],     :ids_section=>params[:ids_section],
-                                                  :divide_type=>params[:divide_type],     :domain=>params[:domain]}
+      page.replace "candidate", :partial=>"synthetic/left_or_right", :object => [lexemes_left, lexemes_right],  
+                                :locals => { :left=>params[:left],        :left_id=>left_id,
+                                            :right=>params[:right],      :right_id=>right_id,
+                                            :ids=>params[:ids],          :chars=>params[:chars],
+                                            :level=>params[:level],      :type=>params[:type],
+                                            :from=>params[:from],        :original_id => params[:original_id],
+                                            :chars_index=>params[:chars_index],     :ids_section=>params[:ids_section],
+                                            :divide_type=>params[:divide_type],     :domain=>params[:domain]}
     end
   end
 
@@ -113,7 +113,7 @@ class ApplicationController < ActionController::Base
                   :original_id=>params[:original_id], :ids=>params[:ids], :chars=>params[:chars], :domain=>params[:domain]
       return
     end
-    meta_ids, meta_chars = get_meta_structures(params[:ids], params[:chars])
+    meta_ids, meta_chars = get_meta_structures(:ids=>params[:ids], :chars=>params[:chars])
     meta_show_chars = meta_chars.dup
     indexes = meta_show_chars.size - 1
     while(indexes >= 0) do
@@ -141,6 +141,7 @@ class ApplicationController < ActionController::Base
   end
   
   def save_internal_struct
+    lexeme_class_name = verify_domain(params[:domain])['Lexeme']
     class_name = verify_domain(params[:domain])['Synthetic']
     property_class_name = verify_domain(params[:domain])['Property']
     new_property_class_name = verify_domain(params[:domain])['NewProperty']
@@ -216,72 +217,178 @@ class ApplicationController < ActionController::Base
     if params[:from] == "new"
       sth_tagging_state = eval(property_class_name+%Q|.find_item_by_tree_string_or_array("sth_tagging_state", "NEW").property_cat_id|)
       begin
-        eval(class_name+'.transaction') do
-          for indexes in 0..(params[:meta_size].to_i-1)
-            temp_struct_string = internal_structure['meta_'+indexes.to_s].split(',').map{|item| '-'+item+'-'}.join(',')
-            sub_structure = eval(class_name+%Q|.new(:sth_ref_id=>sth_ref_id, :sth_meta_id=>indexes, :sth_struct=>temp_struct_string, :sth_tagging_state=>sth_tagging_state, :modified_by=>session[:user_id])|)
-            sub_structure.log = log if indexes == 0
-            if sub_structure.save!
-              eval(item_class_name+'.transaction') do
-                customize_category['meta_'+indexes.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :category=>value)') }
-                customize_text['meta_'+indexes.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :text=>value)') }
-                customize_time['meta_'+indexes.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :time=>value)') }
+        case params[:domain]
+          when 'jp'
+            JpSynthetic.transaction do
+              for indexes in 0..(params[:meta_size].to_i-1)
+                sub_structure = save_synthetic_structure(internal_structure, indexes, class_name, sth_ref_id, sth_tagging_state, log)
+                if sub_structure.save!
+                  JpSyntheticNewPropertyItem.transaction do
+                    save_synthetic_structure_property(customize_category, customize_text, customize_time, item_class_name, indexes, sub_structure.id)
+                  end
+                  JpLexeme.transaction do
+                    update_nodes_dictionary(internal_structure, lexeme_class_name, indexes, sth_ref_id)
+                  end
+                end
               end
             end
-          end
+          when 'cn'
+            CnSynthetic.transaction do
+              for indexes in 0..(params[:meta_size].to_i-1)
+                sub_structure = save_synthetic_structure(internal_structure, indexes, class_name, sth_ref_id, sth_tagging_state, log)
+                if sub_structure.save!
+                  CnSyntheticNewPropertyItem.transaction do
+                    save_synthetic_structure_property(customize_category, customize_text, customize_time, item_class_name, indexes, sub_structure.id)
+                  end
+                  CnLexeme.transaction do
+                    update_nodes_dictionary(internal_structure, lexeme_class_name, indexes, sth_ref_id)
+                  end
+                end
+              end
+            end
+          when 'en'
+            EnSynthetic.transaction do
+              for indexes in 0..(params[:meta_size].to_i-1)
+                sub_structure = save_synthetic_structure(internal_structure, indexes, class_name, sth_ref_id, sth_tagging_state, log)
+                if sub_structure.save!
+                  EnSyntheticNewPropertyItem.transaction do
+                    save_synthetic_structure_property(customize_category, customize_text, customize_time, item_class_name, indexes, sub_structure.id)
+                  end
+                  EnLexeme.transaction do
+                    update_nodes_dictionary(internal_structure, lexeme_class_name, indexes, sth_ref_id)
+                  end
+                end
+              end
+            end
         end
       rescue Exception => e
         flash[:notice_err] = alert_string_3+"<ul><li>#{e}</li></ul>"
+        render(:update) { |page| page.call 'location.reload' }
+        return
       else
         flash[:notice] = success_string
+        render(:update) { |page| page.call 'location.reload' }
+        return
       end
-      render(:update) { |page| page.call 'location.reload' }
     elsif params[:from] == "modify"
       sth_tagging_state = eval(property_class_name+%Q|.find_item_by_tree_string_or_array("sth_tagging_state", get_ordered_string_from_params(params[:sth_tagging_state].dup)).property_cat_id|)
       begin
         if params[:changed].blank?
-          eval(class_name+'.transaction') do
-            for index in 0..(params[:meta_size].to_i-1)
-              sub_structure = eval(class_name+%Q|.find(:first, :conditions=>["sth_ref_id=? and sth_meta_id=?", sth_ref_id, index])|)
-              index == 0 ? temp_log = log : temp_log = nil
-              if sub_structure.update_attributes!(:sth_tagging_state=>sth_tagging_state, :modified_by=>session[:user_id], :log=>temp_log)
-                eval(item_class_name+'.transaction') do
-                  eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub_structure.id])|).each{|item| item.destroy}
-                  customize_category['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :category=>value)') }
-                  customize_text['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :text=>value)') }
-                  customize_time['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :time=>value)') }
+          case params[:domain]
+            when 'jp'
+              JpSynthetic.transaction do
+                for index in 0..(params[:meta_size].to_i-1)
+                  sub_structure = eval(class_name+%Q|.find(:first, :conditions=>["sth_ref_id=? and sth_meta_id=?", sth_ref_id, index])|)
+                  index == 0 ? temp_log = log : temp_log = nil
+                  if sub_structure.update_attributes!(:sth_tagging_state=>sth_tagging_state, :modified_by=>session[:user_id], :log=>temp_log)
+                    JpSyntheticNewPropertyItem.transaction do
+                      eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub_structure.id])|).each{|item| item.destroy}
+                      save_synthetic_structure_property(customize_category, customize_text, customize_time, item_class_name, index, sub_structure.id)
+                    end
+                  end
                 end
               end
-            end
+            when 'cn'
+              CnSynthetic.transaction do
+                for index in 0..(params[:meta_size].to_i-1)
+                  sub_structure = eval(class_name+%Q|.find(:first, :conditions=>["sth_ref_id=? and sth_meta_id=?", sth_ref_id, index])|)
+                  index == 0 ? temp_log = log : temp_log = nil
+                  if sub_structure.update_attributes!(:sth_tagging_state=>sth_tagging_state, :modified_by=>session[:user_id], :log=>temp_log)
+                    CnSyntheticNewPropertyItem.transaction do
+                      eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub_structure.id])|).each{|item| item.destroy}
+                      save_synthetic_structure_property(customize_category, customize_text, customize_time, item_class_name, index, sub_structure.id)
+                    end
+                  end
+                end
+              end
+            when 'en'
+              EnSynthetic.transaction do
+                for index in 0..(params[:meta_size].to_i-1)
+                  sub_structure = eval(class_name+%Q|.find(:first, :conditions=>["sth_ref_id=? and sth_meta_id=?", sth_ref_id, index])|)
+                  index == 0 ? temp_log = log : temp_log = nil
+                  if sub_structure.update_attributes!(:sth_tagging_state=>sth_tagging_state, :modified_by=>session[:user_id], :log=>temp_log)
+                    EnSyntheticNewPropertyItem.transaction do
+                      eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub_structure.id])|).each{|item| item.destroy}
+                      save_synthetic_structure_property(customize_category, customize_text, customize_time, item_class_name, index, sub_structure.id)
+                    end
+                  end
+                end
+              end
           end
         elsif params[:changed] == 'true'
-          eval(class_name+'.transaction') do
-            eval(class_name+'.find(:all, :conditions=>["sth_ref_id=?", sth_ref_id])').each{|sub|
-              eval(item_class_name+'.transaction') do
-                eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub.id])|).each{|item| item.destroy}
-              end
-              sub.destroy
-            }
-            for index in 0..(params[:meta_size].to_i-1)
-              temp_struct_string = internal_structure['meta_'+index.to_s].split(',').map{|item| '-'+item+'-'}.join(',')
-              sub_structure = eval(class_name+%Q|.new(:sth_ref_id=>sth_ref_id, :sth_meta_id=>index, :sth_struct=>temp_struct_string, :sth_tagging_state=>sth_tagging_state, :modified_by=>session[:user_id] )|)
-              sub_structure.log = log if index == 0
-              if sub_structure.save!
-                eval(item_class_name+'.transaction') do
-                  customize_category['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :category=>value)') }
-                  customize_text['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :text=>value)') }
-                  customize_time['meta_'+index.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure.id, :time=>value)') }
+          case params[:domain]
+            when 'jp'
+              JpSynthetic.transaction do
+                eval(class_name+'.find(:all, :conditions=>["sth_ref_id=?", sth_ref_id])').each{|sub|
+                  JpSyntheticNewPropertyItem.transaction do
+                    eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub.id])|).each{|item| item.destroy}
+                  end
+                  sub.destroy
+                }
+                for index in 0..(params[:meta_size].to_i-1)
+                  sub_structure = save_synthetic_structure(internal_structure, index, class_name, sth_ref_id, sth_tagging_state, log)
+                  if sub_structure.save!
+                    JpSyntheticNewPropertyItem.transaction do
+                      save_synthetic_structure_property(customize_category, customize_text, customize_time, item_class_name, index, sub_structure.id)
+                    end
+                    JpLexeme.transaction do
+                      update_nodes_dictionary(internal_structure, lexeme_class_name, index, sth_ref_id)
+                    end
+                  end
                 end
               end
-            end
+            when 'cn'
+              CnSynthetic.transaction do
+                eval(class_name+'.find(:all, :conditions=>["sth_ref_id=?", sth_ref_id])').each{|sub|
+                  CnSyntheticNewPropertyItem.transaction do
+                    eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub.id])|).each{|item| item.destroy}
+                  end
+                  sub.destroy
+                }
+                for index in 0..(params[:meta_size].to_i-1)
+                  sub_structure = save_synthetic_structure(internal_structure, index, class_name, sth_ref_id, sth_tagging_state, log)
+                  if sub_structure.save!
+                    CnSyntheticNewPropertyItem.transaction do
+                      save_synthetic_structure_property(customize_category, customize_text, customize_time, item_class_name, index, sub_structure.id)
+                    end
+                    CnLexeme.transaction do
+                      update_nodes_dictionary(internal_structure, lexeme_class_name, index, sth_ref_id)
+                    end
+                  end
+                end
+              end
+            when 'en'
+              EnSynthetic.transaction do
+                eval(class_name+'.find(:all, :conditions=>["sth_ref_id=?", sth_ref_id])').each{|sub|
+                  EnSyntheticNewPropertyItem.transaction do
+                    eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub.id])|).each{|item| item.destroy}
+                  end
+                  sub.destroy
+                }
+                for index in 0..(params[:meta_size].to_i-1)
+                  sub_structure = save_synthetic_structure(internal_structure, index, class_name, sth_ref_id, sth_tagging_state, log)
+                  if sub_structure.save!
+                    EnSyntheticNewPropertyItem.transaction do
+                      save_synthetic_structure_property(customize_category, customize_text, customize_time, item_class_name, index, sub_structure.id)
+                    end
+                    EnLexeme.transaction do
+                      update_nodes_dictionary(internal_structure, lexeme_class_name, index, sth_ref_id)
+                    end
+                  end
+                end
+              end
           end
         end
       rescue Exception => e
         flash[:notice_err] = alert_string_3+"<ul><li>#{e}</li></ul>"
+        render(:update) { |page| page.call 'location.reload' }
+        return
       else
         flash[:notice] = success_string
+        render(:update) { |page| page.call 'location.reload' }
+        return
       end
-      render(:update) { |page| page.call 'location.reload' }
+
     end
   end
   
@@ -300,13 +407,34 @@ class ApplicationController < ActionController::Base
         success_string = "<ul><li>Internal structure deleted!</li></ul>"
     end
     begin
-      eval(class_name+'.transaction') do
-        eval(class_name+'.find(:all, :conditions=>["sth_ref_id=?", params[:id].to_i])').each{|sub|
-          eval(item_class_name+'.transaction') do
-            eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub.id])|).each{|item| item.destroy}
+      case params[:domain]
+        when 'jp'
+          JpSynthetic.transaction do
+            eval(class_name+'.find(:all, :conditions=>["sth_ref_id=?", params[:id].to_i])').each{|sub|
+              JpSyntheticNewPropertyItem.transaction do
+                eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub.id])|).each{|item| item.destroy}
+              end
+              sub.destroy
+            }
           end
-          sub.destroy
-        }
+        when 'cn'
+          CnSynthetic.transaction do
+            eval(class_name+'.find(:all, :conditions=>["sth_ref_id=?", params[:id].to_i])').each{|sub|
+              CnSyntheticNewPropertyItem.transaction do
+                eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub.id])|).each{|item| item.destroy}
+              end
+              sub.destroy
+            }
+          end
+        when 'en'
+          EnSynthetic.transaction do
+            eval(class_name+'.find(:all, :conditions=>["sth_ref_id=?", params[:id].to_i])').each{|sub|
+              EnSyntheticNewPropertyItem.transaction do
+                eval(item_class_name+%Q|.find(:all, :conditions=>["ref_id=?",sub.id])|).each{|item| item.destroy}
+              end
+              sub.destroy
+            }
+          end
       end
     rescue Exception => e
       flash[:notice_err] = alert_string+"<ul><li>#{e}</li></ul>"
@@ -374,24 +502,24 @@ class ApplicationController < ActionController::Base
   ### :conditions, :domain, :section
   def get_lexeme_ids_from_new_property_items(fields={})
     return nil if fields[:conditions].blank? or fields[:domain].blank? or fields[:section].blank?
-    if fields[:section] = "lexeme"
+    if fields[:section] == "lexeme"
       class_name = verify_domain(fields[:domain])['Lexeme']
       item_class = verify_domain(fields[:domain])['LexemeNewPropertyItem']
-    elsif fields[:section] = "synthetic"
+    elsif fields[:section] == "synthetic"
       class_name = verify_domain(fields[:domain])['Synthetic']
       item_class = verify_domain(fields[:domain])['SyntheticNewPropertyItem']
     end
     ids=[]
-    fields[:conditions].split("and").each_with_index{|search, index|
-      if index == 0
-        collection = eval(item_class+'.find(:all, :select=>"ref_id", :conditions=>[" #{search} "])')
-      else
-        collection = eval(item_class+'.find(:all, :select=>"ref_id", :conditions=>[" #{search} and ref_id in (#{ids.join(",")}) "])')
-      end
+    fields[:conditions].split("**and**").each_with_index{|search, index|
+      collection = eval(item_class+%Q|.find(:all, :select=>"ref_id", :conditions=>search)|)
       if collection.blank?
         return []
       else
-        ids = (collection.map{|item| item.ref_id}).uniq.sort
+        if index == 0
+          ids = (collection.map{|item| item.ref_id}).uniq.sort
+        else
+          ids = ids & (collection.map{|item| item.ref_id}).uniq.sort
+        end
       end
     }
     if fields[:section] == "lexeme"
@@ -405,7 +533,11 @@ class ApplicationController < ActionController::Base
   
   ### :ids, ;domain
   def install_by_dividing(fields={})
-    ids = fields[:ids]
+    if fields[:ids].blank?
+      return []
+    else
+      ids = fields[:ids]
+    end
     class_name = verify_domain(fields[:domain])['Lexeme']
     start = 0
     step = 499
@@ -464,7 +596,7 @@ class ApplicationController < ActionController::Base
   ### :ids_section         the indexes of the character on the left of dividing point.  Format:  level_1_index,level_2_index,level_3_index,....
   
   def get_ids_and_chars(field={})
-    synthetic_class = verify_domain(fields[:domain])['Synthetic']
+    synthetic_class = verify_domain(field[:domain])['Synthetic']
     case field[:type]
       when "new"
         if field[:ids] == ""
@@ -557,4 +689,31 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def save_synthetic_structure(internal_structure={}, indexes=nil, class_name=nil, sth_ref_id=nil, sth_tagging_state=nil, log=nil)
+    temp_struct_string = internal_structure['meta_'+indexes.to_s].split(',').map{|item| '-'+item+'-'}.join(',')
+    sub_structure = eval(class_name+%Q|.new(:sth_ref_id=>sth_ref_id, :sth_meta_id=>indexes, :sth_struct=>temp_struct_string, :sth_tagging_state=>sth_tagging_state, :modified_by=>session[:user_id])|)
+    sub_structure.log = log if indexes == 0
+    return sub_structure
+  end
+              
+  def save_synthetic_structure_property(customize_category={}, customize_text={}, customize_time={}, item_class_name=nil, indexes=nil, sub_structure_id=nil)
+    customize_category['meta_'+indexes.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure_id, :category=>value)') }
+    customize_text['meta_'+indexes.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure_id, :text=>value)') }
+    customize_time['meta_'+indexes.to_s].each{|id,value| eval(item_class_name+'.create!(:property_id=>id, :ref_id=>sub_structure_id, :time=>value)') }
+  end
+  
+  def update_nodes_dictionary(internal_structure={}, lexeme_class_name=nil, indexes=nil, sth_ref_id=nil)
+    original_dic = eval(lexeme_class_name+'.find(sth_ref_id.to_s).dictionary_item.list')
+    internal_structure['meta_'+indexes.to_s].split(',').each{|item|
+      if item =~ /^\d+$/
+        temp_lexeme = eval(lexeme_class_name+'.find(item.to_s)')
+        temp_dic = temp_lexeme.dictionary_item.list
+        diff = original_dic - temp_dic
+        unless diff.blank?
+          temp_dic = temp_dic.concat(diff).sort
+          temp_lexeme.update_attributes!(:dictionary=>temp_dic.map{|item| '-'+item.to_s+'-'}.join(','))
+        end
+      end
+    }
+  end
 end
