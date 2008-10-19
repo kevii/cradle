@@ -4,9 +4,6 @@ _menuOpenDelay=150;
 _subOffsetTop=2;
 _subOffsetLeft=-2;
 
-
-
-
 with(menuStyle=new mm_style()){
 bordercolor="#999999";
 borderstyle="solid";
@@ -35,8 +32,8 @@ with(milonic=new menuname("Main Menu")){
 alwaysvisible=1;
 orientation="horizontal";
 style=menuStyle;
-aI("text=日本語辞書;url=http://dahlia.naist.jp:3000/jp;");
-aI("text=汉语辞典;url=http://dahlia.naist.jp:3000/cn;");
+aI("text=日本語辞書;url=http://dahlia.naist.jp/cradle/jp;");
+aI("text=汉语辞典;url=http://dahlia.naist.jp/cradle/cn;");
 }
 
 drawMenus();
