@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
   session :session_key => '_cradle_session_id'
   ### set charset
   before_filter :set_charset
-
+  
   def update_property_list
     class_name = verify_domain(params[:domain])['Property']
     value = params["level"+params[:level].to_s]
