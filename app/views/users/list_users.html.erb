@@ -11,7 +11,7 @@
                 <tr>
                 <td width="30px" align=center>
                     <% unless user.name=="cradle" or user.id==session[:user_id] %>
-                        <%= link_to "[X]",
+                        <%= link_to image_tag("less.gif", :border=>0),
                                 { :controller => 'users', :action => 'delete_user', :id => user.id },
                                 { :confirm => "Really delete #{user.name}?", :method=>"post" } %>
                     <% end %>
