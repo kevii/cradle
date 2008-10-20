@@ -118,12 +118,6 @@ module ApplicationHelper
     property_class_name = verify_domain(domain)["Property"]
     section == "lexeme" ? item_class_name = verify_domain(domain)["LexemeNewPropertyItem"] : item_class_name = verify_domain(domain)["SyntheticNewPropertyItem"]
     properties = eval(verify_domain(domain)["NewProperty"]+'.find(:all, :conditions=>["section=?", section])')
-    #### if state is search, then filter those propreties that have not been used
-    if state == "search"
-      temp = []
-      properties.each_with_index{|item, index| temp << index unless (eval (item_class_name+".exists?(:property_id =>item.id)"))}
-      temp.reverse.each{|item| properties.delete_at(item) }
-    end
     
     properties.each_with_index{|item, index|
       next if item.type_field=="category" and not (eval (property_class_name+".exists?(:property_string=>item.property_string)"))
