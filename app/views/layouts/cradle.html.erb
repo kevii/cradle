@@ -41,7 +41,7 @@
 	    <% if not @user.blank? %>
 			<div id="menu">
 				<!-- The next file contains your menu data, links and menu structure etc -->
-				<script type="text/javascript" src="/javascripts/menu_data_login.js"></script>
+				<%= javascript_include_tag "menu_data_login.js" %>
 			</div>
 			<div id="navigation-login" style="display:inline;">
 				<%= @user.name %></td>
@@ -57,7 +57,7 @@
 		<% else %>
 			<div id="menu">
 				<!-- The next file contains your menu data, links and menu structure etc -->
-				<script type="text/javascript" src="/javascripts/menu_data_logout.js"></script>
+				<%= javascript_include_tag "menu_data_logout.js" %>
 			</div>
 			<div id="navigation-login">
 	        	<%= link_to 'Login', :controller=>'/users', :action => 'login' %>
