@@ -155,7 +155,7 @@ class JpController < ApplicationController
 
   def input_base
     unless params[:base_type].blank?
-      render :partial => 'input_base', :locals => { :message => "", :base_type => params[:base_type] }
+      render :partial => 'input_base', :locals => { :message => "", :base_type => params[:base_type], :original_base=>"" }
       return
     end
     unless params[:base_as_id].blank?
