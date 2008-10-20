@@ -458,6 +458,7 @@ class ApplicationController < ActionController::Base
     unless User.find_by_id(session[:user_id])
       flash[:notice_err] = "<ul><li>Please log in!</li></ul>"
       redirect_to(:controller => "users" , :action => "login" )
+      return
     end
   end
   
@@ -465,6 +466,7 @@ class ApplicationController < ActionController::Base
     unless User.find_by_id(session[:user_id]).group_name == "admin"
       flash[:notice_err] = "<ul><li>You are not administrator!</li></ul>"
       redirect_to(:controller => "users" , :action => "chg_pwd" )
+      return
     end
   end
   

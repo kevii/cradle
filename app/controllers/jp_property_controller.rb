@@ -1,6 +1,7 @@
 class JpPropertyController < ApplicationController
   layout 'cradle'
   include JpHelper
+  before_filter :authorize
   before_filter :authorize_admin
   before_filter :set_title
   
