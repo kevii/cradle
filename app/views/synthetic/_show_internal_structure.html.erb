@@ -26,7 +26,7 @@
 				<td>
 					<table style="border: 3px solid #f0f8ff;">
 						<tr>
-							<% if ids = "" %>
+							<% if ids == "" %>
 								<%= show_internal_structure(show_internal_structure, true, 1, show_internal_structure["domain"]) %>
 							<% else %>
 								<%= show_internal_structure(show_internal_structure, false, 1, show_internal_structure["domain"]) %>

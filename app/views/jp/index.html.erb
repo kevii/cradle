@@ -7,7 +7,7 @@
 				</td>
 				<td width="200" align=right>
 					<img id='spinner1' style="vertical-align:middle;display:none;" src="/images/load.gif" />
-					<%= button_to_function ("リセット", "Form.reset('main_input')") %>
+					<%= button_to_function("リセット", "Form.reset('main_input')") %>
 					<%= submit_tag "検索", :onclick=>"Element.show('spinner1');Element.show('spinner2');" %>
 				</td>
 			</tr>
@@ -168,7 +168,7 @@
 				</td>
 				<td width="200" align=right>
 					<img id='spinner2' style="vertical-align:middle;display:none;" src="/images/load.gif" />
-					<%= button_to_function ("リセット", "Form.reset('main_input')") %>
+					<%= button_to_function("リセット", "Form.reset('main_input')") %>
 					<%= submit_tag "検索", :onclick=>"Element.show('spinner1');Element.show('spinner2');" %>
 				</td>
 			</tr>

@@ -51,7 +51,7 @@ class JpController < ApplicationController
   
   def list
     params[:page].blank? ? page = nil : page = params[:page].to_i
-    params[:per_page].blank? ? per_page = 10 : per_page = params[:per_page].to_i
+    params[:per_page].blank? ? per_page = 30 : per_page = params[:per_page].to_i
     if params[:dynamic_lexeme_condition].blank? and params[:dynamic_synthetic_condition].blank?
       @jplexemes = JpLexeme.paginate( :select=>" jp_lexemes.* ",   :conditions => params[:static_condition],
                                       :include => [:sub_structs],  :order => " jp_lexemes.id ASC ",
@@ -787,7 +787,7 @@ class JpController < ApplicationController
                     temp = temp.map{|item| item.id}
                     temp_lexeme_id = []
                     temp.each{|temp_id|
-                      temp_structs = JpSynthetic.find(:all, :select=>"sth_ref_id", :conditions=>[%Q|sth_struct like "%-#{temp_id}-%"|])
+                      temp_structs = JpSynthetic.find(:all, :select=>"sth_ref_id", :conditions=>["sth_struct like ?", '%-'+temp_id.to_s+'-%'])
                       temp_lexeme_id.concat(temp_structs.map{|item| item.sth_ref_id}.uniq) unless temp_structs.blank?
                     }
                     unless temp_lexeme_id.blank?
