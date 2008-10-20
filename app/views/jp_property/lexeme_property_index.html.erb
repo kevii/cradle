@@ -92,7 +92,9 @@
 		</table>
     </fieldset>
 	<a id="top" name="top" href="#" STYLE="text-decoration:none"></a>
-	<div id='spinner' style="display:none;"><img src="/images/load.gif" /></div>
+	<div id='spinner' style="display:none;">
+		<%= image_tag("load.gif") %>
+	</div>
 	<div id="show_property">
 		<% if not flash.now[:special].blank? %>
 			<div id="notice" ><%= flash.now[:special] %></div>

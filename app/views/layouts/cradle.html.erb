@@ -8,17 +8,18 @@
 	<%= javascript_include_tag :defaults %>
 	
 	<!-- For main menu... -->
-	<script type="text/javascript" src="/javascripts/milonic_src.js"></script> 
-	<script type="text/javascript" src="/javascripts/mmenudom.js"></script>
+	<%= javascript_include_tag "milonic_src.js" %>
+	<%= javascript_include_tag "mmenudom.js" %>
 
     <!-- For tree view -->
-	<script type="text/javascript" src="/javascripts/ECOTree.js"></script>
-	<link type="text/css" rel="stylesheet" href="/stylesheets/ECOTree.css" />
+	<%= javascript_include_tag "ECOTree.js" %>
+	<%= stylesheet_link_tag "ECOTree", :media => "all" %>
 </head>
 
 <body id="ChaSen">
 	<div>
-		<div style="float:left; padding-top:10px;"><img src="/images/matsu-logo.gif" /></div>
+		<div style="float:left; padding-top:10px;"><%= image_tag("matsu-logo.gif") %></div>
+		
 		<div id="banner" align="right">
 			<div>
 				<table style="width:95%;">
@@ -26,8 +27,8 @@
 						<td style="width:5%;"></td>
 						<td style="width:90%;"><%= @page_title || "Cradle--ChaSen Dictionary Management System" %></td>
 						<td style="width:5%; text-align:right;">
-							<img style="vertical-align:bottom;" src="/images/firefox.png" />
-							<img style="vertical-align:bottom;" src="/images/rails.png" />
+							<%= image_tag("firefox.png", :style=>"vertical-align:bottom;") %>
+							<%= image_tag("rails.png", :style=>"vertical-align:bottom;") %>
 						</td>
 					</tr>
 				</table>

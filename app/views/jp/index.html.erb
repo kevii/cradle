@@ -6,7 +6,7 @@
 					<strong style="font-size:125%;padding-left:180px;">単語属性</strong>
 				</td>
 				<td width="200" align=right>
-					<img id='spinner1' style="vertical-align:middle;display:none;" src="/images/load.gif" />
+					<%= image_tag("load.gif", :id=>'spinner1', :style=>"vertical-align:middle;display:none;") %>
 					<%= button_to_function("リセット", "Form.reset('main_input')") %>
 					<%= submit_tag "検索", :onclick=>"Element.show('spinner1');Element.show('spinner2');" %>
 				</td>
@@ -167,7 +167,7 @@
 					<strong style="font-size:125%;padding-left:180px;">複合語属性</strong>
 				</td>
 				<td width="200" align=right>
-					<img id='spinner2' style="vertical-align:middle;display:none;" src="/images/load.gif" />
+					<%= image_tag("load.gif", :id=>'spinner2', :style=>"vertical-align:middle;display:none;") %>
 					<%= button_to_function("リセット", "Form.reset('main_input')") %>
 					<%= submit_tag "検索", :onclick=>"Element.show('spinner1');Element.show('spinner2');" %>
 				</td>
