@@ -16,7 +16,7 @@
 		<table class="property_list">
 			<thead>
 				<tr>
-					<th colspan=5 style="text-align:center; width:10%;">
+					<th colspan=5 style="text-align:left;">
 						<%= submit_tag '保存' %>
 						<%= hidden_field_tag :type_field, @type_field %>
 						<%= hidden_field_tag :section, @section %>
@@ -24,45 +24,60 @@
 					</th>
 				</tr>
 				<tr>
-					<th>保存用ID</th>
-					<td>
+					<th width="60px">保存用ID</th>
+					<td width="400px">
 						<% if modify_property.blank? %>
-							<%= text_field_tag "string", "英数字と_のみ", :onclick=>"clear()", :class=>'text-field' %>
+							<%= text_field_tag "string", "英数字と_のみ", :onclick=>"clear()", :class=>'text-field', :style=>"width:100%;" %>
 						<% else %>
-							<%= text_field_tag 'string', modify_property.property_string, :class=>'text-field' %>
+							<%= text_field_tag 'string', modify_property.property_string, :class=>'text-field', :style=>"width:100%;" %>
 						<% end %>
 					</td>
-					<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-					<th>表示用名前</th>
-					<td>
+					<td width="60px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+					<th width="100px">表示用名前</th>
+					<td width="400px">
 						<% if modify_property.blank? %>
-							<%= text_field_tag "human_name", nil, :class=>'text-field' %>
+							<%= text_field_tag "human_name", nil, :class=>'text-field', :style=>"width:100%;" %>
 						<% else %>
-							<%= text_field_tag 'human_name', modify_property.human_name, :class=>'text-field' %>
+							<%= text_field_tag 'human_name', modify_property.human_name, :class=>'text-field', :style=>"width:100%;" %>
 						<% end %>
 					</td>
 				<tr>
 					<th>記述</th>
 					<td>
 						<% if modify_property.blank? %>
-							<%= text_field_tag "desc", nil, :class=>'text-field' %>
+							<%= text_field_tag "desc", nil, :class=>'text-field', :style=>"width:100%;" %>
 						<% else %>
-							<%= text_field_tag 'desc', modify_property.description, :class=>'text-field' %>
+							<%= text_field_tag 'desc', modify_property.description, :class=>'text-field', :style=>"width:100%;" %>
 						<% end %>
 					</td>
-					<% if @type_field == "category" %>
-						<td colspan=3></td>
-					<% else %>
-						<td></td>
-						<th>デフォルト値</th>
-						<td>
-							<% if modify_property.blank? %>
-								<%= text_field_tag "default_value", nil, :class=>'text-field' %>
-							<% else %>
-								<%= text_field_tag 'default_value', modify_property.default_value, :class=>'text-field' %>
-							<% end %>
-						</td>
+					
+					
+					<% case @type_field
+						when "category" %>
+							<td colspan=3></td>
+						<% when "text" %>
+							<td></td>
+							<th>デフォルト値</th>
+							<td>
+								<% if modify_property.blank? %>
+									<%= text_field_tag "default_value", nil, :class=>'text-field', :style=>"width:100%;" %>
+								<% else %>
+									<%= text_field_tag 'default_value', modify_property.default_value, :class=>'text-field', :style=>"width:100%;" %>
+								<% end %>
+							</td>
+						<% when "time" %>
+							<td></td>
+							<th>デフォルト値</th>
+							<td>
+								<% if modify_property.blank? %>
+									<%= datetime_select("default_value", "section", {:use_month_numbers => true, :include_blank => true}) %>
+								<% else %>
+									<%= select_datetime(@time, :use_month_numbers => true, :include_blank => true, :prefix=>"default_value") %>
+								<% end %>
+							</td>
 					<% end %>
+					
+					
 				</tr>
 			</thead>
 		</table>

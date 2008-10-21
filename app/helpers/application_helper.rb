@@ -50,7 +50,7 @@ module ApplicationHelper
     field[:id].blank? ? id = 0 : id = field[:id]
     field[:level].blank? ? level = 1 : level = field[:level]
     field[:option].blank? ? option = "" : option = field[:option]
-    
+
     html_string = ""
     function_string = "update_property_list"
     class_name = verify_domain(domain)["Property"]
@@ -143,7 +143,12 @@ module ApplicationHelper
             when "search"
               html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>orig_prefix, :state=>state)
             when "new"
-              html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>orig_prefix, :state=>"modify", :id=>eval(verify_domain(domain)["NewProperty"]+'.find(:first, :conditions=>["property_string=?", item.property_string]).default_value.to_i'))
+              temp = eval(verify_domain(domain)["NewProperty"]+'.find(:first, :conditions=>["property_string=?", item.property_string]).default_value')
+              if temp.blank?
+                html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>orig_prefix, :state=>state)
+              else
+                html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>orig_prefix, :state=>"modify", :id=>temp.to_i)
+              end
             when "modify"
               html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>orig_prefix, :state=>state, :id=>(eval class_name+".find(id)."+item.property_string))
           end
@@ -161,7 +166,12 @@ module ApplicationHelper
             when "search"
               html_string << text_field("#{prefix+item.property_string}", "value", {:style=>"width:100%;", :class=>'text-field'})
             when "new"
-              html_string << text_field_tag("#{prefix+item.property_string}", nil, :style=>"width:100%;", :class=>'text-field')
+              temp = eval(verify_domain(domain)["NewProperty"]+'.find(:first, :conditions=>["property_string=?", item.property_string]).default_value')
+              if temp.blank?
+                html_string << text_field_tag("#{prefix+item.property_string}", nil, :style=>"width:100%;", :class=>'text-field')
+              else
+                html_string << text_field_tag("#{prefix+item.property_string}", temp, :style=>"width:100%;", :class=>'text-field')
+              end
             when "modify"
               html_string << text_field_tag("#{prefix+item.property_string}", (eval class_name+'.find(id).'+item.property_string), :style=>"width:100%;", :class=>'text-field')
           end
@@ -176,8 +186,17 @@ module ApplicationHelper
           end
           html_string << "<td>\n"
           case state
-            when "search","new"
+            when "search"
               html_string << datetime_select(prefix+item.property_string, "section", :use_month_numbers => true, :include_blank => true)
+            when "new"
+              temp = eval(verify_domain(domain)["NewProperty"]+'.find(:first, :conditions=>["property_string=?", item.property_string]).default_value')
+              if temp.blank?
+                html_string << datetime_select(prefix+item.property_string, "section", :use_month_numbers => true, :include_blank => true)
+              else
+                temp_array = temp.split(/-|\s|:/)
+                temp_time = DateTime.civil(temp_array[0].to_i, temp_array[1].to_i, temp_array[2].to_i, temp_array[3].to_i, temp_array[4].to_i)
+                html_string << select_datetime(temp_time, :use_month_numbers => true, :include_blank => true,:prefix=>prefix+item.property_string)
+              end
             when "modify"
               html_string << select_datetime((eval class_name+'.find(id).'+item.property_string), :use_month_numbers => true, :include_blank => true,:prefix=>prefix+item.property_string)
           end
@@ -471,6 +490,7 @@ module ApplicationHelper
         html_string << "  <option value=''></option>\n"
       end
     end
+
     html_string << options_for_select(collection, roots[level-1].value)
     html_string << "</select>\n"
     if level < roots.size

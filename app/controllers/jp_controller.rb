@@ -1,5 +1,3 @@
-require 'date'
-
 class JpController < ApplicationController
   layout 'cradle'
   include JpHelper
@@ -246,7 +244,7 @@ class JpController < ApplicationController
                   return
                 else
                   begin
-                    lexeme[key]=DateTime.civil(value["section(1i)"].to_i, value["section(2i)"].to_i, value["section(3i)"].to_i, value["section(4i)"].to_i, value["section(5i)"].to_i).to_formatted_s(:db)
+                    lexeme[key]=get_time_string_from_hash(value)
                   rescue
                     flash.now[:notice_err] = "<ul><li>時間を正しく指定して下さい！</li></ul>"
                     render :partial=>"preview_edit"
@@ -348,6 +346,7 @@ class JpController < ApplicationController
                 when "text"
                   customize_text[property.id] = params["lexeme"+indexes.to_s][key]
                 when "time"
+                  debugger
                   customize_time[property.id] = params["lexeme"+indexes.to_s][key]
               end
           end
@@ -535,11 +534,7 @@ class JpController < ApplicationController
                   return
                 else
                   begin
-                    if value.has_key?("section(1i)")
-                      lexeme[key]=DateTime.civil(value["section(1i)"].to_i, value["section(2i)"].to_i, value["section(3i)"].to_i, value["section(4i)"].to_i, value["section(5i)"].to_i).to_formatted_s(:db)
-                    elsif value.has_key?("year")
-                      lexeme[key]=DateTime.civil(value["year"].to_i, value["month"].to_i, value["day"].to_i, value["hour"].to_i, value["minite"].to_i).to_formatted_s(:db)
-                    end
+                    lexeme[key]=get_time_string_from_hash(value)
                   rescue
                     flash.now[:notice_err] = "<ul><li>時間を正しく指定して下さい！</li></ul>"
                     render :partial=>"preview_edit"
@@ -917,13 +912,13 @@ class JpController < ApplicationController
                     return "", "", "<ul><li>更新時間を最低日まで指定して下さい！</li></ul>"
                   else
                     begin
-                      time = DateTime.civil(temp["section(1i)"].to_i, temp["section(2i)"].to_i, temp["section(3i)"].to_i, temp["section(4i)"].to_i, temp["section(5i)"].to_i)
+                      time = get_time_string_from_hash(temp)
                       if key == "sth_updated_at"
-                        result << "構造#{initial_property_name["updated_at"]}#{operator0[params[key][:operator]]}#{time.to_formatted_s(:db)}"
-                        condition[0] << " jp_synthetics.updated_at #{params[key][:operator]} '#{time.to_formatted_s(:db)}' "
+                        result << "構造#{initial_property_name["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
+                        condition[0] << " jp_synthetics.updated_at #{params[key][:operator]} '#{time}' "
                       elsif key == "updated_at"
-                        result << "#{initial_property_name["updated_at"]}#{operator0[params[key][:operator]]}#{time.to_formatted_s(:db)}"
-                        condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} '#{time.to_formatted_s(:db)}' "
+                        result << "#{initial_property_name["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
+                        condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} '#{time}' "
                       end
                     rescue
                       return "", "", "<ul><li>時間を正しく指定して下さい！</li></ul>"
@@ -981,13 +976,13 @@ class JpController < ApplicationController
                     return "", "", "<ul><li>#{property.human_name}を最低日まで指定して下さい！</li></ul>"
                   else
                     begin
-                      time = DateTime.civil(temp["section(1i)"].to_i, temp["section(2i)"].to_i, temp["section(3i)"].to_i, temp["section(4i)"].to_i, temp["section(5i)"].to_i)
-                      result << "#{name_string}#{operator0[params[key][:operator]]}#{time.to_formatted_s(:db)}"
+                      time = get_time_string_from_hash(temp)
+                      result << "#{name_string}#{operator0[params[key][:operator]]}#{time}"
                       case property.section
                         when "synthetic"
-                          condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.time #{params[key][:operator]} '#{time.to_formatted_s(:db)}' "
+                          condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.time #{params[key][:operator]} '#{time}' "
                         when "lexeme"
-                          condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.time #{params[key][:operator]} '#{time.to_formatted_s(:db)}' "
+                          condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.time #{params[key][:operator]} '#{time}' "
                       end
                     rescue
                       return "", "", "<ul><li>時間を正しく指定して下さい！</li></ul>"

@@ -57,6 +57,10 @@ class JpPropertyController < ApplicationController
     if params[:id].blank?
       render :partial => 'modify_property'
     else
+      if @type_field == "time"
+        temp = JpNewProperty.find(params[:id].to_i).default_value.split(/-|\s|:/)
+        @time = DateTime.civil(temp[0].to_i, temp[1].to_i, temp[2].to_i, temp[3].to_i, temp[4].to_i)
+      end
       render :partial => 'modify_property', :object=>JpNewProperty.find(params[:id].to_i)
     end
   end
@@ -68,11 +72,13 @@ class JpPropertyController < ApplicationController
     params[:default_value].blank? ? default_value = nil : default_value = params[:default_value]
     if params[:id].blank?
       begin
+        default_value = get_time_string_from_hash(default_value) if @type_field == "time"
         new_property = JpNewProperty.new( :property_string=>params[:string], :human_name=>params[:human_name],
                                           :description=>desc,                :default_value=>default_value,
                                           :section=>params[:section],        :type_field=>params[:type_field] )
         new_property.save!                                      
       rescue
+        debugger
         flash.now[:notice_err] = get_validation_error(new_property, "save")
         render(:update) { |page| page[:show_property].replace_html :partial=>"modify_property" }
       else
@@ -82,7 +88,12 @@ class JpPropertyController < ApplicationController
     else
       @property = JpNewProperty.find(params[:id].to_i)
       begin
-        default_value = @property.default_value if @type_field == "category"
+        case @type_field
+          when "category"
+            default_value = @property.default_value
+          when "time"
+            default_value = get_time_string_from_hash(default_value)
+        end
         @property.update_attributes!(:property_string => params[:string], :human_name=>params[:human_name],
                                      :description=>desc, :default_value=>default_value)
       rescue
@@ -214,7 +225,8 @@ class JpPropertyController < ApplicationController
     @string = params[:string]
     begin
       temp = JpNewProperty.find(:first, :conditions=>["property_string=?", @string])
-      temp.update_attributes!(:default_value=>params[:id])
+      params[:id].blank? ? default_value=nil : default_value=params[:id]
+      temp.update_attributes!(:default_value=>default_value)
     rescue
       flash.now[:notice_err] = "<ul><li>問題が発生しました、デフォルト値を変更できません！</li></ul>"
     else

@@ -104,8 +104,12 @@
 		    </fieldset>
 		    <p>
 			<% if User.find_by_id(session[:user_id]) %>
-				<%= button_to '編集', :action => 'edit', :id => @lexeme %> &nbsp | &nbsp
-			    <%= button_to '削除', { :action => 'destroy', :id => @lexeme }, :confirm => 'Are you sure?', :post => true %>
+				<table>
+					<tr>
+						<td><%= button_to '編集', :action => 'edit', :id => @lexeme %></td>
+						<td><%= button_to '削除', { :action => 'destroy', :id => @lexeme }, :confirm => 'Are you sure?', :post => true %></td>
+					</tr>
+				</table>
 			<% end %>
 		</div>
 		<% if @lexeme.struct.blank? %>
@@ -146,13 +150,19 @@
 				        	</table>
 				        </div>
 				    </fieldset>
-				    <p>
-					<%= button_to_remote "編集", :url => { :action => "modify_structure", :from => "modify", :original_id => @lexeme.id,
-														:ids => @ids, :chars => @chars, :domain=>'jp' },
-											  :before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
-					&nbsp | &nbsp
-				    <%= button_to '削除', { :action => 'destroy_struct', :id => @lexeme.id, :domain=>'jp' }, :confirm => 'Are you sure?', :post => true %>
+		    		<p>
+					<table>
+						<tr>
+							<td>
+								<%= button_to_remote "編集", :url => { :action => "modify_structure", :from => "modify", :original_id => @lexeme.id,
+																	:ids => @ids, :chars => @chars, :domain=>'jp' },
+														  :before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
+							</td>
+							<td><%= button_to '削除', { :action => 'destroy_struct', :id => @lexeme.id, :domain=>'jp' }, :confirm => 'Are you sure?', :post => true %></td>
+						</tr>
+					</table>
 				<% end %>
+		    	<p>
 				<% for index in 0..(JpSynthetic.find(:all, :conditions=>["sth_ref_id=#{@lexeme.id}"]).size-1)
 					sub_structure = JpSynthetic.find(:first, :conditions=>["sth_ref_id=#{@lexeme.id} and sth_meta_id=#{index}"])
 					index_string = 'meta_'+index.to_s %>

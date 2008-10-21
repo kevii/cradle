@@ -278,7 +278,7 @@ select, input {
 }
 
 .property_list th {	font: bold 1.1em/120% sans-serif; text-align: left;}
-.property_list {border-collapse: collapse; width:100%;}
+.property_list {border-collapse: collapse;}
 .property_list tbody tr:hover { color: #000; background-color: lavender; }
 
 

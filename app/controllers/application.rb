@@ -195,11 +195,7 @@ class ApplicationController < ActionController::Base
                 return
               else
                 begin
-                  if value.has_key?("section(1i)")
-                    customize_time[key][property.id] = DateTime.civil( value["section(1i)"].to_i, value["section(2i)"].to_i, value["section(3i)"].to_i, value["section(4i)"].to_i, value["section(5i)"].to_i).to_formatted_s(:db)
-                  elsif value.has_key?("year")
-                    customize_time[key][property.id] = DateTime.civil( value["year"].to_i, value["month"].to_i, value["day"].to_i, value["hour"].to_i, value["minite"].to_i).to_formatted_s(:db)
-                  end
+                  customize_time[key][property.id] = get_time_string_from_hash(value)
                 rescue
                   flash[:notice_err] = alert_string_2
                   temp = get_formatted_ids_and_chars(:original_lexeme_id=>params[:sth_ref_id], :domain=>params[:domain])
@@ -718,4 +714,13 @@ class ApplicationController < ActionController::Base
       end
     }
   end
+  
+  def get_time_string_from_hash(option)
+    if option.has_key?("section(1i)")
+      return DateTime.civil(option["section(1i)"].to_i, option["section(2i)"].to_i, option["section(3i)"].to_i, option["section(4i)"].to_i, option["section(5i)"].to_i).to_formatted_s(:db)
+    elsif option.has_key?("year")
+      return DateTime.civil(option["year"].to_i, option["month"].to_i, option["day"].to_i, option["hour"].to_i, option["minute"].to_i).to_formatted_s(:db)
+    end
+  end
+  
 end

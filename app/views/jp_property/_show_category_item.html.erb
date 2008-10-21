@@ -1,18 +1,24 @@
 <div id="modify_category_item">
 	<% if not flash.now[:notice].blank? %>
 		<div id="notice" ><%= flash.now[:notice] %></div>
+	<% elsif not flash.now[:notice_err].blank? %>
+		<div id="notice_err" ><%= flash.now[:notice_err] %></div>
 	<% end %>
 </div>
+<% JpNewProperty.exists?(:property_string=>@string) ? new_property = true : new_property = false %>
 <fieldset align="left" style="width:960px; padding-top:10px; margin-bottom:30px; background: lightgrey;">
     <legend style="background: steelblue;"><%= h(@human_name) %></legend>
 		<table class="property_list">
 			<thead>
 				<tr>
 					<th width=80px style="text-align:center;"><%= button_to_remote("新規", :update => "modify_category_item", :url => {:action => :modify_category_item, :human_name=>@human_name, :string=>@string})%></th>
-					<th width=50px></th>
-					<% JpNewProperty.exists?(:property_string=>@string) ? new_property = true : new_property = false %>
+					<th width=30px>
+						<% if new_property==true %>
+							<%= link_to_remote "x", :url=>{:action=>"change_category_default", :id=>"", :human_name=>@human_name, :desc=>@desc, :string=>@string} %>
+						<% end %>
+					</th>
 					<% if new_property==true %>
-						<th>デフォルト値</th>
+						<th width=100px>デフォルト値</th>
 					<% end %>
 					<th><%= h(@desc) %></th>
 					<th width=50px></th>
@@ -59,10 +65,10 @@
 									<%= count %>
 								</td>
 							<% else %>
-									<%= link_to_remote count, :url=>{:action=>"change_category_default", :id=>item.id, :human_name=>@human_name, :desc=>@desc, :string=>@string} %>
+									<%= link_to_remote count, :url=>{:action=>"change_category_default", :id=>item.property_cat_id, :human_name=>@human_name, :desc=>@desc, :string=>@string} %>
 								</td>
-								<% if default_cat_id == item.id %>
-									<td style="background-color:blue;"></td>
+								<% if default_cat_id == item.property_cat_id %>
+									<td align="center"><span style="background-color:blue; width:20px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
 								<% else %>
 									<td></td>
 								<% end %>
