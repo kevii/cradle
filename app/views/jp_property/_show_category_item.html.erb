@@ -13,7 +13,7 @@
 				<tr>
 					<th width=80px style="text-align:center;"><%= button_to_remote("新規", :update => "modify_category_item", :url => {:action => :modify_category_item, :human_name=>@human_name, :string=>@string})%></th>
 					<th width=30px>
-						<% if new_property==true %>
+						<% if new_property==true and JpProperty.exists?(:property_string=>@string) %>
 							<%= link_to_remote "x", :url=>{:action=>"change_category_default", :id=>"", :human_name=>@human_name, :desc=>@desc, :string=>@string} %>
 						<% end %>
 					</th>
