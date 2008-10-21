@@ -62,7 +62,7 @@ module ApplicationHelper
     ajax_string = remote_function(:url=>{:controller=>domain, :action=>function_string, :type=>type, :domain=>domain, :prefix=>prefix, :state=>state, :id=>id, :level=>level, :option=>option},
                                   :with=>"'#{name}='+value")
     if level==1
-      if ['search','new'].include?(state)
+      if ['search','new'].include?(state) or (state=='modify' and id.blank?)
         collection = eval(class_name+".find(:all, :conditions=>['property_string = ? and parent_id is null', type], :order=>'property_cat_id ASC')"+".map{|item| item.value}")
         html_string << "<span id='#{span_id}' >\n"
         html_string << "<select id='#{select_id}' name='#{select_name}' onchange=\"#{ajax_string}\" #{option}>\n"
