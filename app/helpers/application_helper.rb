@@ -111,7 +111,13 @@ module ApplicationHelper
     field[:id].blank? ? id=nil : id=field[:id]
     domain = field[:domain]
     section = field[:section]
-    field[:prefix].blank? ? prefix = "" : prefix = field[:prefix]+"_"
+     iffield[:prefix].blank?
+      prefix = ""
+      orig_prefix = ""
+    else
+      prefix = field[:prefix]+"_"
+      orig_prefix = field[:prefix]
+    end
      
     html_string = ""
     section == "lexeme" ? class_name = verify_domain(domain)["Lexeme"] : class_name = verify_domain(domain)["Synthetic"]
@@ -133,12 +139,11 @@ module ApplicationHelper
             html_string << "</td>\n"
           end
           html_string << "<td>\n"
-          prefix = prefix[0..-2] unless prefix.blank?
           case state
             when "search", "new"
-              html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>prefix, :state=>state)
+              html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>orig_prefix, :state=>state)
             when "modify"
-              html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>prefix, :state=>state, :id=>(eval class_name+".find(id)."+item.property_string))
+              html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>orig_prefix, :state=>state, :id=>(eval class_name+".find(id)."+item.property_string))
           end
           html_string << "</td>\n"
         when "text"

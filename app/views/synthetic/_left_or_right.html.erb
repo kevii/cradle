@@ -58,7 +58,12 @@ end %>
 					        <tr>
 					        	<th>
 									<% if left_id.blank? or left_id == "-" %>
-						            	<%= radio_button_tag 'left_id', "-", true %><%= select_string %>
+										<% if left_or_right[0].size > 1 %>
+									            	<%= radio_button_tag 'left_id', "-", true %>
+										<% else %>
+											<%= radio_button_tag 'left_id', "-", false %>
+										<% end %>
+										<%= select_string %>
 									<% else %>
 										<%= radio_button_tag 'left_id', "-", false %><%= select_string %>
 									<% end %>
@@ -77,9 +82,13 @@ end %>
 						        <tr <%= "class='odd'" if odd_or_even == 0 %> >
 						            <td width=25px >
 										<% if left_id != nil and lexeme.id == left_id.to_i %>
-							            	<%= radio_button_tag 'left_id', lexeme.id, true %>
+									            	<%= radio_button_tag 'left_id', lexeme.id, true %>
 										<% else %>
-											<%= radio_button_tag 'left_id', lexeme.id, false %>
+											<% if left_or_right[0].size > 1 %>
+												<%= radio_button_tag 'left_id', lexeme.id, false %>
+											<% else %>
+												<%= radio_button_tag 'left_id', lexeme.id, true %>
+											<% end %>
 										<% end %>
 						            </td>
 									<td><%= h(lexeme.id) %></td>
@@ -133,7 +142,12 @@ end %>
 					        <tr>
 					        	<th>
 									<% if right_id.blank? or right_id == "-" %>
-						            	<%= radio_button_tag 'right_id', "-", true %><%= select_string %>
+										<% if left_or_right[1].size > 1 %>
+									            	<%= radio_button_tag 'right_id', "-", true %>
+										<% else %>
+											<%= radio_button_tag 'right_id', "-", false %>
+										<% end %>
+										<%= select_string %>
 									<% else %>
 										<%= radio_button_tag 'right_id', "-", false %><%= select_string %>
 									<% end %>
@@ -152,9 +166,13 @@ end %>
 						        <tr <%= "class='odd'" if odd_or_even == 0 %> >
 						            <td width=25px >
 										<% if right_id != nil and lexeme.id == right_id.to_i %>
-							            	<%= radio_button_tag 'right_id', lexeme.id, true %>
+									            	<%= radio_button_tag 'right_id', lexeme.id, true %>
 										<% else %>
-											<%= radio_button_tag 'right_id', lexeme.id, false %>
+											<% if left_or_right[1].size > 1 %>
+												<%= radio_button_tag 'right_id', lexeme.id, false %>
+											<% else %>
+												<%= radio_button_tag 'right_id', lexeme.id, true %>
+											<% end %>
 										<% end %>
 						            </td>
 									<td><%= h(lexeme.id) %></td>
