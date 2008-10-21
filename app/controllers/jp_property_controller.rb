@@ -64,11 +64,13 @@ class JpPropertyController < ApplicationController
   def create_or_update_property
     @section = params[:section]
     @type_field = params[:type_field]
+    params[:desc].blank? ? desc = nil : desc = params[:desc]
+    params[:default_value].blank? ? default_value = nil : default_value = params[:default_value]
     if params[:id].blank?
       begin
-        new_property = JpNewProperty.new( :property_string=>params[:string][:value],    :human_name=>params[:human_name][:value],
-                                          :description=>params[:desc][:value],          :section=>params[:section],
-                                          :type_field=>params[:type_field] )
+        new_property = JpNewProperty.new( :property_string=>params[:string], :human_name=>params[:human_name],
+                                          :description=>desc,                :default_value=>default_value,
+                                          :section=>params[:section],        :type_field=>params[:type_field] )
         new_property.save!                                      
       rescue
         flash.now[:notice_err] = get_validation_error(new_property, "save")
@@ -80,7 +82,9 @@ class JpPropertyController < ApplicationController
     else
       @property = JpNewProperty.find(params[:id].to_i)
       begin
-        @property.update_attributes!(:property_string => params[:string][:value], :human_name=>params[:human_name][:value], :description=>params[:desc][:value])
+        default_value = @property.default_value if @type_field == "category"
+        @property.update_attributes!(:property_string => params[:string], :human_name=>params[:human_name],
+                                     :description=>desc, :default_value=>default_value)
       rescue
         flash.now[:notice_err] = get_validation_error(@property, 'update')
         render(:update) { |page| page[:show_property].replace_html :partial=>"modify_property", :object=>JpNewProperty.find(@property.id)}
@@ -183,7 +187,7 @@ class JpPropertyController < ApplicationController
     @human_name = params[:human_name]
     @desc = params[:desc]
     @string = params[:string]
-    params[:seperator][:value].blank? ? seperator = nil : seperator = params[:seperator][:value]
+    params[:seperator].blank? ? seperator = nil : seperator = params[:seperator]
     if seperator==nil and JpProperty.exists?(["property_string = '#{params[:string]}' and parent_id is not null "])
       flash.now[:notice_err] = "<ul><li>多重Levelの項目があるので、区切り符号は空に変更できません！</li></ul>"
     else
@@ -203,7 +207,22 @@ class JpPropertyController < ApplicationController
     end
     render(:update){|page| page[:show_property].replace_html :partial=>"show_category_item"}
   end
-  
+
+  def change_category_default
+    @human_name = params[:human_name]
+    @desc = params[:desc]
+    @string = params[:string]
+    begin
+      temp = JpNewProperty.find(:first, :conditions=>["property_string=?", @string])
+      temp.update_attributes!(:default_value=>params[:id])
+    rescue
+      flash.now[:notice_err] = "<ul><li>問題が発生しました、デフォルト値を変更できません！</li></ul>"
+    else
+      flash.now[:notice] = "<ul><li>デフォルト値を変更しました。</li></ul>"
+    end
+    render(:update){|page| page[:show_property].replace_html :partial=>"show_category_item"}
+  end
+
   def modify_category_item
     if params[:id].blank?
       @property_id = 0
@@ -291,6 +310,8 @@ class JpPropertyController < ApplicationController
       return
     else
       begin
+        default_item = JpNewProperty.find(:first, :conditions=>["property_string=?", @string])
+        default_item.update_attributes!(:default_value=>nil) if not default_item.blank? and default_item.default_value.to_i == temp.id
         temp.destroy
       rescue
         flash.now[:notice_err] = "<ul><li>問題が発生しました、【#{temp.value}】を削除できません！</li></ul>"

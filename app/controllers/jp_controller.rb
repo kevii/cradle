@@ -54,7 +54,12 @@ class JpController < ApplicationController
   
   def list
     params[:page].blank? ? page = nil : page = params[:page].to_i
-    params[:per_page].blank? ? per_page = 30 : per_page = params[:per_page].to_i
+    if params[:per_page].blank?
+      per_page = 30
+      params[:per_page] = "30"
+    else
+      per_page = params[:per_page].to_i
+    end
     if params[:dynamic_lexeme_condition].blank? and params[:dynamic_synthetic_condition].blank?
       @jplexemes = JpLexeme.paginate( :select=>" jp_lexemes.* ",   :conditions => params[:static_condition],
                                       :include => [:sub_structs],  :order => " jp_lexemes.id ASC ",

@@ -117,6 +117,7 @@ namespace :cradle do
           section           enum('lexeme', 'synthetic')  not null,
           type_field        enum('category', 'text', 'time')  not null,
           description       text,
+          default_value     text,
           lock_vertion      int default 0,
           
           primary key (id),

@@ -140,8 +140,10 @@ module ApplicationHelper
           end
           html_string << "<td>\n"
           case state
-            when "search", "new"
+            when "search"
               html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>orig_prefix, :state=>state)
+            when "new"
+              html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>orig_prefix, :state=>"modify", :id=>eval(verify_domain(domain)["NewProperty"]+'.find(:first, :conditions=>["property_string=?", item.property_string]).default_value.to_i'))
             when "modify"
               html_string << display_property_list(:type=>item.property_string, :domain=>domain, :prefix=>orig_prefix, :state=>state, :id=>(eval class_name+".find(id)."+item.property_string))
           end

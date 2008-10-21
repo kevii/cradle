@@ -10,27 +10,33 @@
 				<tr>
 					<th width=80px style="text-align:center;"><%= button_to_remote("新規", :update => "modify_category_item", :url => {:action => :modify_category_item, :human_name=>@human_name, :string=>@string})%></th>
 					<th width=50px></th>
+					<% JpNewProperty.exists?(:property_string=>@string) ? new_property = true : new_property = false %>
+					<% if new_property==true %>
+						<th>デフォルト値</th>
+					<% end %>
 					<th><%= h(@desc) %></th>
 					<th width=50px></th>
 					<th>
-						<% if JpProperty.exists?(:property_string=>@string)
-							seperator = JpProperty.find(:first, :conditions=>["property_string=?", @string]).seperator %>	
+						<% if JpProperty.exists?(:property_string=>@string) %>
+							<% seperator = JpProperty.find(:first, :conditions=>["property_string=?", @string]).seperator %>	
 							<% form_remote_tag :url => { :action => :change_category_seperator, :human_name=>@human_name, :string=>@string, :desc=>@desc } do %>
-								区切り符号:
+								区切り符号：
 								<%= seperator.blank? ? 'なし' : seperator %>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								変更：
-								<%= text_field "seperator", "value", :style=>"width:100px;", :class=>'text-field' %>
+								<%= text_field_tag "seperator", nil, :style=>"width:50px;", :class=>'text-field' %>
 								<%= submit_tag '変更' %>
 							<% end %>
 						<% else %>
-							一つ新規してから、区切り符号の変更ができます
+							一つ新規してから、デフォルト値と区切り符号の変更ができます
 						<% end %>
 					</th>
+
 				</tr>
 			</thead>
 			<tbody>
 				<% count = 1 %>
+				<% default_cat_id = JpNewProperty.find(:first, :conditions=>["property_string=?", @string]).default_value.to_i if new_property==true %>
 				<% JpProperty.find(:all, :conditions=>["property_string=? and parent_id is null", @string], :order=>"id ASC").each{|root|
 					root.sub_tree_items.each{|item| %>
 						<tr>
@@ -49,7 +55,18 @@
 							<% else %>
 								<td>
 							<% end %>
-							<%= count %></td>
+							<% if new_property==false %>
+									<%= count %>
+								</td>
+							<% else %>
+									<%= link_to_remote count, :url=>{:action=>"change_category_default", :id=>item.id, :human_name=>@human_name, :desc=>@desc, :string=>@string} %>
+								</td>
+								<% if default_cat_id == item.id %>
+									<td style="background-color:blue;"></td>
+								<% else %>
+									<td></td>
+								<% end %>
+							<% end %>
 							<td><%= h(item.tree_string) %></td>
 						</tr>
 						<% count = count + 1 %>
