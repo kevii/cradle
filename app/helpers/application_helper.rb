@@ -111,7 +111,7 @@ module ApplicationHelper
     field[:id].blank? ? id=nil : id=field[:id]
     domain = field[:domain]
     section = field[:section]
-     iffield[:prefix].blank?
+    if field[:prefix].blank?
       prefix = ""
       orig_prefix = ""
     else
