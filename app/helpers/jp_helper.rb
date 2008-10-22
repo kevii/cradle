@@ -1,5 +1,3 @@
-require 'date'
-
 module JpHelper
   include ApplicationHelper
   def initial_property_name

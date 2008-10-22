@@ -72,6 +72,7 @@ namespace :cradle do
           sth_ref_id          bigint  unsigned  not null,
           sth_meta_id         int not null,
           sth_struct          text not null,
+          sth_surface         varchar(255),
           sth_tagging_state   int unsigned  not null,
           log                 text,
           modified_by         int not null,
@@ -82,6 +83,7 @@ namespace :cradle do
   
           index   index_ref                (sth_ref_id),
           index   index_meta_id            (sth_meta_id),
+          index   index_sth_surface        (sth_surface),
           index   index_sth_tagging_state  (sth_tagging_state),
           index   index_modified           (modified_by),
           index   index_updated            (updated_at)

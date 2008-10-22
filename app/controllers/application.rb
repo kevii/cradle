@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
   session :session_key => '_cradle_session_id'
   ### set charset
   before_filter :set_charset
-  
+
   def update_property_list
     class_name = verify_domain(params[:domain])['Property']
     value = params["level"+params[:level].to_s]
@@ -27,26 +27,26 @@ class ApplicationController < ActionController::Base
     end
   end
   
-  def define_internal_structure
-    class_name = verify_domain(params[:domain])['Lexeme']
-    case params[:type]
-      when "define"  ###need params:  type, ids, lexeme_id, (chars), from
-        if params[:ids].blank?
-          ids = ""
-          chars = eval(class_name+'.find(params[:original_id].to_i).surface.scan(/./).join("-")')
-        else
-          ids = params[:ids]
-          chars = params[:chars]
-        end
-      when "modify", "new", "delete"
-        ids, chars = get_ids_and_chars(params.update({:domain=>params[:domain]}))
-    end
-    render :update do |page|
-      page["synthetic_struct"].replace :partial=>"synthetic/show_internal_structure",
-                                       :object=>{"ids"=>ids, "chars"=>chars, "part"=>chars, "original_id"=>params[:original_id],
-                                                 "from"=>params[:from], "start_index"=>0, "ids_section"=>"", "domain"=>params[:domain]}
-    end
-  end
+#  def define_internal_structure
+#    class_name = verify_domain(params[:domain])['Lexeme']
+#    case params[:type]
+#      when "define"  ###need params:  type, ids, lexeme_id, (chars), from
+#        if params[:ids].blank?
+#          ids = ""
+#          chars = eval(class_name+'.find(params[:original_id].to_i).surface.scan(/./).join("-")')
+#        else
+#          ids = params[:ids]
+#          chars = params[:chars]
+#        end
+#      when "modify", "new", "delete"
+#        ids, chars = get_ids_and_chars(params.update({:domain=>params[:domain]}))
+#    end
+#    render :update do |page|
+#      page["synthetic_struct"].replace :partial=>"synthetic/show_internal_structure",
+#                                       :object=>{"ids"=>ids, "chars"=>chars, "part"=>chars, "original_id"=>params[:original_id],
+#                                                 "from"=>params[:from], "start_index"=>0, "ids_section"=>"", "domain"=>params[:domain]}
+#    end
+#  end
 
   def split_word
     class_name = verify_domain(params[:domain])['Lexeme']
@@ -593,80 +593,80 @@ class ApplicationController < ActionController::Base
   ### :level               the new dividing level
   ### :ids_section         the indexes of the character on the left of dividing point.  Format:  level_1_index,level_2_index,level_3_index,....
   
-  def get_ids_and_chars(field={})
-    synthetic_class = verify_domain(field[:domain])['Synthetic']
-    case field[:type]
-      when "new"
-        if field[:ids] == ""
-          ids = field[:left_id]+'*+*'+field[:right_id]
-          eval(synthetic_class+'.exists?(:sth_ref_id=>field[:left_id].to_i)') ? left = field[:left] : left = field[:left].scan(/./).join("-")
-          eval(synthetic_class+'.exists?(:sth_ref_id=>field[:right_id].to_i)') ? right = field[:right] : right = field[:right].scan(/./).join("-")
-          chars = left+'*+*'+right
-        else
-          ids_array = swap_idsarray_and_ids(field[:ids],[])
-          indexes = field[:ids_section].split(',')
-          if field[:level].to_i == indexes.size
-            temp = ""
-            temp1 = ""
-            insert_point = ""
-            for index in 0..indexes.size-1
-              temp << '['+indexes[index]+']'
-              index == indexes.size-1 ? insert_point = (indexes[index].to_i+1).to_s : temp1 << '['+indexes[index]+']'
-            end
-            eval ('ids_array'+temp+"='#{field[:left_id]}'")
-            eval ('ids_array'+temp1+"\.insert\(#{insert_point}, '#{field[:right_id]}'\)")
-          elsif field[:level].to_i == indexes.size+1
-            temp = ""
-            indexes.each{|index_item| temp << '['+index_item+']' }
-            eval ('ids_array'+temp+"=\['#{field[:left_id]}', '#{field[:right_id]}'\]")
-          end
-          ids = swap_idsarray_and_ids("", ids_array)
-          from_to = field[:chars_index].split(',')
-          field[:chars].slice!(from_to[0].to_i..from_to[1].to_i)
-          eval(synthetic_class+'.exists?(:sth_ref_id=>field[:left_id].to_i)') ? left = field[:left] : left = field[:left].scan(/./).join("-")
-          eval(synthetic_class+'.exists?(:sth_ref_id=>field[:right_id].to_i)') ? right = field[:right] : right = field[:right].scan(/./).join("-")
-          chars = field[:chars].insert(from_to[0].to_i, left+'*'+'+'*field[:level].to_i+'*'+right)
-        end
-      when "modify"
-        ids_array = swap_idsarray_and_ids(field[:ids],[])
-        indexes = field[:ids_section].split(',')
-        temp = ""
-        temp1 = ""
-        for index in 0..indexes.size-1
-          temp << '['+indexes[index]+']'
-          index == indexes.size-1 ? temp1 << '['+(indexes[index].to_i-1).to_s+']' : temp1 << '['+indexes[index]+']'
-        end
-        eval ('ids_array'+temp1+"='#{field[:left_id]}'")
-        eval ('ids_array'+temp+"='#{field[:right_id]}'")
-        ids = swap_idsarray_and_ids("", ids_array)
-        from_to = field[:chars_index].split(',')
-        field[:chars].slice!(from_to[0].to_i, from_to[1].to_i)
-        eval(synthetic_class+'.exists?(:sth_ref_id=>field[:left_id].to_i)') ? left = field[:left] : left = field[:left].scan(/./).join("-")
-        eval(synthetic_class+'.exists?(:sth_ref_id=>field[:right_id].to_i)') ? right = field[:right] : right = field[:right].scan(/./).join("-")
-        chars = field[:chars].insert(from_to[0].to_i, left+'*'+'+'*field[:level].to_i+'*'+right)
-      when "delete"
-        ids_array = swap_idsarray_and_ids(field[:ids],[])
-        indexes = field[:ids_section].split(',')
-        temp = ""
-        temp1 = ""
-        delete_point = ""
-        for index in 0..indexes.size-1
-          temp << '['+indexes[index]+']'
-          index == indexes.size-1 ? delete_point = (indexes[index].to_i-1).to_s : temp1 << '['+indexes[index]+']'
-        end
-        eval ('ids_array'+temp+"='-'")
-        eval ('ids_array'+temp1+"\.delete_at\(#{delete_point}\)")
-        ids = swap_idsarray_and_ids("", ids_array)
-        ids = "" if ids == "-"
-        from_to = field[:chars_index].split(',')
-        temp = field[:chars].slice(from_to[0].to_i, from_to[1].to_i)
-        temp = temp.split(/\*\++\*/).to_s
-        temp = temp.split("-").to_s.split("").join("-")
-        field[:chars].slice!(from_to[0].to_i, from_to[1].to_i)
-        chars = field[:chars].insert(from_to[0].to_i, temp)
-    end
-    return ids, chars
-  end
+#  def get_ids_and_chars(field={})
+#    synthetic_class = verify_domain(field[:domain])['Synthetic']
+#    case field[:type]
+#      when "new"
+#        if field[:ids] == ""
+#          ids = field[:left_id]+'*+*'+field[:right_id]
+#          eval(synthetic_class+'.exists?(:sth_ref_id=>field[:left_id].to_i)') ? left = field[:left] : left = field[:left].scan(/./).join("-")
+#          eval(synthetic_class+'.exists?(:sth_ref_id=>field[:right_id].to_i)') ? right = field[:right] : right = field[:right].scan(/./).join("-")
+#          chars = left+'*+*'+right
+#        else
+#          ids_array = swap_idsarray_and_ids(field[:ids],[])
+#          indexes = field[:ids_section].split(',')
+#          if field[:level].to_i == indexes.size
+#            temp = ""
+#            temp1 = ""
+#            insert_point = ""
+#            for index in 0..indexes.size-1
+#              temp << '['+indexes[index]+']'
+#              index == indexes.size-1 ? insert_point = (indexes[index].to_i+1).to_s : temp1 << '['+indexes[index]+']'
+#            end
+#            eval ('ids_array'+temp+"='#{field[:left_id]}'")
+#            eval ('ids_array'+temp1+"\.insert\(#{insert_point}, '#{field[:right_id]}'\)")
+#          elsif field[:level].to_i == indexes.size+1
+#            temp = ""
+#            indexes.each{|index_item| temp << '['+index_item+']' }
+#            eval ('ids_array'+temp+"=\['#{field[:left_id]}', '#{field[:right_id]}'\]")
+#          end
+#          ids = swap_idsarray_and_ids("", ids_array)
+#          from_to = field[:chars_index].split(',')
+#          field[:chars].slice!(from_to[0].to_i..from_to[1].to_i)
+#          eval(synthetic_class+'.exists?(:sth_ref_id=>field[:left_id].to_i)') ? left = field[:left] : left = field[:left].scan(/./).join("-")
+#          eval(synthetic_class+'.exists?(:sth_ref_id=>field[:right_id].to_i)') ? right = field[:right] : right = field[:right].scan(/./).join("-")
+#          chars = field[:chars].insert(from_to[0].to_i, left+'*'+'+'*field[:level].to_i+'*'+right)
+#        end
+#      when "modify"
+#        ids_array = swap_idsarray_and_ids(field[:ids],[])
+#        indexes = field[:ids_section].split(',')
+#        temp = ""
+#        temp1 = ""
+#        for index in 0..indexes.size-1
+#          temp << '['+indexes[index]+']'
+#          index == indexes.size-1 ? temp1 << '['+(indexes[index].to_i-1).to_s+']' : temp1 << '['+indexes[index]+']'
+#        end
+#        eval ('ids_array'+temp1+"='#{field[:left_id]}'")
+#        eval ('ids_array'+temp+"='#{field[:right_id]}'")
+#        ids = swap_idsarray_and_ids("", ids_array)
+#        from_to = field[:chars_index].split(',')
+#        field[:chars].slice!(from_to[0].to_i, from_to[1].to_i)
+#        eval(synthetic_class+'.exists?(:sth_ref_id=>field[:left_id].to_i)') ? left = field[:left] : left = field[:left].scan(/./).join("-")
+#        eval(synthetic_class+'.exists?(:sth_ref_id=>field[:right_id].to_i)') ? right = field[:right] : right = field[:right].scan(/./).join("-")
+#        chars = field[:chars].insert(from_to[0].to_i, left+'*'+'+'*field[:level].to_i+'*'+right)
+#      when "delete"
+#        ids_array = swap_idsarray_and_ids(field[:ids],[])
+#        indexes = field[:ids_section].split(',')
+#        temp = ""
+#        temp1 = ""
+#        delete_point = ""
+#        for index in 0..indexes.size-1
+#          temp << '['+indexes[index]+']'
+#          index == indexes.size-1 ? delete_point = (indexes[index].to_i-1).to_s : temp1 << '['+indexes[index]+']'
+#        end
+#        eval ('ids_array'+temp+"='-'")
+#        eval ('ids_array'+temp1+"\.delete_at\(#{delete_point}\)")
+#        ids = swap_idsarray_and_ids("", ids_array)
+#        ids = "" if ids == "-"
+#        from_to = field[:chars_index].split(',')
+#        temp = field[:chars].slice(from_to[0].to_i, from_to[1].to_i)
+#        temp = temp.split(/\*\++\*/).to_s
+#        temp = temp.split("-").to_s.split("").join("-")
+#        field[:chars].slice!(from_to[0].to_i, from_to[1].to_i)
+#        chars = field[:chars].insert(from_to[0].to_i, temp)
+#    end
+#    return ids, chars
+#  end
 
   def swap_idsarray_and_ids(string="", array=[], step=1)
     unless string.blank?

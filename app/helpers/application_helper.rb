@@ -326,141 +326,141 @@ module ApplicationHelper
     return html_string
   end
 
-  def show_internal_structure(field={}, first_time=false, level=0, domain=nil)
-    part = field["part"]
-    html_string = ""
-    if part.include?("*") == false  # do not include *
-      inner_array = part.split("")
-      if inner_array.include?("-")
-        for index in 0..inner_array.size-1
-          if inner_array[index] == "-"
-            html_string << "<td style='text-align:center;'>\n"
-            left = inner_array[0..index-1]
-            left.delete("-")
-            right = inner_array[index+1..-1]
-            right.delete("-")
-            if first_time == true
-              html_string << link_to_remote(image_tag("internal.jpg", :border=>0), :update=>"candidates", :url=>{ :action=>"split_word",
-                                                                                                                  :level => level,
-                                                                                                                  :left=>left.to_s,
-                                                                                                                  :right=>right.to_s,
-                                                                                                                  :ids=>field["ids"],
-                                                                                                                  :chars=>field["chars"],
-                                                                                                                  :type=>"new",
-                                                                                                                  :divide_type=>"",
-                                                                                                                  :original_id=>field["original_id"],
-                                                                                                                  :from=>field["from"],
-                                                                                                                  :chars_index=>field["start_index"].to_s+","+(field["start_index"]+inner_array.to_s.size-1).to_s,
-                                                                                                                  :ids_section=>field["ids_section"],
-                                                                                                                  :domain=>domain })
-            elsif first_time == false
-              html_string << link_to_remote(image_tag("internal-horizontal.jpg", :border=>0), :update=>"candidates", :url=>{  :action=>"split_word",
-                                                                                                                              :level => level-1,
-                                                                                                                              :left=>left.to_s,
-                                                                                                                              :right=>right.to_s,
-                                                                                                                              :ids=>field["ids"],
-                                                                                                                              :chars=>field["chars"],
-                                                                                                                              :type=>"new",
-                                                                                                                              :divide_type=>"horizontal",
-                                                                                                                              :original_id=>field["original_id"],
-                                                                                                                              :from=>field["from"],
-                                                                                                                              :chars_index=>field["start_index"].to_s+","+(field["start_index"]+inner_array.to_s.size-1).to_s,
-                                                                                                                              :ids_section=>field["ids_section"],
-                                                                                                                              :domain=>domain })
-              html_string << '<br/>'
-              html_string << link_to_remote(image_tag("internal-vertical.jpg", :border=>0), :update=>"candidates", :url=>{  :action=>"split_word",
-                                                                                                                            :level => level,
-                                                                                                                            :left=>left.to_s,
-                                                                                                                            :right=>right.to_s,
-                                                                                                                            :ids=>field["ids"],
-                                                                                                                            :chars=>field["chars"],
-                                                                                                                            :type=>"new",
-                                                                                                                            :divide_type=>"vertical",
-                                                                                                                            :original_id=>field["original_id"],
-                                                                                                                            :from=>field["from"],
-                                                                                                                            :chars_index=>field["start_index"].to_s+","+(field["start_index"]+inner_array.to_s.size-1).to_s,
-                                                                                                                            :ids_section=>field["ids_section"],
-                                                                                                                            :domain=>domain })
-            end
-            html_string << "</td>\n"
-          else
-            html_string << "<td style='background:#F0F8FF;padding:5px 10px 5px 10px;color:#047;font-weight:bold;text-align:center;font-size:120%;'>\n"
-            html_string << inner_array[index]+"\n"
-            html_string << "</td>\n"
-          end
-        end
-      else
-        html_string << "<td style='background:#F0F8FF;padding:5px 10px 5px 10px;color:#047;font-weight:bold;text-align:center;font-size:120%;'>\n"
-        html_string << part+"\n"
-        html_string << "</td>\n"
-      end
-    else  #include *
-      sections = part.split("*#{'+'*level}*")
-      transition_index = field["start_index"]
-      for index in 0..sections.size-1
-        unless index == 0
-          html_string << "<td style='text-align:center;vertical-align: middle;'>\n"
-          left = sections[index-1].dup.to_s
-          left.delete!("-")
-          left.delete!("+")
-          left.delete!("*")
-          right = sections[index].dup.to_s
-          right.delete!("-")
-          right.delete!("+")
-          right.delete!("*")
-          html_string << link_to_remote(image_tag("internal-plus.jpg", :border=>0, :style=>"vertical-align: middle;"), :update=>"candidates", :url=>{ :action=>"split_word",
-                                                                                                                   :level => level,
-                                                                                                                   :left=>left,
-                                                                                                                   :right=>right,
-                                                                                                                   :ids=>field["ids"],
-                                                                                                                   :chars=>field["chars"],
-                                                                                                                   :type => "modify",
-                                                                                                                   :original_id => field["original_id"],
-                                                                                                                   :from=>field["from"],
-                                                                                                                   :chars_index=>(transition_index-(2+1*level)-sections[index-1].size).to_s+","+(transition_index+sections[index].size).to_s,
-                                                                                                                   :ids_section=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s,
-                                                                                                                   :domain=>domain})
-          html_string << struct_level[level]+"\n"
-          html_string << link_to_remote(image_tag("internal-minus.jpg", :border=>0, :style=>"vertical-align: middle;"), :url=>{ :action=>"define_internal_structure",
-                                                                                             :level => level,
-                                                                                             :ids=>field["ids"],
-                                                                                             :chars=>field["chars"],
-                                                                                             :type => "delete",
-                                                                                             :original_id => field["original_id"],
-                                                                                             :from=>field["from"],
-                                                                                             :chars_index=>(transition_index-(2+1*level)-sections[index-1].size).to_s+","+(transition_index+sections[index].size).to_s,
-                                                                                             :ids_section=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s,
-                                                                                             :domain=>domain })
-          html_string << "</td>\n"
-        end
-        html_string << show_internal_structure( {"part"=>sections[index],       "ids"=>field["ids"],
-                                                 "chars"=>field["chars"],       "original_id"=>field["original_id"],
-                                                 "from"=>field["from"],         "start_index"=>transition_index,
-                                                 "ids_section"=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s},
-                                                 false,
-                                                 level+1,
-                                                 domain)
-        transition_index = transition_index+(2+1*level)+sections[index].size
-      end
-    end
-    return html_string
-  end
+#  def show_internal_structure(field={}, first_time=false, level=0, domain=nil)
+#    part = field["part"]
+#    html_string = ""
+#    if part.include?("*") == false  # do not include *
+#      inner_array = part.split("")
+#      if inner_array.include?("-")
+#        for index in 0..inner_array.size-1
+#          if inner_array[index] == "-"
+#            html_string << "<td style='text-align:center;'>\n"
+#            left = inner_array[0..index-1]
+#            left.delete("-")
+#            right = inner_array[index+1..-1]
+#            right.delete("-")
+#            if first_time == true
+#              html_string << link_to_remote(image_tag("internal.jpg", :border=>0), :update=>"candidates", :url=>{ :action=>"split_word",
+#                                                                                                                  :level => level,
+#                                                                                                                  :left=>left.to_s,
+#                                                                                                                  :right=>right.to_s,
+#                                                                                                                  :ids=>field["ids"],
+#                                                                                                                  :chars=>field["chars"],
+#                                                                                                                  :type=>"new",
+#                                                                                                                  :divide_type=>"",
+#                                                                                                                  :original_id=>field["original_id"],
+#                                                                                                                  :from=>field["from"],
+#                                                                                                                  :chars_index=>field["start_index"].to_s+","+(field["start_index"]+inner_array.to_s.size-1).to_s,
+#                                                                                                                  :ids_section=>field["ids_section"],
+#                                                                                                                  :domain=>domain })
+#            elsif first_time == false
+#              html_string << link_to_remote(image_tag("internal-horizontal.jpg", :border=>0), :update=>"candidates", :url=>{  :action=>"split_word",
+#                                                                                                                              :level => level-1,
+#                                                                                                                              :left=>left.to_s,
+#                                                                                                                              :right=>right.to_s,
+#                                                                                                                              :ids=>field["ids"],
+#                                                                                                                              :chars=>field["chars"],
+#                                                                                                                              :type=>"new",
+#                                                                                                                              :divide_type=>"horizontal",
+#                                                                                                                              :original_id=>field["original_id"],
+#                                                                                                                              :from=>field["from"],
+#                                                                                                                              :chars_index=>field["start_index"].to_s+","+(field["start_index"]+inner_array.to_s.size-1).to_s,
+#                                                                                                                              :ids_section=>field["ids_section"],
+#                                                                                                                              :domain=>domain })
+#              html_string << '<br/>'
+#              html_string << link_to_remote(image_tag("internal-vertical.jpg", :border=>0), :update=>"candidates", :url=>{  :action=>"split_word",
+#                                                                                                                            :level => level,
+#                                                                                                                            :left=>left.to_s,
+#                                                                                                                            :right=>right.to_s,
+#                                                                                                                            :ids=>field["ids"],
+#                                                                                                                            :chars=>field["chars"],
+#                                                                                                                            :type=>"new",
+#                                                                                                                            :divide_type=>"vertical",
+#                                                                                                                            :original_id=>field["original_id"],
+#                                                                                                                            :from=>field["from"],
+#                                                                                                                            :chars_index=>field["start_index"].to_s+","+(field["start_index"]+inner_array.to_s.size-1).to_s,
+#                                                                                                                            :ids_section=>field["ids_section"],
+#                                                                                                                            :domain=>domain })
+#            end
+#            html_string << "</td>\n"
+#          else
+#            html_string << "<td style='background:#F0F8FF;padding:5px 10px 5px 10px;color:#047;font-weight:bold;text-align:center;font-size:120%;'>\n"
+#            html_string << inner_array[index]+"\n"
+#            html_string << "</td>\n"
+#          end
+#        end
+#      else
+#        html_string << "<td style='background:#F0F8FF;padding:5px 10px 5px 10px;color:#047;font-weight:bold;text-align:center;font-size:120%;'>\n"
+#        html_string << part+"\n"
+#        html_string << "</td>\n"
+#      end
+#    else  #include *
+#      sections = part.split("*#{'+'*level}*")
+#      transition_index = field["start_index"]
+#      for index in 0..sections.size-1
+#        unless index == 0
+#          html_string << "<td style='text-align:center;vertical-align: middle;'>\n"
+#          left = sections[index-1].dup.to_s
+#          left.delete!("-")
+#          left.delete!("+")
+#          left.delete!("*")
+#          right = sections[index].dup.to_s
+#          right.delete!("-")
+#          right.delete!("+")
+#          right.delete!("*")
+#          html_string << link_to_remote(image_tag("internal-plus.jpg", :border=>0, :style=>"vertical-align: middle;"), :update=>"candidates", :url=>{ :action=>"split_word",
+#                                                                                                                   :level => level,
+#                                                                                                                   :left=>left,
+#                                                                                                                   :right=>right,
+#                                                                                                                   :ids=>field["ids"],
+#                                                                                                                   :chars=>field["chars"],
+#                                                                                                                   :type => "modify",
+#                                                                                                                   :original_id => field["original_id"],
+#                                                                                                                   :from=>field["from"],
+#                                                                                                                   :chars_index=>(transition_index-(2+1*level)-sections[index-1].size).to_s+","+(transition_index+sections[index].size).to_s,
+#                                                                                                                   :ids_section=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s,
+#                                                                                                                   :domain=>domain})
+#          html_string << struct_level[level]+"\n"
+#          html_string << link_to_remote(image_tag("internal-minus.jpg", :border=>0, :style=>"vertical-align: middle;"), :url=>{ :action=>"define_internal_structure",
+#                                                                                             :level => level,
+#                                                                                             :ids=>field["ids"],
+#                                                                                             :chars=>field["chars"],
+#                                                                                             :type => "delete",
+#                                                                                             :original_id => field["original_id"],
+#                                                                                             :from=>field["from"],
+#                                                                                             :chars_index=>(transition_index-(2+1*level)-sections[index-1].size).to_s+","+(transition_index+sections[index].size).to_s,
+#                                                                                             :ids_section=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s,
+#                                                                                             :domain=>domain })
+#          html_string << "</td>\n"
+#        end
+#        html_string << show_internal_structure( {"part"=>sections[index],       "ids"=>field["ids"],
+#                                                 "chars"=>field["chars"],       "original_id"=>field["original_id"],
+#                                                 "from"=>field["from"],         "start_index"=>transition_index,
+#                                                 "ids_section"=>field["ids_section"].blank? ? index.to_s : field["ids_section"]+','+index.to_s},
+#                                                 false,
+#                                                 level+1,
+#                                                 domain)
+#        transition_index = transition_index+(2+1*level)+sections[index].size
+#      end
+#    end
+#    return html_string
+#  end
 
-  def get_showing_string(ids="", chars="", step=1)
-    string = ""
-    if ids == ""
-      string = chars.delete("*").delete("+").delete("-")+'()'
-    elsif ids.include?("*")
-      temp = ids.split('*'+'+'*step+'*')
-      for index in 0..temp.size-1
-        string << '  [  '+get_showing_string(temp[index], chars.split('*'+'+'*step+'*')[index], step+1)+'  ]  '
-      end
-    else
-      ids=="-" ? id='()' : id='('+ids+')'
-      string = chars.delete("-")+id
-    end
-    return string
-  end
+#  def get_showing_string(ids="", chars="", step=1)
+#    string = ""
+#    if ids == ""
+#      string = chars.delete("*").delete("+").delete("-")+'()'
+#    elsif ids.include?("*")
+#      temp = ids.split('*'+'+'*step+'*')
+#      for index in 0..temp.size-1
+#        string << '  [  '+get_showing_string(temp[index], chars.split('*'+'+'*step+'*')[index], step+1)+'  ]  '
+#      end
+#    else
+#      ids=="-" ? id='()' : id='('+ids+')'
+#      string = chars.delete("-")+id
+#    end
+#    return string
+#  end
 
   private
   def cradle_button_to_function(name, function, html_options = {})

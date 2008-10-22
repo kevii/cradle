@@ -13,6 +13,7 @@ class JpController < ApplicationController
   end
   
   def search
+    debugger
     if params[:search_type].blank?
       search_conditions, show_conditions, notice = verification( params )
       unless notice == ""
