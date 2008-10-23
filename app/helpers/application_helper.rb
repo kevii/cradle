@@ -4,10 +4,6 @@ module ApplicationHelper
     cradle_button_to_function(name, remote_function(options), html_options)
   end
 
-  def cradle_button_to(name, url, html_options = {})
-    cradle_button_to_function(name, "window.location='" + url_for(url) + "';", html_options)
-  end
-
   def verify_domain(domain=nil)
     class_name = {}
     case domain
@@ -35,6 +31,38 @@ module ApplicationHelper
     end
     return class_name
   end
+
+  
+  def initial_property_name(domain=nil)
+    case domain
+      when "jp"
+        { "id"=>"ID",                     "surface"=>"単語",                  "reading"=>"読み",
+          "pronunciation"=>"発音",         "base_id"=>"Base",                 "root_id"=>"Root",
+          "pos"=>"品詞",                   "ctype"=>"活用型",                  "cform"=>"活用形",
+          "dictionary"=>"辞書",            "tagging_state"=>"状態",            "log"=>"備考",
+          "created_by"=>"新規者",          "modified_by"=>"更新者",             "updated_at"=>"更新時間",
+          "sth_struct"=>"構造",            "sth_tagging_state"=>"状態",        "character_number"=>"文字数" }
+      when "cn"
+      when "en"
+    end  
+  end
+  
+  def initial_property_desc(domain=nil)
+    case domain
+      when "jp"
+        { "id"=>"単語ID",                    "surface"=>"単語表記",               "reading"=>"単語読み",
+          "pronunciation"=>"単語発音",        "base_id"=>"単語のBase",             "root_id"=>"単語のRoot",
+          "pos"=>"品詞情報",                  "ctype"=>"活用型情報",                "cform"=>"活用形情報",
+          "dictionary"=>"辞書情報",           "tagging_state"=>"タグ状態",          "log" => "備考内容",
+          "created_by"=>"新規者情報",         "modified_by"=>"更新者情報",           "updated_at"=>"更新時間情報",
+          "sth_struct"=>"内部構造",           "sth_tagging_state"=>"タグ状態" }
+      when "cn"
+      when "en"
+    end  
+  end
+  
+  
+  
   
   ## type: property_string
   ## domain:  jp, cn, en
@@ -325,7 +353,7 @@ module ApplicationHelper
     html_string << "  }\n</script>\n"
     return html_string
   end
-
+  
 #  def show_internal_structure(field={}, first_time=false, level=0, domain=nil)
 #    part = field["part"]
 #    html_string = ""
@@ -607,5 +635,15 @@ module ApplicationHelper
       end
     end
     return script, number, message
+  end
+
+  def is_string(item)
+      begin
+        item.chomp
+      rescue
+        return false
+      else
+        return true
+      end
   end
 end

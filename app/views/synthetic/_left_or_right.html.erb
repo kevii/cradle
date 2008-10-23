@@ -1,21 +1,24 @@
-<% case domain
+<% case info[:domain]
 	when "jp"
 		change_string = "変更"
 		select_string = "選択"
-		no_word_string = "この単語は辞書にないので、まず新規登録をしてください"
-		dummy_word_string = "Dummy wordにする"
+		select_update_string = "更新"
+		intermediary_part_string = "分割の中間部分にする"
+		dummy_word_string = "Dummy語として指定"
 		confirm_string = "确定"
 	when "cn"
 		change_string = "变更"
 		select_string = "选择"
-		no_word_string = "词典中无此单词，请先创建此单词"
-		dummy_word_string = "设为中间虚置词"
+		select_update_string = "更新"
+		intermediary_part_string = "设为中间虚置部分"
+		dummy_word_string = "在词典中登陆为虚词"
 		confirm_string = "确定"
 	when "en"
 		change_string = "Change"
 		select_string = "Select"
-		no_word_string = "Lexeme does not exist in dictionary, please create it first"
-		dummy_word_string = "As dummy word"
+		select_update_string = "Update"
+		intermediary_part_string = "Use as intermediary part"
+		dummy_word_string = "Register as dummy word"
 		confirm_string = "Confirm"
 end %>
 
@@ -23,9 +26,7 @@ end %>
 	<table style="width:100%; text-align: center; margin:10px 0 10px 0;" >
 		<tr>
 			<td>
-				<% form_remote_tag :url=>{ :action=>"split_word", :right=>right, :ids=>ids, :chars=>chars,
-										   :level=>level, :type=>type, :from=>from,	:original_id => original_id,
-										   :chars_index=>chars_index, :ids_section=>ids_section, :domain=>domain } do %>
+				<% form_remote_tag :url=>{:action=>"split_word", :right=>right, :split_action=>split_action, :structure=>structure, :info=>info} do %>
 				   	<strong><%= left %></strong>
 					<input id="left" name="left" size="15" type="text" />
 					<input name="commit" type="submit" value=<%= change_string %> />
@@ -33,9 +34,7 @@ end %>
 			</td>
 			<td></td>
 			<td>
-				<% form_remote_tag :url=>{ :action=>"split_word", :left=>left, :ids=>ids, :chars=>chars,
-										   :level=>level, :type=>type, :from=>from,	:original_id => original_id,
-										   :chars_index=>chars_index, :ids_section=>ids_section, :domain=>domain } do %>
+				<% form_remote_tag :url=>{:action=>"split_word", :left=>left,  :split_action=>split_action, :structure=>structure, :info=>info} do %>
 				   	<strong><%= right %></strong>
 					<input id="right" name="right" size="15" type="text" />
 					<input name="commit" type="submit" value=<%= change_string %> />
@@ -43,167 +42,175 @@ end %>
 			</td>
 		</tr>
 	</table>
-	<% form_remote_tag :url => { :action=>"define_internal_structure", :type=>type, :ids=>ids, :chars=>chars,
-								 :level=>level, :left=>left, :right=>right, :original_id=>original_id, :from=>from,
-								 :chars_index=>chars_index, :ids_section=>ids_section, :domain=>domain } do %>		
+	<% form_remote_tag :url => {:action=>"define_internal_structure", :split_action=>split_action, :structure=>structure, :info=>info} do %>		
 		<table>
 			<tr>
-			<td class="list" style="width:48%; text-align: center; border: 1px solid #fad163; padding:10px;">
-				<% if left_or_right[0].size == 0 %>
-						<%= no_word_string %><br/>
-						<%= radio_button_tag 'left_id', "-", true %><%= dummy_word_string %>
-				<% else %>
-					<table>
-					    <thead>
-					        <tr>
-					        	<th>
-									<% if left_id.blank? or left_id == "-" %>
-										<% if left_or_right[0].size > 1 %>
-									            	<%= radio_button_tag 'left_id', "-", true %>
-										<% else %>
-											<%= radio_button_tag 'left_id', "-", false %>
-										<% end %>
-										<%= select_string %>
-									<% else %>
-										<%= radio_button_tag 'left_id', "-", false %><%= select_string %>
-									<% end %>
-								</th>
-								<th><%= initial_property_name["id"] %></th>
-								<th><%= initial_property_name["surface"] %></th>
-								<th><%= initial_property_name["pos"] %></th>
-								<th><%= initial_property_name["dictionary"] %></th>
-								<th><%= initial_property_name["sth_struct"] %></th>
-					        </tr>
-					    </thead>
-					    <tbody>
-					        <% odd_or_even = 0 %>
-							<% for lexeme in left_or_right[0]
-					    		odd_or_even = 1 - odd_or_even %> 
-						        <tr <%= "class='odd'" if odd_or_even == 0 %> >
-						            <td width=25px >
-										<% if left_id != nil and lexeme.id == left_id.to_i %>
-									            	<%= radio_button_tag 'left_id', lexeme.id, true %>
-										<% else %>
-											<% if left_or_right[0].size > 1 %>
-												<%= radio_button_tag 'left_id', lexeme.id, false %>
-											<% else %>
-												<%= radio_button_tag 'left_id', lexeme.id, true %>
-											<% end %>
-										<% end %>
-						            </td>
-									<td><%= h(lexeme.id) %></td>
-									<td><%= h(lexeme.surface) %></td>
-									<td><%= h(lexeme.pos_item.tree_string) unless lexeme.pos.blank? %></td>
-									<td style="text-align:center;" >
-										<%	temp = []
-											lexeme.dictionary_item.list.each{|dict| temp << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>" } %>
-										<%= temp.join("  ") %>
-									</td>
-									<td style="text-align:center;" >
-										<% unless lexeme.struct.blank? %>
-											<span style='background-color:#047;'>&nbsp;&nbsp;</span>
-										<% end %>
-									</td>
+				<td class="list" style="width:48%; text-align: center; border: 1px solid #fad163; padding:10px;">
+					<% if ['meta', 'dummy'].include?(left_id) %>
+						<div style="padding-left:30px;text-align:left;">
+							<%= radio_button_tag 'left', 'meta,'+left, left_id=='meta'?true:false %><%= intermediary_part_string %><p>
+							<%= radio_button_tag 'left', 'dummy,'+left, left_id=='dummy'?true:false %><%= dummy_word_string %>
+						</div>
+					<% elsif left_or_right[0].size == 0 %>
+						<div style="padding-left:30px;text-align:left;">
+							<%= radio_button_tag 'left', 'meta,'+left, false %><%= intermediary_part_string %><p>
+							<%= radio_button_tag 'left', 'dummy,'+left, false %><%= dummy_word_string %>
+						</div>
+					<% else %>
+						<table>
+						    <thead>
+						        <tr>
+						        	<th><%= select_string %></th>
+									<th><%= select_update_string %></th>
+									<th><%= initial_property_name(info[:domain])["id"] %></th>
+									<th><%= initial_property_name(info[:domain])["surface"] %></th>
+									<th><%= initial_property_name(info[:domain])["pos"] %></th>
+									<th><%= initial_property_name(info[:domain])["sth_struct"] %></th>
+									<th><%= initial_property_name(info[:domain])["dictionary"] %></th>
+									<th><%= initial_property_name(info[:domain])["tagging_state"] %></th>
 						        </tr>
-					        <% end %>
-					    </tbody>
-					    <thead>
-					        <tr>
-					        	<th></th>
-								<th><%= initial_property_name["id"] %></th>
-								<th><%= initial_property_name["surface"] %></th>
-								<th><%= initial_property_name["pos"] %></th>
-								<th><%= initial_property_name["dictionary"] %></th>
-								<th><%= initial_property_name["sth_struct"] %></th>
-					        </tr>
-					    </thead>
-					</table>
-				<% end %>
-			</td>
-			
-			<td style="width:4%; text-align: center;">
-				<% unless divide_type.blank?
-					if divide_type == "horizontal" %>
-						<%= image_tag("internal-horizontal.jpg", :border=>0, :style=>"padding-bottom:40px;") %>
-					<% elsif divide_type == "vertical" %>
-						<%= image_tag("internal-vertical.jpg", :border=>0, :style=>"padding-bottom:10px;") %>
-					<% end
-				end %>
-				<%= submit_tag confirm_string %>
-			</td>
-			
-			<td class="list" style="width:48%; text-align: center; border: 1px solid #fad163; padding:10px;">
-				<% if left_or_right[1].size == 0 %>
-						<%= no_word_string %><br/>
-						<%= radio_button_tag 'right_id', "-", true %><%= dummy_word_string %>
-				<% else %>
-					<table>
-					    <thead>
-					        <tr>
-					        	<th>
-									<% if right_id.blank? or right_id == "-" %>
-										<% if left_or_right[1].size > 1 %>
-									            	<%= radio_button_tag 'right_id', "-", true %>
-										<% else %>
-											<%= radio_button_tag 'right_id', "-", false %>
-										<% end %>
-										<%= select_string %>
-									<% else %>
-										<%= radio_button_tag 'right_id', "-", false %><%= select_string %>
-									<% end %>
-								</th>
-								<th><%= initial_property_name["id"] %></th>
-								<th><%= initial_property_name["surface"] %></th>
-								<th><%= initial_property_name["pos"] %></th>
-								<th><%= initial_property_name["dictionary"] %></th>
-								<th><%= initial_property_name["sth_struct"] %></th>
-					        </tr>
-					    </thead>
-					    <tbody>
-					        <% odd_or_even = 0 %>
-							<% for lexeme in left_or_right[1]
-					    		odd_or_even = 1 - odd_or_even %> 
-						        <tr <%= "class='odd'" if odd_or_even == 0 %> >
-						            <td width=25px >
-										<% if right_id != nil and lexeme.id == right_id.to_i %>
-									            	<%= radio_button_tag 'right_id', lexeme.id, true %>
-										<% else %>
-											<% if left_or_right[1].size > 1 %>
-												<%= radio_button_tag 'right_id', lexeme.id, false %>
+						    </thead>
+						    <tbody>
+						        <% odd_or_even = 0 %>
+								<% for lexeme in left_or_right[0]
+						    		odd_or_even = 1 - odd_or_even %> 
+							        <tr <%= "class='odd'" if odd_or_even == 0 %> >
+							            <td width=25px >
+											<% if left_id =~ /^\d+$/ and lexeme.id == left_id.to_i %>
+								            	<%= radio_button_tag 'left', 'select,'+lexeme.id.to_s, true %>
 											<% else %>
-												<%= radio_button_tag 'right_id', lexeme.id, true %>
+												<% if left_or_right[0].size > 1 %>
+													<%= radio_button_tag 'left', 'select,'+lexeme.id.to_s, false %>
+												<% else %>
+													<%= radio_button_tag 'left', 'select,'+lexeme.id.to_s, true %>
+												<% end %>
 											<% end %>
-										<% end %>
-						            </td>
-									<td><%= h(lexeme.id) %></td>
-									<td><%= h(lexeme.surface) %></td>
-									<td><%= h(lexeme.pos_item.tree_string) unless lexeme.pos.blank? %></td>
-									<td style="text-align:center;" >
-										<%	temp = []
-											lexeme.dictionary_item.list.each{|dict| temp << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>" } %>
-										<%= temp.join("  ") %>
-									</td>
-									<td style="text-align:center;" >
-										<% unless lexeme.struct.blank? %>
-											<span style='background-color:#047;'>&nbsp;&nbsp;</span>
-										<% end %>
-									</td>
+							            </td>
+										<td width=25px >
+											<% unless lexeme.struct.blank? %>
+												<%= radio_button_tag 'left', 'update,'+lexeme.id.to_s, false %>
+											<% end %>
+										</td>
+										<td><%= h(lexeme.id) %></td>
+										<td><%= h(lexeme.surface) %></td>
+										<td><%= h(lexeme.pos_item.tree_string) unless lexeme.pos.blank? %></td>
+										<td style="text-align:center;" >
+											<% unless lexeme.struct.blank? %>
+												<span style='background-color:#047;'>&nbsp;&nbsp;</span>
+											<% end %>
+										</td>
+										<td style="text-align:center;" >
+											<%	temp = []
+												lexeme.dictionary_item.list.each{|dict| temp << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>" } %>
+											<%= temp.join("  ") %>
+										</td>
+										<td><%= h(lexeme.tagging_state_item.tree_string) %></td>
+							        </tr>
+						        <% end %>
+						    </tbody>
+						    <thead>
+						        <tr>
+						        	<th><%= select_string %></th>
+									<th><%= select_update_string %></th>
+									<th><%= initial_property_name(info[:domain])["id"] %></th>
+									<th><%= initial_property_name(info[:domain])["surface"] %></th>
+									<th><%= initial_property_name(info[:domain])["pos"] %></th>
+									<th><%= initial_property_name(info[:domain])["sth_struct"] %></th>
+									<th><%= initial_property_name(info[:domain])["dictionary"] %></th>
+									<th><%= initial_property_name(info[:domain])["tagging_state"] %></th>
 						        </tr>
-					        <% end %>
-					    </tbody>
-					    <thead>
-					        <tr>
-					        	<th></th>
-								<th><%= initial_property_name["id"] %></th>
-								<th><%= initial_property_name["surface"] %></th>
-								<th><%= initial_property_name["pos"] %></th>
-								<th><%= initial_property_name["dictionary"] %></th>
-								<th><%= initial_property_name["sth_struct"] %></th>
-					        </tr>
-					    </thead>
-					</table>
-				<% end %>
-			</td>
+						    </thead>
+						</table>
+					<% end %>
+				</td>
+				
+				<td style="width:4%; text-align: center;">
+						<% if split_action[:divide_type] == "horizontal" %>
+							<%= image_tag("internal-horizontal.jpg", :border=>0, :style=>"padding-bottom:40px;") %>
+						<% elsif split_action[:divide_type] == "vertical" %>
+							<%= image_tag("internal-vertical.jpg", :border=>0, :style=>"padding-bottom:10px;") %>
+						<% end %>
+						<%= submit_tag confirm_string %>
+				</td>
+				
+				<td class="list" style="width:48%; text-align: center; border: 1px solid #fad163; padding:10px;">
+					<% if ['meta', 'dummy'].include?(right_id) %>
+						<div style="padding-left:30px;text-align:left;">
+							<%= radio_button_tag 'right', 'meta,'+right, right_id=='meta'?true:false %><%= intermediary_part_string %><p>
+							<%= radio_button_tag 'right', 'dummy,'+right, right_id=='dummy'?true:false %><%= dummy_word_string %>
+						</div>
+					<% elsif left_or_right[1].size == 0 %>
+						<div style="padding-left:30px;text-align:left;">
+							<%= radio_button_tag 'right', 'meta,'+right, false %><%= intermediary_part_string %><p>
+							<%= radio_button_tag 'right', 'dummy,'+right, false %><%= dummy_word_string %>
+						</div>
+					<% else %>
+						<table>
+						    <thead>
+						        <tr>
+						        	<th><%= select_string %></th>
+									<th><%= select_update_string %></th>
+									<th><%= initial_property_name(info[:domain])["id"] %></th>
+									<th><%= initial_property_name(info[:domain])["surface"] %></th>
+									<th><%= initial_property_name(info[:domain])["pos"] %></th>
+									<th><%= initial_property_name(info[:domain])["sth_struct"] %></th>
+									<th><%= initial_property_name(info[:domain])["dictionary"] %></th>
+									<th><%= initial_property_name(info[:domain])["tagging_state"] %></th>
+						        </tr>
+						    </thead>
+						    <tbody>
+						        <% odd_or_even = 0 %>
+								<% for lexeme in left_or_right[1]
+						    		odd_or_even = 1 - odd_or_even %> 
+							        <tr <%= "class='odd'" if odd_or_even == 0 %> >
+							            <td width=25px >
+											<% if right_id =~ /^\d+$/ and lexeme.id == right_id.to_i %>
+								            	<%= radio_button_tag 'right', 'select,'+lexeme.id.to_s, true %>
+											<% else %>
+												<% if left_or_right[1].size > 1 %>
+													<%= radio_button_tag 'right', 'select,'+lexeme.id.to_s, false %>
+												<% else %>
+													<%= radio_button_tag 'right', 'select,'+lexeme.id.to_s, true %>
+												<% end %>
+											<% end %>
+							            </td>
+										<td width=25px >
+											<% unless lexeme.struct.blank? %>
+												<%= radio_button_tag 'right', 'update,'+lexeme.id.to_s, false %>
+											<% end %>
+										</td>
+										<td><%= h(lexeme.id) %></td>
+										<td><%= h(lexeme.surface) %></td>
+										<td><%= h(lexeme.pos_item.tree_string) unless lexeme.pos.blank? %></td>
+										<td style="text-align:center;" >
+											<% unless lexeme.struct.blank? %>
+												<span style='background-color:#047;'>&nbsp;&nbsp;</span>
+											<% end %>
+										</td>
+										<td style="text-align:center;" >
+											<%	temp = []
+												lexeme.dictionary_item.list.each{|dict| temp << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>" } %>
+											<%= temp.join("  ") %>
+										</td>
+										<td><%= h(lexeme.tagging_state_item.tree_string) %></td>
+							        </tr>
+						        <% end %>
+						    </tbody>
+						    <thead>
+						        <tr>
+						        	<th><%= select_string %></th>
+									<th><%= select_update_string %></th>
+									<th><%= initial_property_name(info[:domain])["id"] %></th>
+									<th><%= initial_property_name(info[:domain])["surface"] %></th>
+									<th><%= initial_property_name(info[:domain])["pos"] %></th>
+									<th><%= initial_property_name(info[:domain])["sth_struct"] %></th>
+									<th><%= initial_property_name(info[:domain])["dictionary"] %></th>
+									<th><%= initial_property_name(info[:domain])["tagging_state"] %></th>
+						        </tr>
+						    </thead>
+						</table>
+					<% end %>
+				</td>
 			</tr>
 		</table>
 	<% end %>

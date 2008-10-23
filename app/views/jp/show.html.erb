@@ -7,40 +7,40 @@
 		        <div class="list">
 		            <table style="width:100%;">
 						<tr>
-							<th style="width:50px;"><%= initial_property_name['id'] %></th>
+							<th style="width:50px;"><%= initial_property_name('jp')['id'] %></th>
 							<td colspan=2><%= h(@lexeme.send("id")) %></td>
 						</tr>
 						<tr class='odd'>
-							<th><%= initial_property_name['surface'] %></th>
+							<th><%= initial_property_name('jp')['surface'] %></th>
 							<td colspan=2><%= h(@lexeme.send("surface")) %></td>
 						</tr>
 						<tr>
-							<th><%= initial_property_name['reading'] %></th>
+							<th><%= initial_property_name('jp')['reading'] %></th>
 							<td colspan=2><%= h(@lexeme.send("reading")) %></td>
 						</tr>					
 						<tr class='odd'>
-							<th><%= initial_property_name['pronunciation'] %></th>
+							<th><%= initial_property_name('jp')['pronunciation'] %></th>
 							<td colspan=2><%= h(@lexeme.send("pronunciation")) %></td>
 						</tr>
 						<tr>
-							<th><%= initial_property_name['pos'] %></th>
+							<th><%= initial_property_name('jp')['pos'] %></th>
 							<td colspan=2><%= h(@lexeme.pos_item.tree_string) unless @lexeme.send("pos").blank?  %></td>
 						</tr>
 						<tr class='odd'>
-							<th><%= initial_property_name['ctype'] %></th>
+							<th><%= initial_property_name('jp')['ctype'] %></th>
 							<td colspan=2><%= h(@lexeme.ctype_item.tree_string) unless @lexeme.send("ctype").blank? %></td>
 						</tr>
 						<tr>
-							<th><%= initial_property_name['cform'] %></th>
+							<th><%= initial_property_name('jp')['cform'] %></th>
 							<td colspan=2><%= h(@lexeme.cform_item.tree_string) unless @lexeme.send("cform").blank? %></td>
 						</tr>
 						<tr class='odd'>
-							<th><%= initial_property_name['base_id'] %></th>
+							<th><%= initial_property_name('jp')['base_id'] %></th>
 							<td><%= link_to( h(@lexeme.base.surface), :action=> 'show', :id=>@lexeme.base_id )  %></td>
 							<th style="width:25px; text-align:right;"><%= link_to( "系列", :action=> 'search', :base_id => @lexeme.base_id, :search_type => "base" )%></th>
 						</tr>
 						<tr>
-							<th><%= initial_property_name['root_id'] %></th>
+							<th><%= initial_property_name('jp')['root_id'] %></th>
 							<% if @lexeme.root_id.blank? %>
 								<td colspan=2></td>
 							<% else %>
@@ -51,7 +51,7 @@
 							<% end %>
 						</tr>
 						<tr class='odd'>
-							<th><%= initial_property_name['dictionary'] %></th>
+							<th><%= initial_property_name('jp')['dictionary'] %></th>
 							<% temp = []
 							   @lexeme.dictionary_item.list.each{|dict| temp << JpProperty.find(:first, :conditions=>["property_string='dictionary' and property_cat_id=#{dict.to_i}"]).tree_string }	%>
 							<td  colspan=2><%= h(temp.join(", ")) %></td>
@@ -79,23 +79,23 @@
 						<% } %>
 						<% if User.find_by_id(session[:user_id]) %>
 							<tr <%= "class='odd'" if odd_or_even == 1 %>>
-								<th><%= initial_property_name['tagging_state'] %></th>
+								<th><%= initial_property_name('jp')['tagging_state'] %></th>
 								<td colspan=2><%= h(@lexeme.tagging_state_item.tree_string) unless @lexeme.tagging_state == 0 %></td>
 							</tr>
 							<tr <%= "class='odd'" if odd_or_even == 0 %>>
-								<th><%= initial_property_name['log'] %></th>
+								<th><%= initial_property_name('jp')['log'] %></th>
 								<td colspan=2><%= h(@lexeme.log) %></td>
 							</tr>
 							<tr <%= "class='odd'" if odd_or_even == 1 %>>
-								<th><%= initial_property_name['created_by'] %></th>
+								<th><%= initial_property_name('jp')['created_by'] %></th>
 								<td colspan=2><%= h(@lexeme.creator.name) %></td>
 							</tr>
 							<tr <%= "class='odd'" if odd_or_even == 0 %>>
-								<th><%= initial_property_name['modified_by'] %></th>
+								<th><%= initial_property_name('jp')['modified_by'] %></th>
 								<td colspan=2><%= h(@lexeme.annotator.name) unless @lexeme.annotator.blank? %></td>
 							</tr>
 							<tr <%= "class='odd'" if odd_or_even == 1 %>>
-								<th><%= initial_property_name['updated_at'] %></th>
+								<th><%= initial_property_name('jp')['updated_at'] %></th>
 								<td colspan=2><%= h(@lexeme.send("updated_at").to_formatted_s(:db)) %></td>
 							</tr>
 						<% end %>
@@ -117,8 +117,10 @@
 			    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;text-align:center">
 					<legend style="background: #1e2078;">構造詳細</legend>
 					<% if User.find_by_id(session[:user_id]) %>
-						<%= button_to_remote "指定", :url => { :action => "define_internal_structure", :type => "define",
-															:original_id => @lexeme.id, :from=>"new", :domain=>"jp" },
+						<%= button_to_remote "指定", :url=>{:controller=>:synthetic,
+														   :action=>:define_internal_structure,
+											               :split_action=>{:type => "define"},
+													       :info=>{:original_id=>@lexeme.id, :from=>"creation", :domain=>"jp"}},
 												  :before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
 					<% end %>
 			    </fieldset>
@@ -132,19 +134,19 @@
 				        <div class="list">
 				        	<table style="width:100%;">
 								<tr>
-									<th style="width:50px;"><%= initial_property_name['sth_tagging_state'] %></th>
+									<th style="width:50px;"><%= initial_property_name('jp')['sth_tagging_state'] %></th>
 									<td colspan=2><%= h(@lexeme.struct.sth_tagging_state_item.tree_string) %></td>
 								</tr>
 								<tr class='odd'>
-									<th><%= initial_property_name['log'] %></th>
+									<th><%= initial_property_name('jp')['log'] %></th>
 									<td colspan=2><%= h(@lexeme.struct.log) %></td>
 								</tr>
 								<tr>
-									<th><%= initial_property_name['modified_by'] %></th>
+									<th><%= initial_property_name('jp')['modified_by'] %></th>
 									<td colspan=2><%= @lexeme.struct.annotator.name unless @lexeme.struct.annotator.blank? %></td>
 								</tr>
 								<tr class='odd'>
-									<th><%= initial_property_name['updated_at'] %></th>
+									<th><%= initial_property_name('jp')['updated_at'] %></th>
 									<td colspan=2><%= @lexeme.struct.send("updated_at").to_formatted_s(:db) %></td>
 								</tr>
 				        	</table>

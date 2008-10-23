@@ -11,8 +11,8 @@
 					odd_or_even = 1 - odd_or_even %>
 					</tr><tr <%= "class='odd'" if odd_or_even == 0 %> >
 				<% end 
-				if not initial_property_name[item].blank? %>
-					<th style="width:70px;"><%= item=="sth_tagging_state" ? "構造"+initial_property_name[item] : initial_property_name[item] %></th>
+				if not initial_property_name('jp')[item].blank? %>
+					<th style="width:70px;"><%= item=="sth_tagging_state" ? "構造"+initial_property_name('jp')[item] : initial_property_name('jp')[item] %></th>
 					<% case item
 						when "id", "surface", "reading", "pronunciation", "log" %>
 							<td><%= h(show_desc[item]) %></td>
@@ -69,7 +69,7 @@
 							</td>
 					<% end
 				elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item) %>
-					<th style="width:70px;">構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
+					<th style="width:70px;">構造<%= initial_property_name('jp')[item.gsub("sth_", "")] %></th>
 					<% case item
 						when "sth_log" %>
 							<td><%= show_desc.struct.sth_log unless show_desc.struct.blank? %></td>

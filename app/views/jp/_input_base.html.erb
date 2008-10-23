@@ -1,6 +1,6 @@
 <% if message.blank? %>
 	<% if base_type == "id" %>
-		<td><%= initial_property_name['base_id'] %></td>
+		<td><%= initial_property_name('jp')['base_id'] %></td>
 		<td>
 			<input type="radio" name='base_type' id='base_type' checked="checked" value="id" onclick=<%= "\"#{remote_function(:update=>'base_field', :url=>{:action=>:input_base}, :with=>"'base_type='+value")}\"" %> />ID
 			<input type="radio" name='base_type' id='base_type' value="surface" onclick=<%= "\"#{remote_function(:update=>'base_field', :url=>{:action=>:input_base}, :with=>"'base_type='+value")}\"" %> />単語
@@ -15,16 +15,16 @@
 			<a href="#">==></a>
 		</td>
 		<td></td>
-		<td><%= initial_property_name['base_id'] %>検証</td>
+		<td><%= initial_property_name('jp')['base_id'] %>検証</td>
 		<% if original_base.blank? %>
-			<td><span id="message">空の場合、<%= initial_property_name['base_id'] %>は単語自身になる<span></td>
+			<td><span id="message">空の場合、<%= initial_property_name('jp')['base_id'] %>は単語自身になる<span></td>
 		<% else %>
 			<td><span id="message"><strong style="color:red;">OK</strong>(<%= JpLexeme.find(original_base).surface %>)</span></td>
 			<%= hidden_field_tag 'base_id', original_base %>
 			<%= hidden_field_tag 'base_ok', 'true' %>
 		<% end %>
 	<% elsif base_type == "surface" %>
-		<td><%= initial_property_name['base_id'] %></td>
+		<td><%= initial_property_name('jp')['base_id'] %></td>
 		<td>
 			<input type="radio" name='base_type' id='base_type' value="id" onclick=<%= "\"#{remote_function(:update=>'base_field', :url=>{:action=>:input_base}, :with=>"'base_type='+value")}\"" %> />ID
 			<input type="radio" name='base_type' id='base_type' checked="checked" value="surface" onclick=<%= "\"#{remote_function(:update=>'base_field', :url=>{:action=>:input_base}, :with=>"'base_type='+value")}\"" %> />単語
@@ -33,8 +33,8 @@
 			<a href="#">==></a>
 		</td>
 		<td></td>
-		<td><%= initial_property_name['base_id'] %>検証</td>
-		<td><span id="message">空の場合、<%= initial_property_name['base_id'] %>は単語自身になる<span></td>
+		<td><%= initial_property_name('jp')['base_id'] %>検証</td>
+		<td><span id="message">空の場合、<%= initial_property_name('jp')['base_id'] %>は単語自身になる<span></td>
 	<% end %>
 <% else %>
 	<% case message

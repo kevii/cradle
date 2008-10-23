@@ -48,97 +48,97 @@ class ApplicationController < ActionController::Base
 #    end
 #  end
 
-  def split_word
-    class_name = verify_domain(params[:domain])['Lexeme']
-    lexemes_left = eval(class_name+%Q|.find(:all, :include=>[:struct], :conditions=>["surface='#{params[:left]}'"], :order=>"id ASC")|)
-    lexemes_right = eval(class_name+%Q|.find(:all, :include=>[:struct], :conditions => ["surface='#{params[:right]}'"], :order=>"id ASC")|)
-    if params[:type] == "modify"
-      ids_array = swap_idsarray_and_ids(params[:ids],[])
-      indexes = params[:ids_section].split(',')
-      prev_id = ""
-      next_id = ""
-      if indexes.size == 1
-        prev_id = '['+(indexes[0].to_i-1).to_s+']'
-        next_id = '['+indexes[0]+']'
-      else
-        for index_item in 0..indexes.size-1
-          if index_item == indexes.size-1
-            prev_id << '['+(indexes[index_item].to_i-1).to_s+']'
-            next_id << '['+indexes[index_item]+']'
-          else
-            prev_id << '['+indexes[index_item]+']'
-            next_id << '['+indexes[index_item]+']'
-          end
-        end
-      end
-      left_id = eval 'ids_array'+prev_id
-      right_id = eval 'ids_array'+next_id
-      begin
-        left_id.chomp
-      rescue
-        left_id = nil
-      end
-      begin
-        right_id.chomp
-      rescue
-        right_id = nil
-      end
-    else params[:type] == "new"
-      left_id = nil
-      right_id = nil
-    end
-    render :update do |page|
-      page.replace "candidate", :partial=>"synthetic/left_or_right", :object => [lexemes_left, lexemes_right],  
-                                :locals => { :left=>params[:left],        :left_id=>left_id,
-                                            :right=>params[:right],      :right_id=>right_id,
-                                            :ids=>params[:ids],          :chars=>params[:chars],
-                                            :level=>params[:level],      :type=>params[:type],
-                                            :from=>params[:from],        :original_id => params[:original_id],
-                                            :chars_index=>params[:chars_index],     :ids_section=>params[:ids_section],
-                                            :divide_type=>params[:divide_type],     :domain=>params[:domain]}
-    end
-  end
+#  def split_word
+#    class_name = verify_domain(params[:domain])['Lexeme']
+#    lexemes_left = eval(class_name+%Q|.find(:all, :include=>[:struct], :conditions=>["surface='#{params[:left]}'"], :order=>"id ASC")|)
+#    lexemes_right = eval(class_name+%Q|.find(:all, :include=>[:struct], :conditions => ["surface='#{params[:right]}'"], :order=>"id ASC")|)
+#    if params[:type] == "modify"
+#      ids_array = swap_idsarray_and_ids(params[:ids],[])
+#      indexes = params[:ids_section].split(',')
+#      prev_id = ""
+#      next_id = ""
+#      if indexes.size == 1
+#        prev_id = '['+(indexes[0].to_i-1).to_s+']'
+#        next_id = '['+indexes[0]+']'
+#      else
+#        for index_item in 0..indexes.size-1
+#          if index_item == indexes.size-1
+#            prev_id << '['+(indexes[index_item].to_i-1).to_s+']'
+#            next_id << '['+indexes[index_item]+']'
+#          else
+#            prev_id << '['+indexes[index_item]+']'
+#            next_id << '['+indexes[index_item]+']'
+#          end
+#        end
+#      end
+#      left_id = eval 'ids_array'+prev_id
+#      right_id = eval 'ids_array'+next_id
+#      begin
+#        left_id.chomp
+#      rescue
+#        left_id = nil
+#      end
+#      begin
+#        right_id.chomp
+#      rescue
+#        right_id = nil
+#      end
+#    else params[:type] == "new"
+#      left_id = nil
+#      right_id = nil
+#    end
+#    render :update do |page|
+#      page.replace "candidate", :partial=>"synthetic/left_or_right", :object => [lexemes_left, lexemes_right],  
+#                                :locals => { :left=>params[:left],        :left_id=>left_id,
+#                                            :right=>params[:right],      :right_id=>right_id,
+#                                            :ids=>params[:ids],          :chars=>params[:chars],
+#                                            :level=>params[:level],      :type=>params[:type],
+#                                            :from=>params[:from],        :original_id => params[:original_id],
+#                                            :chars_index=>params[:chars_index],     :ids_section=>params[:ids_section],
+#                                            :divide_type=>params[:divide_type],     :domain=>params[:domain]}
+#    end
+#  end
 
-  def modify_structure  ##params:  ids, from, chars, original_id, domain
-    if params[:ids].blank? or params[:ids].include?("-")
-      case params[:domain]
-        when "jp"
-          flash[:notice_err] = "<ul><li>内部構造の各部分を確実に存在している単語に指定してください！</li></ul>"
-        when "cn"
-          flash[:notice_err] = "<ul><li>内部构造的各个部分必须为实际存在的单词！</li></ul>"
-        when "en"
-          flash[:notice_err] = "<ul><li>Every part of internal structure should be lexeme actually registered in dictioanry!</li></ul>"
-      end
-      redirect_to :action=>"define_internal_structure", :type=>"define", :from=>params[:from],
-                  :original_id=>params[:original_id], :ids=>params[:ids], :chars=>params[:chars], :domain=>params[:domain]
-      return
-    end
-    meta_ids, meta_chars = get_meta_structures(:ids=>params[:ids], :chars=>params[:chars])
-    meta_show_chars = meta_chars.dup
-    indexes = meta_show_chars.size - 1
-    while(indexes >= 0) do
-      if meta_show_chars['meta_'+indexes.to_s].include?('meta')
-        temp = []
-        meta_show_chars['meta_'+indexes.to_s].split(',').each{|item| item.include?('meta') ? temp << meta_show_chars[item].split(',').join("") : temp << item}
-        meta_show_chars['meta_'+indexes.to_s] = temp.join(',')
-      end
-      indexes = indexes - 1
-    end
-    if params[:from] == "new"
-      object = ""
-    elsif params[:from] == "modify"
-      class_name = verify_domain(params[:domain])['Synthetic']
-      structs = eval(class_name+%Q|.find(:all, :conditions=>["sth_ref_id=?", params[:original_id].to_i])|)
-      object = {}
-      structs.each{|substruct| object['meta_'+substruct.sth_meta_id.to_s]=substruct }
-    end
-    render :update do |page|
-      page["synthetic_struct"].replace :partial=>"synthetic/modify_internal_struct", :object=>object,
-                                       :locals=>{ :ids=>params[:ids],   :chars=>params[:chars], :original_id=>params[:original_id],
-                                                  :from=>params[:from], :meta_ids=>meta_ids,  :meta_chars=>meta_chars,
-                                                  :meta_show_chars=>meta_show_chars, :domain=>params[:domain] }
-    end
-  end
+#  def modify_structure  ##params:  ids, from, chars, original_id, domain
+#    if params[:ids].blank? or params[:ids].include?("-")
+#      case params[:domain]
+#        when "jp"
+#          flash[:notice_err] = "<ul><li>内部構造の各部分を確実に存在している単語に指定してください！</li></ul>"
+#        when "cn"
+#          flash[:notice_err] = "<ul><li>内部构造的各个部分必须为实际存在的单词！</li></ul>"
+#        when "en"
+#          flash[:notice_err] = "<ul><li>Every part of internal structure should be lexeme actually registered in dictioanry!</li></ul>"
+#      end
+#      redirect_to :action=>"define_internal_structure", :type=>"define", :from=>params[:from],
+#                  :original_id=>params[:original_id], :ids=>params[:ids], :chars=>params[:chars], :domain=>params[:domain]
+#      return
+#    end
+#    meta_ids, meta_chars = get_meta_structures(:ids=>params[:ids], :chars=>params[:chars])
+#    meta_show_chars = meta_chars.dup
+#    indexes = meta_show_chars.size - 1
+#    while(indexes >= 0) do
+#      if meta_show_chars['meta_'+indexes.to_s].include?('meta')
+#        temp = []
+#        meta_show_chars['meta_'+indexes.to_s].split(',').each{|item| item.include?('meta') ? temp << meta_show_chars[item].split(',').join("") : temp << item}
+#        meta_show_chars['meta_'+indexes.to_s] = temp.join(',')
+#      end
+#      indexes = indexes - 1
+#    end
+#    if params[:from] == "new"
+#      object = ""
+#    elsif params[:from] == "modify"
+#      class_name = verify_domain(params[:domain])['Synthetic']
+#      structs = eval(class_name+%Q|.find(:all, :conditions=>["sth_ref_id=?", params[:original_id].to_i])|)
+#      object = {}
+#      structs.each{|substruct| object['meta_'+substruct.sth_meta_id.to_s]=substruct }
+#    end
+#    render :update do |page|
+#      page["synthetic_struct"].replace :partial=>"synthetic/modify_internal_struct", :object=>object,
+#                                       :locals=>{ :ids=>params[:ids],   :chars=>params[:chars], :original_id=>params[:original_id],
+#                                                  :from=>params[:from], :meta_ids=>meta_ids,  :meta_chars=>meta_chars,
+#                                                  :meta_show_chars=>meta_show_chars, :domain=>params[:domain] }
+#    end
+#  end
   
   def save_internal_struct
     lexeme_class_name = verify_domain(params[:domain])['Lexeme']

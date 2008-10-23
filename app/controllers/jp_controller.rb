@@ -13,7 +13,6 @@ class JpController < ApplicationController
   end
   
   def search
-    debugger
     if params[:search_type].blank?
       search_conditions, show_conditions, notice = verification( params )
       unless notice == ""
@@ -777,11 +776,11 @@ class JpController < ApplicationController
         when "commit", "authenticity_token", "controller", "action", "search_type"
           next
         else
-          if initial_property_name[key] != nil or ["sth_modified_by", "sth_updated_at"].include?(key)
+          if initial_property_name('jp')[key] != nil or ["sth_modified_by", "sth_updated_at"].include?(key)
             case key
               when "character_number"
                 unless params[key][:value].blank?
-                  result << "#{initial_property_name[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
+                  result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
                   condition[0]<<" char_length(jp_lexemes.surface) #{params[key][:operator]} #{params[key][:value].to_i} "
                 end
               when "sth_struct"
@@ -795,14 +794,14 @@ class JpController < ApplicationController
                       temp_lexeme_id.concat(temp_structs.map{|item| item.sth_ref_id}.uniq) unless temp_structs.blank?
                     }
                     unless temp_lexeme_id.blank?
-                      result << "#{initial_property_name[key]}include#{params[key][:value]}"
+                      result << "#{initial_property_name('jp')[key]}include#{params[key][:value]}"
                       condition[0] << " jp_lexemes.id in (#{temp_lexeme_id.uniq.join(',')}) "
                     end
                   end
                 end
               when "id"
                 unless params[key][:value].blank?
-                  result << "#{initial_property_name[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
+                  result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
                   condition[0]<<" jp_lexemes.#{key} #{params[key][:operator]} #{params[key][:value].to_i} "
                 end
               when "surface", "reading", "pronunciation"
@@ -828,12 +827,12 @@ class JpController < ApplicationController
                         temp = params[key][:value]
                     end
                   end
-                  result << "#{initial_property_name[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
+                  result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
                   condition[0]<<" jp_lexemes.#{key} #{params[key][:operator]} '#{regexp}#{temp}#{regexp}' "
                 end
               when "base_id"
                 unless params[key][:value].blank?
-                  result << "#{initial_property_name[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
+                  result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
                   if params[key][:operator] == "="
                     specific_base = JpLexeme.find(:all, :conditions=>["surface='#{params[key][:value]}'"])
                   elsif params[key][:operator] == "like"
@@ -858,10 +857,10 @@ class JpController < ApplicationController
                       series.delete(0)
                       case key
                         when "sth_tagging_state"
-                          result << "構造#{initial_property_name[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
+                          result << "構造#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
                           condition[0] << " jp_synthetics.#{key} #{params[key][:operator]} (#{series.join(',')}) "
                         when "pos", "ctype", "cform", "tagging_state"
-                          result << "#{initial_property_name[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
+                          result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
                           condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} (#{series.join(',')}) "  
                       end
                     end
@@ -869,10 +868,10 @@ class JpController < ApplicationController
                     unless temp.blank?
                       case key
                         when "sth_tagging_state"
-                          result << "構造#{initial_property_name[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
+                          result << "構造#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
                           condition[0] << " jp_synthetics.#{key} #{params[key][:operator]} #{temp.property_cat_id} "
                         when "pos", "ctype", "cform", "tagging_state"
-                          result << "#{initial_property_name[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
+                          result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
                           condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} #{temp.property_cat_id} "
                       end
                     end
@@ -880,10 +879,10 @@ class JpController < ApplicationController
               when "created_by", "modified_by", "sth_modified_by"
                 unless params[key][:value].blank?
                   if ["created_by", "modified_by"].include?(key)
-                    result << "#{initial_property_name[key]}#{operator0[params[key][:operator]]}#{User.find(params[key][:value].to_i).name}"
+                    result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{User.find(params[key][:value].to_i).name}"
                     condition[0]<<" jp_lexemes.#{key} #{params[key][:operator]} '#{params[key][:value].to_i}' "
                   elsif key == "sth_modified_by"
-                    result << "構造#{initial_property_name["modified_by"]}#{operator0[params[key][:operator]]}#{User.find(params[key][:value].to_i).name}"
+                    result << "構造#{initial_property_name('jp')["modified_by"]}#{operator0[params[key][:operator]]}#{User.find(params[key][:value].to_i).name}"
                     condition[0]<<" jp_synthetics.modified_by #{params[key][:operator]} #{params[key][:value].to_i} "
                   end
                 end
@@ -895,7 +894,7 @@ class JpController < ApplicationController
                     dic_names_array << JpProperty.find(:first, :conditions=>["property_string='dictionary' and property_cat_id=?", item.to_i]).tree_string
                     dic_num << item.to_i
                   }
-                  result << "#{initial_property_name[key]}:(#{dic_names_array.join(operator0[params[key][:operator]])})"
+                  result << "#{initial_property_name('jp')[key]}:(#{dic_names_array.join(operator0[params[key][:operator]])})"
                   temp_section = []
                   if params[key][:operator] == "and"
                     dic_num.sort.each{|num| temp_section << "%-#{num.to_s}-%"}
@@ -915,10 +914,10 @@ class JpController < ApplicationController
                     begin
                       time = get_time_string_from_hash(temp)
                       if key == "sth_updated_at"
-                        result << "構造#{initial_property_name["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
+                        result << "構造#{initial_property_name('jp')["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
                         condition[0] << " jp_synthetics.updated_at #{params[key][:operator]} '#{time}' "
                       elsif key == "updated_at"
-                        result << "#{initial_property_name["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
+                        result << "#{initial_property_name('jp')["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
                         condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} '#{time}' "
                       end
                     rescue

@@ -37,16 +37,16 @@
 			<table>
     			<thead>
 	        		<tr>
-						<%= "<th>#{initial_property_name['surface']}</th>" unless preview_edit["surface"].blank? %>
-						<%= "<th>#{initial_property_name['reading']}</th>" unless preview_edit["reading"].blank? %>
-						<%= "<th>#{initial_property_name['pronunciation']}</th>" unless preview_edit["pronunciation"].blank? %>
-						<%= "<th>#{initial_property_name['base_id']}</th>" %>
-						<%= "<th>#{initial_property_name['pos']}</th>" unless preview_edit["pos"].blank? %>
-						<%= "<th>#{initial_property_name['ctype']}</th>" unless preview_edit["ctype"].blank? %>
-						<%= "<th>#{initial_property_name['cform']}</th>" unless preview_edit["cform"].blank? %>
-						<%= "<th>#{initial_property_name['dictionary']}</th>" unless preview_edit["dictionary"].blank? %>
-						<%= "<th>#{initial_property_name['tagging_state']}</th>" unless preview_edit["tagging_state"].blank? %>
-						<%= "<th>#{initial_property_name['log']}</th>" unless preview_edit["log"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['surface']}</th>" unless preview_edit["surface"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['reading']}</th>" unless preview_edit["reading"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['pronunciation']}</th>" unless preview_edit["pronunciation"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['base_id']}</th>" %>
+						<%= "<th>#{initial_property_name('jp')['pos']}</th>" unless preview_edit["pos"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['ctype']}</th>" unless preview_edit["ctype"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['cform']}</th>" unless preview_edit["cform"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['dictionary']}</th>" unless preview_edit["dictionary"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['tagging_state']}</th>" unless preview_edit["tagging_state"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['log']}</th>" unless preview_edit["log"].blank? %>
 						<% properties = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
 						unless properties.blank?
 							properties.each{|item|
@@ -145,16 +145,16 @@
 
     			<thead>
 	        		<tr>
-						<%= "<th>#{initial_property_name['surface']}</th>" unless preview_edit["surface"].blank? %>
-						<%= "<th>#{initial_property_name['reading']}</th>" unless preview_edit["reading"].blank? %>
-						<%= "<th>#{initial_property_name['pronunciation']}</th>" unless preview_edit["pronunciation"].blank? %>
-						<%= "<th>#{initial_property_name['base_id']}</th>" %>
-						<%= "<th>#{initial_property_name['pos']}</th>" unless preview_edit["pos"].blank? %>
-						<%= "<th>#{initial_property_name['ctype']}</th>" unless preview_edit["ctype"].blank? %>
-						<%= "<th>#{initial_property_name['cform']}</th>" unless preview_edit["cform"].blank? %>
-						<%= "<th>#{initial_property_name['dictionary']}</th>" unless preview_edit["dictionary"].blank? %>
-						<%= "<th>#{initial_property_name['tagging_state']}</th>" unless preview_edit["tagging_state"].blank? %>
-						<%= "<th>#{initial_property_name['log']}</th>" unless preview_edit["log"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['surface']}</th>" unless preview_edit["surface"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['reading']}</th>" unless preview_edit["reading"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['pronunciation']}</th>" unless preview_edit["pronunciation"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['base_id']}</th>" %>
+						<%= "<th>#{initial_property_name('jp')['pos']}</th>" unless preview_edit["pos"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['ctype']}</th>" unless preview_edit["ctype"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['cform']}</th>" unless preview_edit["cform"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['dictionary']}</th>" unless preview_edit["dictionary"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['tagging_state']}</th>" unless preview_edit["tagging_state"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['log']}</th>" unless preview_edit["log"].blank? %>
 						<% properties = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
 						unless properties.blank?
 							properties.each{|item|

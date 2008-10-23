@@ -78,7 +78,6 @@ class JpPropertyController < ApplicationController
                                           :section=>params[:section],        :type_field=>params[:type_field] )
         new_property.save!                                      
       rescue
-        debugger
         flash.now[:notice_err] = get_validation_error(new_property, "save")
         render(:update) { |page| page[:show_property].replace_html :partial=>"modify_property" }
       else

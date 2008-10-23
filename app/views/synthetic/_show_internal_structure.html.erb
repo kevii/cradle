@@ -1,19 +1,10 @@
 <div  id='synthetic_struct'>
-	<% if not flash.now[:notice].blank? %>
-		<div id="notice" ><%= flash.now[:notice] %></div>
-	<% elsif not flash.now[:notice_err].blank? %>
-		<div id="notice_err" ><%= flash.now[:notice_err] %></div>
-	<% elsif not flash[:notice].blank? %>
-		<div id="notice" ><%= flash[:notice] %></div>
-	<% elsif not flash[:notice_err].blank? %>
-		<div id="notice_err" ><%= flash[:notice_err] %></div>
-    <% end %>
 	<div align="center">
 		<table>
 			<tr>
 				<td>
 					<strong>
-						<% case domain
+						<% case info[:domain]
 							when "jp" %>
 								内部構造：
 							<% when "cn" %>
@@ -26,19 +17,19 @@
 				<td>
 					<table style="border: 3px solid #f0f8ff;">
 						<tr>
-							<% if show_internal_structure.size == 1 %>
-								<%= show_internal_structure(:structure=>show_internal_structure, :first_time=>true, :domain=>domain, :from=>from, :original_id=>original_id) %>
+							<% if show_internal_structure.size == 2 %>
+								<%= show_internal_structure(:structure=>show_internal_structure, :first_time=>true, :info=>info) %>
 							<% else %>
-								<%= show_internal_structure(:structure=>show_internal_structure, :first_time=>false, :domain=>domain, :from=>from, :original_id=>original_id) %>
+								<%= show_internal_structure(:structure=>show_internal_structure, :first_time=>false, :info=>info) %>
 							<% end %>
 		
 						</tr>
 					</table>
 				</td>
 				<td>
-					<% form_remote_tag :url=>{:action=>"modify_structure", :structure=>show_internal_structure, :original_id=>original_id, :from=>from, :domain=>domain} do %>
+					<% form_remote_tag :url=>{:action=>"modify_structure", :structure=>show_internal_structure, :info=>info} do %>
 						<span>
-							<% case domain
+							<% case info[:domain]
 								when "jp" %>
 									<% temp_string = "リセット" %>
 									<%= submit_tag '確認' %>
@@ -50,21 +41,24 @@
 									<%= submit_tag 'Confirm' %>
 							<% end %>
 						</span>
-						<%= button_to_remote(temp_string, :url=>{:action => :define_internal_structure, :type=>"define", :original_id=>original_id, :from=>from, :domain=>domain}) %>
+						<%= button_to_remote(temp_string, :url=>{:action => :define_internal_structure, :action=>{:type=>"define"}, :info=>info}) %>
 					<% end %>
 				</td>
 			</tr>
 			<tr>
-				<td colspan=3><%= get_showing_string(:structure=>show_internal_structure, :domain=>domain) %></td>
+				<td colspan=3><%= get_showing_string(:structure=>show_internal_structure, :domain=>info[:domain]) %></td>
 			</tr>
 		</table>
 		<div id="candidate" style="text-align:left;padding-left:5%;padding-top:50px;">
+			<% if not flash.now[:notice_err].blank? %>
+				<div id="notice_err" ><%= flash.now[:notice_err] %></div>
+		    <% end %>
 			<table>
 				<tr>
 					<td><%= image_tag("internal-horizontal.jpg", :border=>0) %></td>
 					<td>
 						<span style="padding-left:10px;">
-							<% case domain
+							<% case info[:domain]
 								when "jp" %>
 									：同じレベルで分割する
 								<% when "cn" %>
@@ -79,7 +73,7 @@
 					<td><%= image_tag("internal-vertical.jpg", :border=>0) %></td>
 					<td>
 						<span style="padding-left:10px;">
-							<% case domain
+							<% case info[:domain]
 								when "jp" %>
 									：下のレベルに分割する
 								<% when "cn" %>
@@ -94,7 +88,7 @@
 					<td>①②③</td>
 					<td>
 						<span style="padding-left:10px;">
-							<% case domain
+							<% case info[:domain]
 								when "jp" %>
 									：分割ポイントのレベルを表示する
 								<% when "cn" %>
@@ -109,7 +103,7 @@
 					<td><%= image_tag("internal-plus.jpg", :border=>0) %></td>
 					<td>
 						<span style="padding-left:10px;">
-							<% case domain
+							<% case info[:domain]
 								when "jp" %>
 									：分割ポイントの左右を編集する
 								<% when "cn" %>
@@ -124,7 +118,7 @@
 					<td><%= image_tag("internal-minus.jpg", :border=>0) %></td>
 					<td>
 						<span style="padding-left:10px;">
-							<% case domain
+							<% case info[:domain]
 								when "jp" %>
 									：分割ポイントを削除する
 								<% when "cn" %>

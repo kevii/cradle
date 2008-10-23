@@ -182,7 +182,9 @@ namespace :cradle do
                 temp[4] = "\\\)"
               end
               ##  tagging_state not null
-              if original_tagging_states.key?(temp[1])
+              if temp[1] == 'DELETE'
+                  next
+              elsif original_tagging_states.key?(temp[1])
                 temp[1] = original_tagging_states[temp[1]]
               elsif ["NOTIMPORT", "NOTIMPORT-CONJ", ""].include?(temp[1])
                 next

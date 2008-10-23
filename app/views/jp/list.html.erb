@@ -68,10 +68,10 @@
 						<th>ID</th>
 			            <% @list.each{|ordered_item|
 							item = ordered_item.gsub(/^\d+_/, "")
-							if not initial_property_name[item].blank? %>
-								<th><%= item=="sth_tagging_state" ? "構造"+initial_property_name[item] : initial_property_name[item] %></th>
+							if not initial_property_name('jp')[item].blank? %>
+								<th><%= item=="sth_tagging_state" ? "構造"+initial_property_name('jp')[item] : initial_property_name('jp')[item] %></th>
 							<% elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item) %>
-								<th>構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
+								<th>構造<%= initial_property_name('jp')[item.gsub("sth_", "")] %></th>
 							<% else
 								temp = JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %>
 								<th <%= temp.scan(/./).size > 5 ? %Q|style="width:70px;"| : %Q|style="white-space: nowrap;"| %>><%= h(temp) %></th>
@@ -90,7 +90,7 @@
 				            <td align="left" ><%= h(lexeme.id) %></td>
 							<% @list.each do |ordered_item|
 								item = ordered_item.gsub(/^\d+_/, "")
-								if not initial_property_name[item].blank?
+								if not initial_property_name('jp')[item].blank?
 									case item
 										when "surface" %>
 											<td><%= link_to( h(lexeme.surface), "http://www.google.co.jp/search?hl=ja&q=#{lexeme.surface}") %></td>
@@ -192,10 +192,10 @@
 						<th>ID</th>
 			            <% @list.each{|ordered_item|
 							item = ordered_item.gsub(/^\d+_/, "")
-							if not initial_property_name[item].blank? %>
-								<th><%= item=="sth_tagging_state" ? "構造"+initial_property_name[item] : initial_property_name[item] %></th>
+							if not initial_property_name('jp')[item].blank? %>
+								<th><%= item=="sth_tagging_state" ? "構造"+initial_property_name('jp')[item] : initial_property_name('jp')[item] %></th>
 							<% elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item) %>
-								<th>構造<%= initial_property_name[item.gsub("sth_", "")] %></th>
+								<th>構造<%= initial_property_name('jp')[item.gsub("sth_", "")] %></th>
 							<% else
 								temp = JpNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %>
 								<th <%= temp.scan(/./).size > 5 ? %Q|style="width:70px;"| : %Q|style="white-space: nowrap;"| %>><%= h(temp) %></th>
