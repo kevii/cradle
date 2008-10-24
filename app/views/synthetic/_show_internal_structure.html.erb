@@ -46,7 +46,35 @@
 				</td>
 			</tr>
 			<tr>
-				<td colspan=3><%= get_showing_string(:structure=>show_internal_structure, :domain=>info[:domain]) %></td>
+				<td colspan=3>
+					<table>
+						<tr>
+							<td style="color:red;"><strong>Root:</strong></td>
+							<td><%= h(get_structure_display_string(:structure=>show_internal_structure, :domain=>info[:domain])) %></td>
+						</tr>
+						<% to_create, to_update = get_create_and_update_structures(:structure=>show_internal_structure, :domain=>info[:domain]) %>
+						<% to_create.each_with_index{|new_structure,index| %>
+							<tr>
+								<% if index == 0 %>
+									<td style="color:red;"><strong>New:</strong></td>
+								<% else %>
+									<td></td>
+								<% end %>
+								<td><%= h(new_structure) %></td>
+							</tr>
+						<% } %>
+						<% to_update.each_with_index{|update_structure,index| %>
+							<tr>
+								<% if index == 0 %>
+									<td style="color:red;"><strong>Update:</strong></td>
+								<% else %>
+									<td></td>
+								<% end %>
+								<td><%= h(update_structure) %></td>
+							</tr>
+						<% } %>
+					</table>
+				</td>
 			</tr>
 		</table>
 		<div id="candidate" style="text-align:left;padding-left:5%;padding-top:50px;">
