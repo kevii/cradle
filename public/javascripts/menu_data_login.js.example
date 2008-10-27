@@ -42,14 +42,14 @@ style=menuStyle;
 aI("text=Top;url=http://dahlia.naist.jp/cradle/jp;")
 aI("text=新規単語;url=http://dahlia.naist.jp/cradle/jp/new;")
 aI("text=ルート編集;url=http://dahlia.naist.jp/cradle/jp/define_root;")
-aI("showmenu=property;text=属性管理;url=http://dahlia.naist.jp/cradle/jp_property/lexeme_property_index;")
+aI("showmenu=property;text=属性管理;url=http://dahlia.naist.jp/cradle/property/lexeme_property_index?domain=jp;")
 }
 
 with(milonic=new menuname("property")){
 overflow="scroll";
 style=menuStyle;
-aI("text=単語属性;url=http://dahlia.naist.jp/cradle/jp_property/lexeme_property_index;");
-aI("text=複合語属性;url=http://dahlia.naist.jp/cradle/jp_property/synthetic_property_index;");
+aI("text=単語属性;url=http://dahlia.naist.jp/cradle/property/lexeme_property_index?domain=jp;");
+aI("text=複合語属性;url=http://dahlia.naist.jp/cradle/property/synthetic_property_index?domain=jp;");
 }
 
 with(milonic=new menuname("cn")){

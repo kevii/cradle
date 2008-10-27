@@ -62,4 +62,20 @@ class JpSynthetic < ActiveRecord::Base
       super
     end
   end
+  
+  ######################################################
+  ##### method
+  ######################################################
+  def get_display_string
+    string_array = []
+    sth_struct.split(',').map{|item| item.delete('-')}.each{|part|
+      if part =~ /^\d+$/
+        string_array << JpLexeme.find(part.to_i).surface
+      else part =~ /^meta_(.*)$/
+        string_array << JpSynthetic.find(:first, :conditions=>["sth_ref_id=? and sth_meta_id=?", sth_ref_id, $1.to_i]).sth_surface
+      end
+    }
+    return string_array.join(',&nbsp;&nbsp;&nbsp;')
+  end
+  
 end

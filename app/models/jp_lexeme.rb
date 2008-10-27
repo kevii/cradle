@@ -228,7 +228,7 @@ class JpLexeme < ActiveRecord::Base
         property = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
         unless property.blank?
           property.each{|item|
-            temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id='#{item.property_id}' and ref_id=#{lexeme.id}"])
+            temp = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id='#{item.id}' and ref_id=#{lexeme.id}"])
             temp.destroy unless temp.blank?
           }
         end
@@ -237,7 +237,7 @@ class JpLexeme < ActiveRecord::Base
         JpSynthetic.find(:all, :conditions=>["sth_ref_id=#{lexeme.id}"]).each{|sub|
           JpSyntheticNewPropertyItem.transaction do
             JpNewProperty.find(:all, :conditions=>["section='synthetic'"]).each{|property|
-              temp = JpSyntheticNewPropertyItem.find(:first, :conditions=>["property_id='#{property.property_id}' and ref_id=#{sub.id}"])
+              temp = JpSyntheticNewPropertyItem.find(:first, :conditions=>["property_id='#{property.id}' and ref_id=#{sub.id}"])
               temp.destroy unless temp.blank?
             }
           end

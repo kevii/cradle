@@ -262,11 +262,13 @@ namespace :cradle do
                     insert into jp_synthetics  ( sth_ref_id,
                                                  sth_meta_id,
                                                  sth_struct,
+                                                 sth_surface,
                                                  sth_tagging_state,
                                                  modified_by )
                                          values( #{temp[0].to_i},
                                                  0,
                                                  convert("#{temp[11]}" using utf8),
+                                                 convert("#{temp[2]}" using utf8),
                                                  #{temp[12]},
                                                  1 )
                   ENB

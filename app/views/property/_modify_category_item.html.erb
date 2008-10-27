@@ -1,17 +1,38 @@
-<% form_remote_tag :url => { :action => :save_category_item } do %>
+<% case params[:domain]
+	when "jp"
+		create_string = "新規"
+		modify_string = "編集"
+		save_string = "保存"
+		msg_string = "区切り符号指定してから、多段入力できます。"
+		add_field_string = "フィールド追加"
+	when "cn"
+		create_string = "创建"
+		modify_string = "编辑"
+		save_string = "保存"
+		msg_string = "在指定了分隔符号之后，就能创建多层的属性"
+		add_field_string = "增加层次"
+	when "en"
+		create_string = "Create"
+		modify_string = "Modify"
+		save_string = "Save"
+		msg_string = "You can create multiple level property after specifying a seperator."
+		add_field_string = "Add Field"
+end %>
+
+<% form_remote_tag :url => { :action => :save_category_item, :domain=>params[:domain] } do %>
 	<a id="top" name="top" href="#" STYLE="text-decoration:none"></a>
 	<fieldset id="category_item" align="left" style="width:960px; padding-top:10px; margin-bottom:10px; background: lightgrey;">
 	    <legend style="background: steelblue;">
 			<% if @property_id == 0 %>
-				新規<%= h(@human_name) %>
+				<%= create_string %><%= h(@human_name) %>
 			<% else %>
-				<%= h(@human_name) %>編集
+				<%= h(@human_name) %><%= modify_string %>
 			<% end %>
 		</legend>
 		<table style="width:100%;">
 			<tr>
 				<td width=80px style="text-align:center;">
-					<%= submit_tag '保存' %>
+					<%= submit_tag save_string %>
 					<%= hidden_field_tag :id, @property_id %>
 					<%= hidden_field_tag :seperator, @seperator %>
 					<%= hidden_field_tag :string, @string %>
@@ -21,16 +42,22 @@
 				<td>
 					<% if @property_id == 0 %>
 						<% if @seperator.blank? %>
-							区切り符号指定してから、多段入力できます。
+							<%= msg_string %>
 						<% else %>
-							<input type="button" value="フィールド追加" onclick="addField('level_area','level', '<%= @string %>');" />
+							<input type="button" value=<%= add_field_string %> onclick="addField('level_area','level', '<%= @string %>');" />
 						<% end %>
 					<% else %>
-						<% temp = JpProperty.find(@property_id).sub_tree_items.size %>
+						<% temp = verify_domain(params[:domain])['Property'].constantize.find(@property_id).sub_tree_items.size %>
 						<% if temp > 1 %>
-							フィールドを変更すると、このitem以下の
-							<span style="color:red;"><%= temp %>個</span>
-							のitemをすべて変更します。
+						<% case params[:domain]
+							when "jp" %>
+								フィールドを変更すると、このitem以下の<span style="color:red;"><%= temp %>個</span>のitemをすべて変更します。
+							<% when "cn" %>
+								更新后、这个item以下的<span style="color:red;"><%= temp %>个</span>item全部自动更新。
+							<% when "en" %>
+								After modified、there are <span style="color:red;"><%= temp %>items</span> under this item will all be updated.
+						<% end %>
+
 						<% end %>
 					<% end %>
 				</td>

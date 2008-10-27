@@ -1,14 +1,31 @@
 <div id='synthetic_struct'>
-	<div style="margin-left:2%; float:left;width:48%;">
+	<% if @lexeme.struct.blank? %>
+	<div style="margin-left:2%;float:left;width:100%;">
+		<div class="User-control" style="float:left;">
+	<% else %>
+	<div style="margin-left:2%;float:left;width:48%;">
+		<% if not flash.now[:notice_special].blank? %>
+			<div id="notice" style="width:90%;"><%= flash.now[:notice_special] %></div>
+		<% end %>
 		<div id='show_desc' style='display:none;'></div>
 		<div class="User-control" style="float:left; width:48%;">
+	<% end %>
 		    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;">
 		        <legend style="background: #1e2078;">単語詳細</legend>
 		        <div class="list">
+		        	<% if @lexeme.struct.blank? %>
+					<table>
+					<% else %>
 		            <table style="width:100%;">
+					<% end %>
 						<tr>
-							<th style="width:50px;"><%= initial_property_name('jp')['id'] %></th>
-							<td colspan=2><%= h(@lexeme.send("id")) %></td>
+				        	<% if @lexeme.struct.blank? %>
+								<th style="width:100px;"><%= initial_property_name('jp')['id'] %></th>
+								<td colspan=2 style="width:300px;"><%= h(@lexeme.send("id")) %></td>
+							<% else %>
+				            	<th style="width:50px;"><%= initial_property_name('jp')['id'] %></th>
+								<td colspan=2><%= h(@lexeme.send("id")) %></td>
+							<% end %>
 						</tr>
 						<tr class='odd'>
 							<th><%= initial_property_name('jp')['surface'] %></th>
@@ -113,18 +130,28 @@
 			<% end %>
 		</div>
 		<% if @lexeme.struct.blank? %>
-			<div class="User-control" style="margin-left:4%; float:left;width:48%;">
-			    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;text-align:center">
-					<legend style="background: #1e2078;">構造詳細</legend>
-					<% if User.find_by_id(session[:user_id]) %>
-						<%= button_to_remote "指定", :url=>{:controller=>:synthetic,
-														   :action=>:define_internal_structure,
-											               :split_action=>{:type => "define"},
-													       :info=>{:original_id=>@lexeme.id, :from=>"creation", :domain=>"jp"}},
-												  :before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
-					<% end %>
-			    </fieldset>
-			</div>
+			<% if User.find_by_id(session[:user_id]) %>
+				<div class="User-control" style="margin-left:4%; float:left;width:48%;">
+				    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;text-align:center">
+						<legend style="background: #1e2078;">構造詳細</legend>
+							<% temp = JpSynthetic.find(:all, :conditions=>["sth_surface=?", @lexeme.surface]) %>
+							<% unless temp.blank? %>
+								<strong style="color:red">この単語は以下の単語内部の【中間部分】として使われている</strong>
+								<table>
+									<% temp.each{|parent| %>
+										<tr><td><%= JpLexeme.find(parent.sth_ref_id).surface %></td<td>(<%= parent.sth_ref_id %>)</td></tr>
+									<% } %>
+								</table>
+								<strong style="color:red">この単語の内部構造を指定すると、上記単語の【中間部分】に自動的にリンクされる</strong>
+							<% end %>
+							<%= button_to_remote "指定", :url=>{:controller=>:synthetic,
+															   :action=>:define_internal_structure,
+												               :split_action=>{:type => "define"},
+														       :info=>{:original_id=>@lexeme.id, :from=>"creation", :domain=>"jp"}},
+													    :before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
+				    </fieldset>
+				</div>
+			<% end %>
 	</div>
 		<% else %>
 			<div class="User-control" style="margin-left:4%; float:left;width:48%;">
@@ -156,11 +183,12 @@
 					<table>
 						<tr>
 							<td>
-								<%= button_to_remote "編集", :url => { :action => "modify_structure", :from => "modify", :original_id => @lexeme.id,
-																	:ids => @ids, :chars => @chars, :domain=>'jp' },
-														  :before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
+								<%= button_to_remote "編集", :url=>{:controller=>:synthetic, :action=>"modify_structure", :split_action=>{:type => "define"},
+																   :info=>{:original_id=>@lexeme.id, :from=>"modification", :domain=>"jp"}, :first_modification=>'true'},
+															:before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
 							</td>
-							<td><%= button_to '削除', { :action => 'destroy_struct', :id => @lexeme.id, :domain=>'jp' }, :confirm => 'Are you sure?', :post => true %></td>
+							<td><%= button_to_remote '削除', :url=>{:controller=>:synthetic, :action=>'destroy_struct', :id=>@lexeme.id, :domain=>'jp'},
+															:confirm=>'内部構造を削除しますか？', :post=>true %></td>
 						</tr>
 					</table>
 				<% end %>
@@ -169,16 +197,12 @@
 					sub_structure = JpSynthetic.find(:first, :conditions=>["sth_ref_id=#{@lexeme.id} and sth_meta_id=#{index}"])
 					index_string = 'meta_'+index.to_s %>
 				    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;">
-						<legend style="background: #1e2078;"><%= @meta_show_chars[index_string].delete(',') %></legend>
+						<legend style="background: #1e2078;"><%= sub_structure.sth_surface %></legend>
 						<div class="list">
 				        	<table style="width:100%;">
 								<tr>
 									<th style="width:50px;">構成</th>
-									<td colspan=2>
-										<% @meta_show_chars[index_string].split(',').each{|part| %>
-											<%= part %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										<% } %>
-									</td>
+									<td colspan=2><%= sub_structure.get_display_string %></td>
 								</tr>
 								<% odd_or_even =1
 								JpNewProperty.find(:all, :conditions=>["section='synthetic'"]).each{|property|
@@ -208,7 +232,7 @@
 			</div>
 	</div>
 			<div style="float:left;margin-left:4%;width:46%;">
-				<%= generate_tree_view(:root=>@lexeme.id, :ids=>@ids, :domain=>"jp") %>
+				<%= generate_tree_view(:domain=>'jp', :id=>@lexeme.id) %>
 				<div id="myTreeContainer"></div>
 			</div>
 		<% end %>

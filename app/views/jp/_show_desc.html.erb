@@ -1,6 +1,6 @@
 <script>if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();</script>
 <div id='show_desc' align="center" class="list" onclick="Effect.SlideUp('show_desc')" style="padding-bottom:20px;">
-	<table style="text-align:right;">
+	<table style="text-align:left;">
         <% odd_or_even =1
 		list = ["id"].concat(session[:jp_section_list].map{|item| item.gsub(/^\d+_/, "")}) %>
 			<tr><td colspan=6 style="text-align:center;"><strong>単語詳細</strong></td></tr>
@@ -105,5 +105,35 @@
 				end
 			end %>
 		</tr>
-	</table>	
+		<% unless show_desc.struct.blank?
+			list_property = JpNewProperty.find(:all, :conditions=>["section='synthetic'"])
+			show_desc.sub_structs.sort{|a,b| a.sth_meta_id<=>b.sth_meta_id}.each{|sub_structure| %>
+				<tr><td colspan=6 style="background-color:#87CEFA"></td></tr>
+				<tr><td colspan=6 style="background-color:#87CEFA"></td></tr>
+		        <% odd_or_even =1 %>
+				<tr><td colspan=6 style="text-align:center;"><strong>内部構造</strong></td></tr>
+				<tr class='odd'><th>構造</th><td colspan=5><%= sub_structure.get_display_string %></td></tr>
+				<tr>
+					<% list_property.each_with_index{|item, index|
+						if index % 3 == 0 and index != 0
+							odd_or_even = 1 - odd_or_even %>
+							</tr><tr <%= "class='odd'" if odd_or_even == 0 %> >
+						<% end %>
+						<th><%= item.human_name %></th>
+						<td>
+							<% unless eval('sub_structure.'+item.property_string).blank? %>
+								<% case item.type_field
+									when 'category' %>
+										<%= JpProperty.find(:first, :conditions=>["property_string=? and property_cat_id=?", item.property_string, eval('sub_structure.'+item.property_string)]).tree_string %>
+									<% when 'text' %>
+										<%= eval('sub_structure.'+item.property_string) %>
+									<% when 'time' %>
+										<%= eval('sub_structure.'+item.property_string).to_formatted_s(:db) %>
+								<% end %>
+							<% end %>
+						</td>
+					<% } %>
+			<% } %>
+		<% end %>
+	</table>
 </div>

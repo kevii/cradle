@@ -133,19 +133,6 @@ class JpController < ApplicationController
 
   def show
     @lexeme = JpLexeme.find(params[:id].to_i)
-    unless @lexeme.struct.blank?
-      @ids, @chars = get_formatted_ids_and_chars(:original_lexeme_id=>@lexeme.id, :domain=>'jp')
-      @meta_show_chars = get_meta_structures(:ids=>@ids, :chars=>@chars)[1]
-      indexes = @meta_show_chars.size - 1
-      while(indexes >= 0) do
-        if @meta_show_chars['meta_'+indexes.to_s].include?('meta')
-          temp = []
-          @meta_show_chars['meta_'+indexes.to_s].split(',').each{|item| item.include?('meta') ? temp << @meta_show_chars[item].delete(',') : temp << item}
-          @meta_show_chars['meta_'+indexes.to_s] = temp.join(',')
-        end
-        indexes = indexes - 1
-      end
-    end
   end
 
   def show_desc
@@ -238,16 +225,13 @@ class JpController < ApplicationController
               when "time"
                 if value.values.join("").blank?
                   lexeme[key]=nil
-                elsif value["section(1i)"]=="" or value["section(2i)"]=="" or value["section(3i)"]==""
-                  flash.now[:notice_err] = "<ul><li>時間を最低日まで指定して下さい！</li></ul>"
-                  render :partial=>"preview_news"
-                  return
                 else
-                  begin
-                    lexeme[key]=get_time_string_from_hash(value)
-                  rescue
-                    flash.now[:notice_err] = "<ul><li>時間を正しく指定して下さい！</li></ul>"
-                    render :partial=>"preview_edit"
+                  time_error, time_string = verify_time_property(:value=>value, :domain=>'jp')
+                  if time_error.blank?
+                    lexeme[key] = time_string
+                  else
+                    flash.now[:notice_err] = time_error
+                    render :partial=>"preview_news"
                     return
                   end
                 end
@@ -451,7 +435,7 @@ class JpController < ApplicationController
     lexeme = JpLexeme.find(params[:id])
     base = lexeme.base
     begin
-      if JpSynthetic.exists?([%Q|sth_struct like "%-#{params[:id]}-%"|])
+      if JpSynthetic.exists?(["sth_struct like ?", "'%-#{params[:id]}-%'"])
         flash[:notice_err] = "<ul><li>ほかの単語の内部構造になっているので、削除できません！</li></ul>"
       else
         if lexeme.id != base.id  #word is in base series, but is not base
@@ -528,15 +512,12 @@ class JpController < ApplicationController
               when "time"
                 if value.values.join("").blank?
                   lexeme[key]=nil
-                elsif (value.has_key?("section(1i)") and (value["section(1i)"]=="" or value["section(2i)"]=="" or value["section(3i)"]=="")) or (value.has_key?("year") and (value["year"]=="" or value["month"]=="" or value["day"]==""))
-                  flash.now[:notice_err] = "<ul><li>時間を最低日まで指定して下さい！</li></ul>"
-                  render :partial=>"preview_edit"
-                  return
                 else
-                  begin
-                    lexeme[key]=get_time_string_from_hash(value)
-                  rescue
-                    flash.now[:notice_err] = "<ul><li>時間を正しく指定して下さい！</li></ul>"
+                  time_error, time_string = verify_time_property(:value=>value, :domain=>'jp')
+                  if time_error.blank?
+                    lexeme[key]=time_string
+                  else
+                    flash.now[:notice_err] = time_error
                     render :partial=>"preview_edit"
                     return
                   end
@@ -908,21 +889,18 @@ class JpController < ApplicationController
                 temp = params[key].dup
                 temp.delete("operator")
                 unless temp.values.join("") == ""
-                  if temp["section(1i)"]=="" or temp["section(2i)"]=="" or temp["section(3i)"]==""
-                    return "", "", "<ul><li>更新時間を最低日まで指定して下さい！</li></ul>"
-                  else
-                    begin
-                      time = get_time_string_from_hash(temp)
-                      if key == "sth_updated_at"
-                        result << "構造#{initial_property_name('jp')["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
-                        condition[0] << " jp_synthetics.updated_at #{params[key][:operator]} '#{time}' "
-                      elsif key == "updated_at"
-                        result << "#{initial_property_name('jp')["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
-                        condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} '#{time}' "
-                      end
-                    rescue
-                      return "", "", "<ul><li>時間を正しく指定して下さい！</li></ul>"
+                  time_error, time_string = verify_time_property(:value=>temp, :domain=>'jp')
+                  if time_error.blank?
+                    time = time_string
+                    if key == "sth_updated_at"
+                      result << "構造#{initial_property_name('jp')["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
+                      condition[0] << " jp_synthetics.updated_at #{params[key][:operator]} '#{time}' "
+                    elsif key == "updated_at"
+                      result << "#{initial_property_name('jp')["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
+                      condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} '#{time}' "
                     end
+                  else
+                    return "", "", time_error
                   end
                 end
             end
@@ -972,21 +950,18 @@ class JpController < ApplicationController
                 temp = params[key].dup
                 temp.delete("operator")
                 unless temp.values.join("") == ""
-                  if temp["section(1i)"]=="" or temp["section(2i)"]=="" or temp["section(3i)"]==""
-                    return "", "", "<ul><li>#{property.human_name}を最低日まで指定して下さい！</li></ul>"
-                  else
-                    begin
-                      time = get_time_string_from_hash(temp)
-                      result << "#{name_string}#{operator0[params[key][:operator]]}#{time}"
-                      case property.section
-                        when "synthetic"
-                          condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.time #{params[key][:operator]} '#{time}' "
-                        when "lexeme"
-                          condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.time #{params[key][:operator]} '#{time}' "
-                      end
-                    rescue
-                      return "", "", "<ul><li>時間を正しく指定して下さい！</li></ul>"
+                  time_error, time_string = verify_time_property(:value=>temp, :domain=>'jp')
+                  if time_error.blank?
+                    time = time_string
+                    result << "#{name_string}#{operator0[params[key][:operator]]}#{time}"
+                    case property.section
+                      when "synthetic"
+                        condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.time #{params[key][:operator]} '#{time}' "
+                      when "lexeme"
+                        condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.time #{params[key][:operator]} '#{time}' "
                     end
+                  else
+                    return "", "", time_error
                   end
                 end
             end

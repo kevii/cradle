@@ -72,7 +72,7 @@ namespace :cradle do
           sth_ref_id          bigint  unsigned  not null,
           sth_meta_id         int not null,
           sth_struct          text not null,
-          sth_surface         varchar(255),
+          sth_surface         varchar(255) not null,
           sth_tagging_state   int unsigned  not null,
           log                 text,
           modified_by         int not null,

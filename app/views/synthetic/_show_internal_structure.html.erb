@@ -27,7 +27,7 @@
 					</table>
 				</td>
 				<td>
-					<% form_remote_tag :url=>{:action=>"modify_structure", :structure=>show_internal_structure, :info=>info} do %>
+					<% form_remote_tag :url=>{:action=>"modify_structure", :structure=>swap_structure_array_and_string('', show_internal_structure), :info=>info} do %>
 						<span>
 							<% case info[:domain]
 								when "jp" %>
@@ -41,7 +41,7 @@
 									<%= submit_tag 'Confirm' %>
 							<% end %>
 						</span>
-						<%= button_to_remote(temp_string, :url=>{:action => :define_internal_structure, :action=>{:type=>"define"}, :info=>info}) %>
+						<%= button_to_remote(temp_string, :url=>{:action => :define_internal_structure, :split_action=>{:type=>"define"}, :info=>info}) %>
 					<% end %>
 				</td>
 			</tr>
@@ -49,7 +49,7 @@
 				<td colspan=3>
 					<table>
 						<tr>
-							<td style="color:red;"><strong>Root:</strong></td>
+							<td style="color:red;"><strong>Top:</strong></td>
 							<td><%= h(get_structure_display_string(:structure=>show_internal_structure, :domain=>info[:domain])) %></td>
 						</tr>
 						<% to_create, to_update = get_create_and_update_structures(:structure=>show_internal_structure, :domain=>info[:domain]) %>

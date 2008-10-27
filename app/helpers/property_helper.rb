@@ -1,3 +1,3 @@
-module JpHelper
+module PropertyHelper
   include ApplicationHelper
 end
