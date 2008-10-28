@@ -2,7 +2,7 @@
 	<% if @lexeme.struct.blank? %>
 		<div style="margin-left:20px;float:left;width:950px;">
 	<% else %>
-		<div style="margin-left:20px;float:left;width:530px;">
+		<div style="margin-left:20px;float:left;width:650px;">
 	<% end %>
 		<% if not flash.now[:notice_special].blank? %>
 			<div id="notice" style="width:400px;"><%= flash.now[:notice_special] %></div>
@@ -226,7 +226,7 @@
 				<% end %>
 			</div>
 	</div>
-	<div style="float:left;margin-left:20px;width:450px;">
+	<div style="margin-left:680px;width:450px;">
 		<%= generate_tree_view(:domain=>'jp', :id=>@lexeme.id) %>
 		<div id="myTreeContainer"></div>
 	</div>
