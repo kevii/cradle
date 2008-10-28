@@ -1,30 +1,25 @@
 <div id='synthetic_struct'>
 	<% if @lexeme.struct.blank? %>
-	<div style="margin-left:2%;float:left;width:100%;">
-		<div class="User-control" style="float:left;">
+		<div style="margin-left:20px;float:left;width:950px;">
 	<% else %>
-	<div style="margin-left:2%;float:left;width:48%;">
+		<div style="margin-left:20px;float:left;width:530px;">
+	<% end %>
 		<% if not flash.now[:notice_special].blank? %>
-			<div id="notice" style="width:90%;"><%= flash.now[:notice_special] %></div>
+			<div id="notice" style="width:400px;"><%= flash.now[:notice_special] %></div>
 		<% end %>
 		<div id='show_desc' style='display:none;'></div>
-		<div class="User-control" style="float:left; width:48%;">
-	<% end %>
-		    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;">
+		<div class="User-control" style="float:left">
+		    <fieldset style="padding-left:10px; padding-right:10px;padding-top:20px; background: #f7faff;">
 		        <legend style="background: #1e2078;">単語詳細</legend>
 		        <div class="list">
-		        	<% if @lexeme.struct.blank? %>
 					<table>
-					<% else %>
-		            <table style="width:100%;">
-					<% end %>
 						<tr>
 				        	<% if @lexeme.struct.blank? %>
 								<th style="width:100px;"><%= initial_property_name('jp')['id'] %></th>
 								<td colspan=2 style="width:300px;"><%= h(@lexeme.send("id")) %></td>
 							<% else %>
 				            	<th style="width:50px;"><%= initial_property_name('jp')['id'] %></th>
-								<td colspan=2><%= h(@lexeme.send("id")) %></td>
+								<td colspan=2 style="width:190px;"><%= h(@lexeme.send("id")) %></td>
 							<% end %>
 						</tr>
 						<tr class='odd'>
@@ -131,8 +126,8 @@
 		</div>
 		<% if @lexeme.struct.blank? %>
 			<% if User.find_by_id(session[:user_id]) %>
-				<div class="User-control" style="margin-left:4%; float:left;width:300px;">
-				    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;text-align:center">
+				<div class="User-control" style="margin-left:20px; float:left;width:300px;">
+				    <fieldset style="padding-left:10px; padding-right:10px;padding-top:20px; background: #f7faff;text-align:center">
 						<legend style="background: #1e2078;">構造詳細</legend>
 							<% temp = JpSynthetic.find(:all, :conditions=>["sth_surface=?", @lexeme.surface]) %>
 							<% unless temp.blank? %>
@@ -154,15 +149,15 @@
 			<% end %>
 	</div>
 		<% else %>
-			<div class="User-control" style="margin-left:4%; float:left;width:48%;">
+			<div class="User-control" style="margin-left:20px; float:left;">
 				<% if User.find_by_id(session[:user_id]) %>
-				    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;">
+				    <fieldset style="padding-left:10px; padding-right:10px;padding-top:20px; background: #f7faff;">
 				        <legend style="background: #1e2078;">構造詳細</legend>
 				        <div class="list">
 				        	<table style="width:100%;">
 								<tr>
 									<th style="width:50px;"><%= initial_property_name('jp')['sth_tagging_state'] %></th>
-									<td colspan=2><%= h(@lexeme.struct.sth_tagging_state_item.tree_string) %></td>
+									<td colspan=2 style="width:190px;"><%= h(@lexeme.struct.sth_tagging_state_item.tree_string) %></td>
 								</tr>
 								<tr class='odd'>
 									<th><%= initial_property_name('jp')['log'] %></th>
@@ -196,13 +191,13 @@
 				<% for index in 0..(JpSynthetic.find(:all, :conditions=>["sth_ref_id=#{@lexeme.id}"]).size-1)
 					sub_structure = JpSynthetic.find(:first, :conditions=>["sth_ref_id=#{@lexeme.id} and sth_meta_id=#{index}"])
 					index_string = 'meta_'+index.to_s %>
-				    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;">
+				    <fieldset style="padding-left:10px; padding-right:10px;padding-top:20px; background: #f7faff;">
 						<legend style="background: #1e2078;"><%= sub_structure.sth_surface %></legend>
 						<div class="list">
 				        	<table style="width:100%;">
 								<tr>
 									<th style="width:50px;">構成</th>
-									<td colspan=2><%= sub_structure.get_display_string %></td>
+									<td colspan=2 style="width:190px;"><%= sub_structure.get_display_string %></td>
 								</tr>
 								<% odd_or_even =1
 								JpNewProperty.find(:all, :conditions=>["section='synthetic'"]).each{|property|
@@ -231,10 +226,10 @@
 				<% end %>
 			</div>
 	</div>
-			<div style="float:left;margin-left:4%;width:46%;">
-				<%= generate_tree_view(:domain=>'jp', :id=>@lexeme.id) %>
-				<div id="myTreeContainer"></div>
-			</div>
+	<div style="float:left;margin-left:20px;width:450px;">
+		<%= generate_tree_view(:domain=>'jp', :id=>@lexeme.id) %>
+		<div id="myTreeContainer"></div>
+	</div>
 		<% end %>
 </div>
 <% unless @lexeme.struct.blank? %>
