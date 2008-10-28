@@ -473,7 +473,9 @@ class JpController < ApplicationController
   end
 
   def edit
-    if request.post?
+    if params[:preview_edit].blank?
+      @lexeme = JpLexeme.find(params[:id])
+    elsif params[:preview_edit] == 'true'
       if params[:surface].blank? or params[:reading].blank? or params[:pronunciation].blank?
         flash.now[:notice_err] = "<ul><li>単語、読み、発音は必須属性なので、全部入力してください！</li><ul>"
         render :partial=>"preview_edit"
@@ -500,7 +502,7 @@ class JpController < ApplicationController
             end
           when "dictionary"
             lexeme[key]=value.join(',')
-          when  "base_type", "base", "base_ok", "base_id", "id"
+          when  "base_type", "base", "base_ok", "base_id", "id", "preview_edit"
             next
           else
             case JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"]).type_field
@@ -549,8 +551,6 @@ class JpController < ApplicationController
       end
       #############################################################################
       render :partial=>"preview_edit", :object=>lexeme, :locals=> { :series_change => series_change }
-    else
-      @lexeme = JpLexeme.find(params[:id])
     end
   end
 

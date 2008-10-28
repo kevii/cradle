@@ -131,7 +131,7 @@
 		</div>
 		<% if @lexeme.struct.blank? %>
 			<% if User.find_by_id(session[:user_id]) %>
-				<div class="User-control" style="margin-left:4%; float:left;width:48%;">
+				<div class="User-control" style="margin-left:4%; float:left;width:300px;">
 				    <fieldset style="padding-left:15px; padding-right:15px;padding-top:20px; background: #f7faff;text-align:center">
 						<legend style="background: #1e2078;">構造詳細</legend>
 							<% temp = JpSynthetic.find(:all, :conditions=>["sth_surface=?", @lexeme.surface]) %>
