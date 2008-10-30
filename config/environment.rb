@@ -67,3 +67,5 @@ Rails::Initializer.run do |config|
 end
 
 require 'will_paginate'
+Workling::Remote.dispatcher = Workling::Remote::Runners::StarlingRunner.new
+Workling::Return::Store.instance = Workling::Return::Store::StarlingReturnStore.new 

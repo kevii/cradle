@@ -28,6 +28,49 @@ class ApplicationController < ActionController::Base
                    :inline=>"<%= display_property_list(:type=>'#{params[:type]}', :domain=>'#{params[:domain]}', :prefix=>'#{params[:prefix]}', :state=>'#{params[:state]}', :option=>'#{params[:option]}', :id=>#{id}, :level=>#{params[:level].to_i+1}) %>"
     end
   end
+
+  
+#  
+#<%= button_to_remote 'test', :url=>{:action=>:test_count} %>
+#<div id='wrapper'>ok</div>
+#<p>
+#<span class="progressBar" id="progressBar">0%</span>
+
+  
+  
+  def test_count
+    count = 0
+    @uid = DumpDataWorker.asynch_counting(:count=>count)
+    session[:update_percentage] = 1
+    render(:update){|page| page[:wrapper].replace_html :inline=>"<%= periodically_call_remote(:url=>{:action=>'update_count', :uid=>@uid}, :frequency=>'10') %>"}
+  end
+
+  def update_count
+    @display_number = 0
+    temp = 0
+    @uid = params[:uid]
+    while(temp != nil)
+      @display_number = temp
+      temp = Workling::Return::Store.get(params[:uid])
+    end
+    if @display_number == 0
+      render(:update){|page| page.insert_html :bottom, 'wrapper', :inline=>""}
+    else
+      render(:update){|page|
+        if @display_number != 100
+          page.insert_html :bottom, 'wrapper', :inline=>""
+        else
+          page.remove 'wrapper'
+        end
+        page << "function update_percentage(){myJsProgressBarHandler.setPercentage('progressBar', '#{@display_number}');return false;}"
+        page << "window.onload=update_percentage();"
+      }
+    end
+  end
+  
+  
+  
+  
   
   private
   def authorize

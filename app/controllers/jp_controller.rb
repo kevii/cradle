@@ -5,7 +5,7 @@ class JpController < ApplicationController
   before_filter :authorize, :only => [ :new, :create, :destroy, :edit, :update,
                                        :define_internal_structure, :split_word, :modify_structure, :save_internal_struct, :destroy_struct,
                                        :define_root, :save_roots]
-  
+
   def index
     if session[:jp_section_list].blank?
       session[:jp_section_list] = ['1_surface', '2_reading', '3_pronunciation', '4_base_id', '5_root_id', '6_dictionary', '7_pos', '8_ctype', '9_cform']
