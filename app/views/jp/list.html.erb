@@ -20,13 +20,7 @@
 				<%= button_to_remote( "表示フィールド", :url =>{ :action => :load_section_list }, :with=>"'state='+Element.visible('field_list')",
 									  :before=>%Q|if(Element.visible('dictionary_list')){Effect.SlideUp('dictionary_list');}|+%Q|if(Element.visible('field_list')){Effect.SlideUp('field_list');}| ) %>
 			</span>
-			<span id='wrapper' style="padding-left:30px;">
-				<span id='period_caller'><%= button_to_remote 'test', :url=>{:action=>:start_dump} %></span>
-				<span id='indicator' style="display:none;">
-					Dumping:&nbsp;&nbsp;&nbsp;<%= image_tag("load.gif") %>
-					<span class="progressBar" id="progressBar">1%</span>
-				</span>
-			</span>
+
 		<% end %>
 	</div>
 	<div style="width:100%;">

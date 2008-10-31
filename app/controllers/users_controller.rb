@@ -22,6 +22,8 @@ class UsersController < ApplicationController
   
   def logout
     session[:user_id] = nil
+    ['10_tagging_state', '11_log', '12_created_by', '13_modified_by', '14_updated_at',
+     '101_sth_tagging_state', '102_sth_log', '103_sth_modified_by', '104_sth_updated_at'].each{|item| session[:jp_section_list].delete(item)}
     redirect_to(:controller=>:jp, :action=>:index)
   end
   
