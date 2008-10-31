@@ -1,6 +1,4 @@
 module SyntheticHelper
-  include ApplicationHelper
-
   def show_internal_structure(option)
     option[:original_struct] = swap_structure_array_and_string("", option[:structure].dup) if option[:original_struct].blank?
     option[:section_indexes] = "" if option[:section_indexes].blank?

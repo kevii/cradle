@@ -1,6 +1,4 @@
 class JpController < ApplicationController
-  layout 'cradle'
-  include JpHelper
   before_filter :set_title
   before_filter :authorize, :only => [ :new, :create, :destroy, :edit, :update,
                                        :define_internal_structure, :split_word, :modify_structure, :save_internal_struct, :destroy_struct,

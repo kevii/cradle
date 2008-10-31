@@ -1,6 +1,4 @@
 class UsersController < ApplicationController
-  layout 'cradle'
-
   before_filter :authorize, :except => :login
   before_filter :authorize_admin, :only => [ :list_users, :add_user, :delete_user, :merge_user]
   before_filter :set_current_user

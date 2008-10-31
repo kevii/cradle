@@ -1,6 +1,4 @@
 class PropertyController < ApplicationController
-  layout 'cradle'
-  include PropertyHelper
   before_filter :authorize
   before_filter :authorize_admin
   before_filter :set_title

@@ -248,7 +248,6 @@ class JpLexeme < ActiveRecord::Base
     end
   end
   
-  
   private
   def self.find_seed(array = [], string ="")
     return array[0] if array.size == 1 and (string =~ /#{array[0].surface_end}$/) != nil

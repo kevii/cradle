@@ -1,6 +1,4 @@
 class SyntheticController < ApplicationController
-  include SyntheticHelper
-  
   def define_internal_structure
     lexeme_class = verify_domain(params[:info][:domain])['Lexeme']
     case params[:split_action][:type]
