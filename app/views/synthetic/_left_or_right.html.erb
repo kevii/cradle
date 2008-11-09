@@ -66,6 +66,7 @@ end %>
 									<th><%= select_update_string %></th>
 									<th><%= initial_property_name(info[:domain])["id"] %></th>
 									<th><%= initial_property_name(info[:domain])["surface"] %></th>
+									<th><%= initial_property_name(info[:domain])["reading"] %></th>
 									<th><%= initial_property_name(info[:domain])["pos"] %></th>
 									<th><%= initial_property_name(info[:domain])["sth_struct"] %></th>
 									<th><%= initial_property_name(info[:domain])["dictionary"] %></th>
@@ -95,6 +96,7 @@ end %>
 									<% end %>
 									<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.id) %></td>
 									<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.surface) %></td>
+									<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.reading) %></td>
 									<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.pos_item.tree_string) unless lexeme.pos.blank? %></td>
 									<td style="text-align:center;" onclick=<%= '$("'+select_id+'").checked=true;' %> >
 										<% unless lexeme.struct.blank? %>
@@ -116,6 +118,7 @@ end %>
 									<th><%= select_update_string %></th>
 									<th><%= initial_property_name(info[:domain])["id"] %></th>
 									<th><%= initial_property_name(info[:domain])["surface"] %></th>
+									<th><%= initial_property_name(info[:domain])["reading"] %></th>
 									<th><%= initial_property_name(info[:domain])["pos"] %></th>
 									<th><%= initial_property_name(info[:domain])["sth_struct"] %></th>
 									<th><%= initial_property_name(info[:domain])["dictionary"] %></th>
@@ -156,6 +159,7 @@ end %>
 									<th><%= select_update_string %></th>
 									<th><%= initial_property_name(info[:domain])["id"] %></th>
 									<th><%= initial_property_name(info[:domain])["surface"] %></th>
+									<th><%= initial_property_name(info[:domain])["reading"] %></th>
 									<th><%= initial_property_name(info[:domain])["pos"] %></th>
 									<th><%= initial_property_name(info[:domain])["sth_struct"] %></th>
 									<th><%= initial_property_name(info[:domain])["dictionary"] %></th>
@@ -185,6 +189,7 @@ end %>
 									<% end %>
 									<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.id) %></td>
 									<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.surface) %></td>
+									<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.reading) %></td>
 									<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.pos_item.tree_string) unless lexeme.pos.blank? %></td>
 									<td style="text-align:center;" onclick=<%= '$("'+select_id+'").checked=true;' %> >
 										<% unless lexeme.struct.blank? %>
@@ -206,6 +211,7 @@ end %>
 									<th><%= select_update_string %></th>
 									<th><%= initial_property_name(info[:domain])["id"] %></th>
 									<th><%= initial_property_name(info[:domain])["surface"] %></th>
+									<th><%= initial_property_name(info[:domain])["reading"] %></th>
 									<th><%= initial_property_name(info[:domain])["pos"] %></th>
 									<th><%= initial_property_name(info[:domain])["sth_struct"] %></th>
 									<th><%= initial_property_name(info[:domain])["dictionary"] %></th>
