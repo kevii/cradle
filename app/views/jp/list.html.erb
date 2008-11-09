@@ -20,7 +20,7 @@
 				<%= button_to_remote( "表示フィールド", :url =>{ :action => :load_section_list }, :with=>"'state='+Element.visible('field_list')",
 									  :before=>%Q|if(Element.visible('dictionary_list')){Effect.SlideUp('dictionary_list');}|+%Q|if(Element.visible('field_list')){Effect.SlideUp('field_list');}| ) %>
 			</span>
-			<% if User.find_by_id(session[:user_id]).group_name == "admin" %>
+			<% if not session[:user_id].blank? and User.find_by_id(session[:user_id]).group_name == "admin" %>
 				<span id='wrapper' style="padding-left:30px;">
 					<span id='period_caller'>
 						<%= button_to_remote '結果出力', :url=>{:action=>:start_dump,
