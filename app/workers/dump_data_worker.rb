@@ -44,11 +44,7 @@ class DumpDataWorker < Workling::Base
       Workling::Return::Store.set(options[:uid], count.to_s)
     end
     output_file.close
-    if ENV["RAILS_ENV"] == "production"
-      Workling::Return::Store.set(options[:uid], '/cradle'+file_path)
-    else
-      Workling::Return::Store.set(options[:uid], file_path)
-    end
+    Workling::Return::Store.set(options[:uid], options[:prefix]+file_path)
   end
 
   private
