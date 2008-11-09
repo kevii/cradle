@@ -1,6 +1,7 @@
 module SyntheticHelper
+  include CradleModule
+  
   def show_internal_structure(option)
-    option[:original_struct] = swap_structure_array_and_string("", option[:structure].dup) if option[:original_struct].blank?
     option[:section_indexes] = "" if option[:section_indexes].blank?
     html_string = ""
     option[:structure].each_with_index{|section,index|
@@ -92,59 +93,6 @@ module SyntheticHelper
     }
     return html_string
   end
-  
-  def get_structure_display_string(option)
-    lexeme_class = verify_domain(option[:domain])['Lexeme']
-    option[:top_level]="true" if option[:top_level].blank?
-    char_string = []
-    if is_string(option[:structure]) == true and option[:structure] =~ /^update_(.*)$/
-      temp = $1
-      return lexeme_class.constantize.find(temp.to_i).surface+'('+temp+')'+'  ==>  []'
-    else
-      option[:structure].each_with_index{|item, index|
-        next if index == 0
-        if is_string(item) == true
-          if (item =~ /^meta_(.*)$/) or (item =~ /^initial_(.*)$/)
-            char_string << $1+'()'
-    elsif item =~ /^update_(.*)$/
-      char_string << lexeme_class.constantize.find($1.to_i).surface+'('+$1+')'
-          elsif item =~ /^dummy_(.*)$/
-            char_string << $1+'(dummy)'
-          else
-            char_string << lexeme_class.constantize.find(item.to_i).surface+'('+item+')'
-          end
-        else
-    if item[0] =~ /^meta_(.*)$/
-      char_string << get_structure_display_string(:structure=>item, :domain=>option[:domain], :top_level=>"false")
-    elsif item[0] =~ /^update_(.*)$/
-      char_string << lexeme_class.constantize.find($1.to_i).surface+'('+$1+')'
-    elsif item[0] =~ /^\d+$/
-      char_string << lexeme_class.constantize.find(item[0].to_i).surface+'('+item[0]+')'
-    end
-        end
-      }
-      if option[:top_level]=="false"
-        return '[ '+char_string.join(',   ')+' ]'
-      else
-        if option[:structure][0] =~ /^\d+$/
-          root = lexeme_class.constantize.find(option[:structure][0].to_i).surface+'('+option[:structure][0]+')'
-        elsif option[:structure][0] =~ /^update_(.*)$/
-          id = $1
-          root = lexeme_class.constantize.find(id.to_i).surface+'('+id+')'
-        end
-        return root+'  ===>  '+'[ '+char_string.join(',   ')+' ]'
-      end
-    end
-  end
-
-  def get_create_and_update_structures(option)
-    create_indexes, update_indexes = find_structure_indexes(:structure=>option[:structure])
-    create_array = []
-    update_array = []
-    create_indexes.each{|index_string| create_array << get_structure_display_string(:structure=>eval('option[:structure]'+index_string), :domain=>option[:domain])}
-    update_indexes.each{|index_string| update_array << get_structure_display_string(:structure=>eval('option[:structure]'+index_string), :domain=>option[:domain])}
-    return create_array, update_array
-  end
 
   private
   def get_chars_from_structure(section, domain)
@@ -155,60 +103,11 @@ module SyntheticHelper
       elsif (section =~ /^dummy_(.*)$/) or (section =~ /^meta_(.*)$/)
         char_string << $1
       elsif section =~ /^update_(.*)$/
-  char_string << verify_domain(domain)['Lexeme'].constantize.find($1.to_i).surface
+        char_string << verify_domain(domain)['Lexeme'].constantize.find($1.to_i).surface
       end
     else
       section[1..-1].each{|item| char_string << get_chars_from_structure(item, domain)}
     end
     return char_string
-  end
-
-  def swap_structure_array_and_string(string="", array=[], step=1)
-    unless string.blank?
-      string.split('*'+'+'*step+'*').each{|item|
-        if item.include?('*')
-          array << swap_structure_array_and_string(item, [], step+1)
-        else
-          array << item
-        end
-      }
-      return array
-    end
-    unless array.blank?
-      string = []
-      for index in 0..array.size-1
-  if is_string(array[index]) == true
-    string << array[index]
-  else
-    string << swap_structure_array_and_string("", array[index], step+1)
-  end
-      end
-      return string.join('*'+'+'*step+'*')
-    end
-  end
-
-  def find_structure_indexes(option)
-    create_index_array=[]
-    update_index_array=[]
-    option[:transite_index]="" if option[:transite_index].blank?
-    option[:structure].each_with_index{|item, index|
-      next if index == 0
-      if is_string(item) == true
-        if item =~ /^update_(.*)$/
-          update_index_array << option[:transite_index]+'['+index.to_s+']'
-        else
-          next
-        end
-      end
-      if item[0] =~ /^\d+$/
-        create_index_array << option[:transite_index]+'['+index.to_s+']'
-      elsif item[0] =~ /^update_(.*)$/
-        update_index_array << option[:transite_index]+'['+index.to_s+']'
-      end
-      temp = find_structure_indexes(:structure=>item, :transite_index=>option[:transite_index]+'['+index.to_s+']')
-      create_index_array.concat(temp[0])
-      update_index_array.concat(temp[1])
-    }
-    return create_index_array, update_index_array
   end
 end

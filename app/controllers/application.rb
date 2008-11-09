@@ -3,9 +3,9 @@
 require 'date'
 class ApplicationController < ActionController::Base
   layout 'cradle'
-  helper :all # include all helpers, all the time
-  include ApplicationHelper
-  include SyntheticHelper
+  helper :all
+  include SearchModule
+  
   ### Pick a unique cookie name to distinguish our session data from others
   session :session_key => '_cradle_session_id'
   ### set charset
@@ -33,28 +33,42 @@ class ApplicationController < ActionController::Base
   end
 
   def start_dump
-    count = 0
-    @uid = DumpDataWorker.asynch_dump_data(:count=>count)
+    case params[:domain]
+      when 'jp'
+        section_list = session[:jp_section_list]
+      when 'cn'
+        section_list = session[:cn_section_list]
+      when 'en'
+        section_list = session[:en_section_list]
+    end
+    @uid = DumpDataWorker.asynch_dump_data(:static_condition=>params[:static_condition],
+                                           :dynamic_lexeme_condition=>params[:dynamic_lexeme_condition],
+                                           :dynamic_synthetic_condition=>params[:dynamic_synthetic_condition],
+                                           :show_conditions=>params[:show_conditions],
+                                           :simple_search=>params[:simple_search],
+                                           :section_list=>section_list,
+                                           :domain=>params[:domain])
     render(:update){|page|
-      page[:period_caller].replace_html :inline=>"<%= periodically_call_remote(:url=>{:action=>'update_indicator', :uid=>@uid}, :frequency=>'5', :variable=>'progress_indicator') %>"
+      page[:period_caller].replace_html :inline=>"<%= periodically_call_remote(:url=>{:action=>'update_indicator', :uid=>@uid}, :frequency=>'1', :variable=>'progress_indicator') %>"
       page[:indicator].show
     }
   end
 
   def update_indicator
-    @display_number = "0"
-    temp = "0"
+    @display = "0"
+    temp = "1"
     while(temp != nil)
-      @display_number = temp
+      @display = temp
       temp = Workling::Return::Store.get(params[:uid])
     end
     render(:update){|page|
-      if @display_number =~ /^\d+$/
-        page << "function update_indicator(){myJsProgressBarHandler.setPercentage('progressBar', '#{@display_number}');return false;}"
+      if @display =~ /^\d+$/
+        page << "function update_indicator(){myJsProgressBarHandler.setPercentage('progressBar', '#{@display}');return false;}"
         page << "window.onload=update_indicator();"
       else
+        page << "function update_indicator(){myJsProgressBarHandler.setPercentage('progressBar', '100');return false;}"
         page << "progress_indicator.stop();"
-        page.replace_html 'wrapper', :inline=>"Finished.&nbsp;&nbsp;Click to download:&nbsp;&nbsp;<a href='test'>#{@display_number}</a>"
+        page.replace_html 'wrapper', :inline=>"Finished.&nbsp;&nbsp;Click to download:&nbsp;&nbsp;<a href='#{@display}'>#{@display.split('/')[-1]}</a>"
       end
     }
   end
@@ -106,7 +120,6 @@ class ApplicationController < ActionController::Base
     end
   end
   
-
   def get_time_string_from_hash(option)
     if option.has_key?("section(1i)")
       return DateTime.civil(option["section(1i)"].to_i, option["section(2i)"].to_i, option["section(3i)"].to_i, option["section(4i)"].to_i, option["section(5i)"].to_i).to_formatted_s(:db)

@@ -26,7 +26,7 @@ end %>
 	<table style="width:100%; text-align: center; margin:10px 0 10px 0;" >
 		<tr>
 			<td>
-				<% form_remote_tag :url=>{:action=>"split_word", :right=>right, :split_action=>split_action, :structure=>swap_structure_array_and_string('',structure), :info=>info} do %>
+				<% form_remote_tag :url=>{:action=>"split_word", :right=>right, :split_action=>split_action, :structure=>string_structure, :info=>info} do %>
 				   	<strong><%= left %></strong>
 					<%= text_field_tag 'left', nil, :size=>"15", :class=>'text-field' %>
 					<input name="commit" type="submit" value=<%= change_string %> />
@@ -34,7 +34,7 @@ end %>
 			</td>
 			<td></td>
 			<td>
-				<% form_remote_tag :url=>{:action=>"split_word", :left=>left,  :split_action=>split_action, :structure=>swap_structure_array_and_string('', structure), :info=>info} do %>
+				<% form_remote_tag :url=>{:action=>"split_word", :left=>left,  :split_action=>split_action, :structure=>string_structure, :info=>info} do %>
 				   	<strong><%= right %></strong>
 					<%= text_field_tag 'right', nil, :size=>'15', :class=>'text-field' %>
 					<input name="commit" type="submit" value=<%= change_string %> />
@@ -42,7 +42,7 @@ end %>
 			</td>
 		</tr>
 	</table>
-	<% form_remote_tag :url => {:action=>"define_internal_structure", :split_action=>split_action, :structure=>swap_structure_array_and_string('', structure), :info=>info} do %>		
+	<% form_remote_tag :url => {:action=>"define_internal_structure", :split_action=>split_action, :structure=>string_structure, :info=>info} do %>		
 		<table>
 			<tr>
 				<td class="list" valign='top' style="width:48%; text-align: center; border: 1px solid #fad163; padding:10px;">

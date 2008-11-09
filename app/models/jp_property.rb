@@ -61,16 +61,16 @@ class JpProperty < ActiveRecord::Base
   def self.find_item_by_tree_string_or_array(type="", value_string=nil, state=nil)
     sections = []
     begin
-      value_string.flatten
-    rescue ## string
+      value_string.chomp
+    rescue
+      sections = value_string
+    else
       seperator = JpProperty.find(:first, :conditions=>["property_string=?", type]).seperator
       if seperator.blank?
         sections = [value_string]
       else
         sections = value_string.split(seperator)
       end
-    else ## array
-      sections = value_string
     end
     parent = nil
     0.upto(sections.size-1){|index|

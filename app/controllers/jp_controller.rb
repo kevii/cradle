@@ -1,8 +1,6 @@
 class JpController < ApplicationController
   before_filter :set_title
-  before_filter :authorize, :only => [ :new, :create, :destroy, :edit, :update,
-                                       :define_internal_structure, :split_word, :modify_structure, :save_internal_struct, :destroy_struct,
-                                       :define_root, :save_roots]
+  before_filter :authorize, :only => [:input_base, :new, :create, :destroy, :edit, :update, :define_root, :save_roots]
 
   def index
     if session[:jp_section_list].blank?
@@ -47,7 +45,7 @@ class JpController < ApplicationController
                                    :dynamic_synthetic_condition=>dynamic_synthetic_condition,
                                    :show_conditions => show_conditions
   end
-  
+
   def list
     params[:page].blank? ? page = nil : page = params[:page].to_i
     if params[:per_page].blank?
@@ -57,7 +55,7 @@ class JpController < ApplicationController
       per_page = params[:per_page].to_i
     end
     if params[:dynamic_lexeme_condition].blank? and params[:dynamic_synthetic_condition].blank?
-      @jplexemes = JpLexeme.paginate( :select=>" jp_lexemes.* ",   :conditions => params[:static_condition],
+      @jplexemes = JpLexeme.paginate( :all, :select=>" jp_lexemes.* ",   :conditions => params[:static_condition],
                                       :include => [:sub_structs],  :order => " jp_lexemes.id ASC ",
                                       :per_page => per_page,       :page => page )
     elsif params[:simple_search] == "true"

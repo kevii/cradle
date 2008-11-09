@@ -31,7 +31,7 @@ end %>
 			<td><%= h(top_structure) %></td>
 			<td>
 				<%= button_to_remote(change_string, :url=>{:action=>:define_internal_structure, :split_action=>{:type => "define"},
-														   :info=>info, :structure=>swap_structure_array_and_string('', structure.dup)}) %>
+														   :info=>info, :structure=>string_structure}) %>
 			</td>
 		</tr>
 		<% if first_modification.blank? %>
@@ -90,7 +90,7 @@ end %>
 					</tr>
 				</table>
 				<% if first_modification.blank? %>
-					<%= hidden_field_tag 'structure', swap_structure_array_and_string('', structure.dup) %>
+					<%= hidden_field_tag 'structure', string_structure %>
 					<% modify_internal_struct[0].each{|meta_id, meta_section| %>
 						<p>
 						<fieldset style="background: #f7faff;">

@@ -1,4 +1,6 @@
 class SyntheticController < ApplicationController
+  before_filter :authorize
+  
   def define_internal_structure
     lexeme_class = verify_domain(params[:info][:domain])['Lexeme']
     case params[:split_action][:type]
@@ -64,8 +66,13 @@ class SyntheticController < ApplicationController
         end
         structure = params[:structure]
     end
+    temp = get_create_and_update_structures(:structure=>structure, :domain=>params[:info][:domain])
+    string_structure = swap_structure_array_and_string('', structure.dup)
+    root_structure = get_structure_display_string(:structure=>structure, :domain=>params[:info][:domain])
     render :update do |page|
-      page["synthetic_struct"].replace :partial=>"show_internal_structure", :object=> structure, :locals=>{:info=>params[:info]}
+      page["synthetic_struct"].replace :partial=>"show_internal_structure", :object=> structure,
+                                       :locals=>{:info=>params[:info], :string_structure=>string_structure, :root_structure=>root_structure,
+                                                 :to_create=>temp[0], :to_update=>temp[1]}
     end
   end
 
@@ -90,12 +97,13 @@ class SyntheticController < ApplicationController
         left_id = nil
         right_id = nil
     end
+    string_structure = swap_structure_array_and_string('', params[:structure].dup)
     render :update do |page|
       page.replace "candidate", :partial=>"left_or_right", :object=>[lexemes_left, lexemes_right],  
                                 :locals => {:left=>params[:left],         :right=>params[:right],
                                             :left_id=>left_id,            :right_id=>right_id,
-                                            :info=>params[:info],         :structure=>params[:structure],
-                                            :split_action=>params[:split_action]}
+                                            :info=>params[:info],         :split_action=>params[:split_action],
+                                            :string_structure=>string_structure}
     end
   end
 
@@ -113,8 +121,13 @@ class SyntheticController < ApplicationController
       [to_create_structure, to_update_structure].each{|array| array.each{|string| not_defined = true if string.include?('()') or string.include?('[]')}}
       if not_defined == true
         flash.now[:notice_err] = get_error_message(params[:info][:domain], "modify_structure_1")
+        temp = get_create_and_update_structures(:structure=>params[:structure], :domain=>params[:info][:domain])
+        string_structure = swap_structure_array_and_string('', params[:structure].dup)
+        root_structure = get_structure_display_string(:structure=>params[:structure], :domain=>params[:info][:domain])
         render :update do |page|
-          page["synthetic_struct"].replace :partial=>"show_internal_structure", :object=>params[:structure], :locals=>{:info=>params[:info]}
+          page["synthetic_struct"].replace :partial=>"show_internal_structure", :object=>params[:structure],
+                                           :locals=>{:info=>params[:info], :string_structure=>string_structure, :root_structure=>root_structure,
+                                                     :to_create=>temp[0], :to_update=>temp[1]}
         end
         return
       end
@@ -125,12 +138,13 @@ class SyntheticController < ApplicationController
       create_indexes.each{|index_string| create_meta_array << get_meta_structure(:structure=>eval('params[:structure]'+index_string), :domain=>params[:info][:domain])[0]}
       update_indexes.each{|index_string| update_meta_array << get_meta_structure(:structure=>eval('params[:structure]'+index_string), :domain=>params[:info][:domain])[0]}
       flash.now[:notice_err] = params[:err_msg] unless params[:err_msg].blank?
+      string_structure = swap_structure_array_and_string('', params[:structure].dup)
       render :update do |page|
         page["synthetic_struct"].replace :partial=>"modify_internal_struct",
                                          :object=>[top_meta, create_meta_array, update_meta_array],
-                                         :locals=>{:top_structure=>top_structure, :to_create_structure=>to_create_structure,
-                                                   :to_update_structure=>to_update_structure, :structure=>params[:structure],
-                                                   :info=>params[:info], :first_modification=>''}
+                                         :locals=>{:top_structure=>top_structure,             :to_create_structure=>to_create_structure,
+                                                   :to_update_structure=>to_update_structure, :info=>params[:info], :first_modification=>'',
+                                                   :string_structure=>string_structure}
       end
       return
     else
@@ -138,9 +152,11 @@ class SyntheticController < ApplicationController
       top_structure = get_structure_display_string(:structure=>structure, :domain=>params[:info][:domain])
       top_meta = verify_domain(params[:info][:domain])['Synthetic'].constantize.find(:all, :order=>'sth_meta_id ASC', :conditions=>["sth_ref_id=?", params[:info][:original_id]])
       flash.now[:notice_err] = params[:err_msg] unless params[:err_msg].blank?
+      string_structure = swap_structure_array_and_string('', structure.dup)
       render :update do |page|
         page["synthetic_struct"].replace :partial=>"modify_internal_struct", :object=>top_meta,
-                                         :locals=>{:top_structure=>top_structure, :structure=>structure, :info=>params[:info], :first_modification=>"true"}
+                                         :locals=>{:top_structure=>top_structure, :info=>params[:info], :first_modification=>"true",
+                                                   :string_structure=>string_structure}
       end
       return
     end
@@ -407,7 +423,7 @@ class SyntheticController < ApplicationController
     end
     render(:update) { |page| page.call 'location.reload' }
   end
-    
+  
   private
   def make_initial_structure(option)
     if option[:info][:from] == 'creation'
@@ -486,7 +502,6 @@ class SyntheticController < ApplicationController
     end
   end
 
-  
   def get_meta_structure(option)
     option[:original_count] = 0 if option[:original_count].blank?
     lexeme_class = verify_domain(option[:domain])['Lexeme']
@@ -627,5 +642,106 @@ class SyntheticController < ApplicationController
     }
     return array
   end
-          
+
+  def find_structure_indexes(option)
+    create_index_array=[]
+    update_index_array=[]
+    option[:transite_index]="" if option[:transite_index].blank?
+    option[:structure].each_with_index{|item, index|
+      next if index == 0
+      if is_string(item) == true
+        if item =~ /^update_(.*)$/
+          update_index_array << option[:transite_index]+'['+index.to_s+']'
+        else
+          next
+        end
+      end
+      if item[0] =~ /^\d+$/
+        create_index_array << option[:transite_index]+'['+index.to_s+']'
+      elsif item[0] =~ /^update_(.*)$/
+        update_index_array << option[:transite_index]+'['+index.to_s+']'
+      end
+      temp = find_structure_indexes(:structure=>item, :transite_index=>option[:transite_index]+'['+index.to_s+']')
+      create_index_array.concat(temp[0])
+      update_index_array.concat(temp[1])
+    }
+    return create_index_array, update_index_array
+  end
+  
+  def get_structure_display_string(option)
+    lexeme_class = verify_domain(option[:domain])['Lexeme']
+    option[:top_level]="true" if option[:top_level].blank?
+    char_string = []
+    if is_string(option[:structure]) == true and option[:structure] =~ /^update_(.*)$/
+      temp = $1
+      return lexeme_class.constantize.find(temp.to_i).surface+'('+temp+')'+'  ==>  []'
+    else
+      option[:structure].each_with_index{|item, index|
+        next if index == 0
+        if is_string(item) == true
+          if (item =~ /^meta_(.*)$/) or (item =~ /^initial_(.*)$/)
+            char_string << $1+'()'
+    elsif item =~ /^update_(.*)$/
+      char_string << lexeme_class.constantize.find($1.to_i).surface+'('+$1+')'
+          elsif item =~ /^dummy_(.*)$/
+            char_string << $1+'(dummy)'
+          else
+            char_string << lexeme_class.constantize.find(item.to_i).surface+'('+item+')'
+          end
+        else
+    if item[0] =~ /^meta_(.*)$/
+      char_string << get_structure_display_string(:structure=>item, :domain=>option[:domain], :top_level=>"false")
+    elsif item[0] =~ /^update_(.*)$/
+      char_string << lexeme_class.constantize.find($1.to_i).surface+'('+$1+')'
+    elsif item[0] =~ /^\d+$/
+      char_string << lexeme_class.constantize.find(item[0].to_i).surface+'('+item[0]+')'
+    end
+        end
+      }
+      if option[:top_level]=="false"
+        return '[ '+char_string.join(',   ')+' ]'
+      else
+        if option[:structure][0] =~ /^\d+$/
+          root = lexeme_class.constantize.find(option[:structure][0].to_i).surface+'('+option[:structure][0]+')'
+        elsif option[:structure][0] =~ /^update_(.*)$/
+          id = $1
+          root = lexeme_class.constantize.find(id.to_i).surface+'('+id+')'
+        end
+        return root+'  ===>  '+'[ '+char_string.join(',   ')+' ]'
+      end
+    end
+  end
+
+  def get_create_and_update_structures(option)
+    create_indexes, update_indexes = find_structure_indexes(:structure=>option[:structure])
+    create_array = []
+    update_array = []
+    create_indexes.each{|index_string| create_array << get_structure_display_string(:structure=>eval('option[:structure]'+index_string), :domain=>option[:domain])}
+    update_indexes.each{|index_string| update_array << get_structure_display_string(:structure=>eval('option[:structure]'+index_string), :domain=>option[:domain])}
+    return create_array, update_array
+  end
+  
+  def swap_structure_array_and_string(string="", array=[], step=1)
+    unless string.blank?
+      string.split('*'+'+'*step+'*').each{|item|
+        if item.include?('*')
+          array << swap_structure_array_and_string(item, [], step+1)
+        else
+          array << item
+        end
+      }
+      return array
+    end
+    unless array.blank?
+      string = []
+      for index in 0..array.size-1
+        if is_string(array[index]) == true
+          string << array[index]
+        else
+          string << swap_structure_array_and_string("", array[index], step+1)
+        end
+      end
+      return string.join('*'+'+'*step+'*')
+    end
+  end
 end

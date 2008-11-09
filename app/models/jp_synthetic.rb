@@ -71,11 +71,23 @@ class JpSynthetic < ActiveRecord::Base
     sth_struct.split(',').map{|item| item.delete('-')}.each{|part|
       if part =~ /^\d+$/
         string_array << JpLexeme.find(part.to_i).surface
-      else part =~ /^meta_(.*)$/
+      elsif part =~ /^meta_(.*)$/
         string_array << JpSynthetic.find(:first, :conditions=>["sth_ref_id=? and sth_meta_id=?", sth_ref_id, $1.to_i]).sth_surface
       end
     }
     return string_array.join(',&nbsp;&nbsp;&nbsp;')
+  end
+  
+  def get_dump_string
+    dump_string_array = []
+    sth_struct.split(',').map{|item| item.delete('-')}.each{|part|
+      if part =~ /^\d+$/
+        dump_string_array << JpLexeme.find(part.to_i).surface + '(' + part + ')'
+      elsif part =~ /^meta_(.*)$/
+        dump_string_array << '(' + JpSynthetic.find(:first, :conditions=>["sth_ref_id=? and sth_meta_id=?", sth_ref_id, $1.to_i]).get_dump_string + ')'
+      end
+    }
+    return dump_string_array.join(',')
   end
   
 end

@@ -18,16 +18,16 @@
 					<table style="border: 3px solid #f0f8ff;">
 						<tr>
 							<% if show_internal_structure.size == 2 %>
-								<%= show_internal_structure(:structure=>show_internal_structure, :first_time=>true, :info=>info) %>
+								<%= show_internal_structure(:structure=>show_internal_structure, :first_time=>true, :info=>info, :original_struct=>string_structure) %>
 							<% else %>
-								<%= show_internal_structure(:structure=>show_internal_structure, :first_time=>false, :info=>info) %>
+								<%= show_internal_structure(:structure=>show_internal_structure, :first_time=>false, :info=>info, :original_struct=>string_structure) %>
 							<% end %>
 		
 						</tr>
 					</table>
 				</td>
 				<td>
-					<% form_remote_tag :url=>{:action=>"modify_structure", :structure=>swap_structure_array_and_string('', show_internal_structure), :info=>info} do %>
+					<% form_remote_tag :url=>{:action=>"modify_structure", :structure=>string_structure, :info=>info} do %>
 						<span>
 							<% case info[:domain]
 								when "jp" %>
@@ -50,9 +50,8 @@
 					<table>
 						<tr>
 							<td style="color:red;"><strong>Top:</strong></td>
-							<td><%= h(get_structure_display_string(:structure=>show_internal_structure, :domain=>info[:domain])) %></td>
+							<td><%= h(root_structure) %></td>
 						</tr>
-						<% to_create, to_update = get_create_and_update_structures(:structure=>show_internal_structure, :domain=>info[:domain]) %>
 						<% to_create.each_with_index{|new_structure,index| %>
 							<tr>
 								<% if index == 0 %>
