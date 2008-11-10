@@ -19,8 +19,8 @@ time_suffix_type = 'day'  ## time suffix type:  second or day
 last_time = 0
 
 
-log_path = File.dirname(__File__) + "/../../log/"
-user_dump_path = File.dirname(__File__) + "/../../public/user_dump_file/"
+log_path = File.dirname(__FILE__) + "/../../log/"
+user_dump_path = File.dirname(__FILE__) + "/../../public/user_dump_file/"
 
 
 while($running) do
