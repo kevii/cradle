@@ -24,7 +24,7 @@ module CustomizefieldHelper
     select_id = "#{prefix}"+type+"_"+name
     span_id = select_id+"_list"
     next_span_id = "#{prefix}"+type+"_level"+(level+1).to_s+"_list"
-    ajax_string = remote_function(:url=>{:controller=>domain, :action=>function_string, :type=>type, :domain=>domain, :prefix=>prefix, :state=>state, :id=>id, :level=>level, :option=>option},
+    ajax_string = remote_function(:url=>{:controller=>domain, :action=>function_string, :type=>type, :domain=>domain, :prefix=>prefix.chop, :state=>state, :id=>id, :level=>level, :option=>option},
                                   :with=>"'#{name}='+value")
     if level==1
       if ['search','new'].include?(state) or (state=='modify' and id==0)

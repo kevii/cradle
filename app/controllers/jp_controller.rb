@@ -759,27 +759,40 @@ class JpController < ApplicationController
         when "commit", "authenticity_token", "controller", "action", "search_type"
           next
         else
-          if initial_property_name('jp')[key] != nil or ["sth_modified_by", "sth_updated_at"].include?(key)
+          if initial_property_name('jp')[key] != nil or ["sth_modified_by", "sth_updated_at", "sth_pos", "sth_reading"].include?(key)
             case key
               when "character_number"
                 unless params[key][:value].blank?
                   result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
                   condition[0]<<" char_length(jp_lexemes.surface) #{params[key][:operator]} #{params[key][:value].to_i} "
                 end
-              when "sth_struct"
-                unless params[key][:value].blank?
-                  temp = JpLexeme.find(:all, :select=>"id", :conditions=>["surface=?", params[key][:value]])
-                  unless temp.blank?
-                    temp = temp.map{|item| item.id}
-                    temp_lexeme_id = []
-                    temp.each{|temp_id|
-                      temp_structs = JpSynthetic.find(:all, :select=>"sth_ref_id", :conditions=>["sth_struct like ?", '%-'+temp_id.to_s+'-%'])
-                      temp_lexeme_id.concat(temp_structs.map{|item| item.sth_ref_id}.uniq) unless temp_structs.blank?
-                    }
-                    unless temp_lexeme_id.blank?
-                      result << "#{initial_property_name('jp')[key]}include#{params[key][:value]}"
-                      condition[0] << " jp_lexemes.id in (#{temp_lexeme_id.uniq.join(',')}) "
-                    end
+              when "sth_struct", "sth_reading", "sth_pos"
+		inner_surface = params['sth_struct'][:value].dup
+		inner_reading = params['sth_reading'][:value].dup
+		inner_pos = params['sth_pos'].dup
+		params.delete('sth_struct')
+		params.delete('sth_reading')
+		params.delete('sth_pos')
+		temp_conditions = []
+		temp_conditions << " surface = '#{inner_surface}' " unless inner_surface.blank?
+		temp_conditions << " reading = '#{inner_reading}' " unless inner_reading.blank?
+		inner_pos.delete("operator")
+		temp_pos = JpProperty.find_item_by_tree_string_or_array('pos', get_ordered_string_from_params(inner_pos))
+		temp_conditions << " pos = #{temp_pos.property_cat_id} " unless temp_pos.blank?
+		unless temp_conditions.blank?
+		  temp_ids = JpLexeme.find(:all, :select=>'id', :conditions=>temp_conditions.join(" and ")).map(&:id)
+                  temp_lexeme_id = []
+                  temp_ids.each{|temp_id|
+                    temp_structs = JpSynthetic.find(:all, :select=>"sth_ref_id", :conditions=>["sth_struct like ?", '%-'+temp_id.to_s+'-%']).map(&:sth_ref_id).uniq
+                    temp_lexeme_id = temp_lexeme_id.concat(temp_structs).uniq unless temp_structs.blank?
+                  }
+                  unless temp_lexeme_id.blank?
+		    show_result = []
+		    show_result << "構造内部表記include#{inner_surface}" unless inner_surface.blank?
+		    show_result << "構造内部読みinclude#{inner_reading}" unless inner_reading.blank?
+		    show_result << "構造内部品詞incluce#{temp_pos.tree_string}" unless temp_pos.blank?
+		    result << show_result.join(',&nbsp;&nbsp;&nbsp;')
+                    condition[0] << " jp_lexemes.id in (#{temp_lexeme_id.join(',')}) "
                   end
                 end
               when "id"
@@ -971,7 +984,7 @@ class JpController < ApplicationController
       end
     }
     if result.empty?
-      return "", "", "<ul><li>検索条件を正しく入力して下さい!</li></ul>"
+      return "", "", "<ul><li>検索条件入力エラーもしくは単語が見つかりません!</li></ul>"
     else
       return condition, result.join(",&nbsp;&nbsp;&nbsp;"), ""
     end

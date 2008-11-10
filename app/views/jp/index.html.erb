@@ -176,13 +176,30 @@
 				<td colspan=2>
 					<table>
 						<tr>
-							<td><%= initial_property_name('jp')['sth_struct'] %></td>
+							<td>内部表記</td>
 							<td>
 				                <select id="operator_sth_struct" name="sth_struct[operator]" style="width:100%;">
 				                    <option selected value='like'>include</option>
 				                </select>
 							</td>
 							<td><%= text_field :sth_struct, :value, {:style=>"width:100%;", :class=>'text-field'}%></td>
+							<td></td>
+							<td>内部読み</td>
+							<td>
+								<select id="operator_sth_reading" name="sth_reading[operator]" style="width:100%;">
+									<option select value='like'>include</option>
+								</select>
+							</td>
+							<td><%= text_field :sth_reading, :value, {:style=>"width:100%;", :class=>'text-field'} %></td>
+						</tr>
+						<tr>
+							<td>内部POS</td>
+							<td>
+								<select id="operator_sth_pos" name="sth_pos[operator]" style="width:100%;">
+									<option select value='='>include</option>
+								</select>
+							</td>
+							<td><%= display_property_list(:type=>"pos", :domain=>"jp", :state=>"search", :prefix=>'sth') %></td>
 							<td></td>
 						<% if User.find_by_id(session[:user_id]) %>
 							<td><%= initial_property_name('jp')['sth_tagging_state'] %></td>

@@ -26,8 +26,9 @@ class ApplicationController < ActionController::Base
       end
       children.each{|child| id = child.id if child.value == value}
     end
+    params[:prefix].blank? ? prefix = "" : prefix = params[:prefix]+'_' 
     render :update do |page|
-      page.replace "#{params[:prefix]}"+"#{params[:type]}_level#{params[:level].to_i+1}_list",
+      page.replace prefix+"#{params[:type]}_level#{params[:level].to_i+1}_list",
                    :inline=>"<%= display_property_list(:type=>'#{params[:type]}', :domain=>'#{params[:domain]}', :prefix=>'#{params[:prefix]}', :state=>'#{params[:state]}', :option=>'#{params[:option]}', :id=>#{id}, :level=>#{params[:level].to_i+1}) %>"
     end
   end
