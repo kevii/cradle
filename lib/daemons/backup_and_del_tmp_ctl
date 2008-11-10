@@ -12,4 +12,4 @@ options = YAML.load(
   )).result).with_indifferent_access
 options[:dir_mode] = options[:dir_mode].to_sym
 
-Daemons.run File.dirname(__FILE__) + '/backup.rb', options
+Daemons.run File.dirname(__FILE__) + '/backup_and_del_tmp.rb', options

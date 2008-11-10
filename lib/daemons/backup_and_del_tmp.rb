@@ -16,12 +16,19 @@ backup_time = 3        ## 3 am
 backup_copies = 10     ## the number of copies
 sleep_time = 600        ## in second
 time_suffix_type = 'day'  ## time suffix type:  second or day
-
 last_time = 0
+
+
+log_path = File.dirname(__File__) + "/../../log/"
+user_dump_path = File.dirname(__File__) + "/../../public/user_dump_file/"
+
 
 while($running) do
   now_time = Time.now.to_s(:db).split(/-|\s|:/).join('').to_i
   if now_time-last_time>backup_interval and Time.now.hour==backup_time
+    ########################################################
+	###   backup mysql database
+    ########################################################
     if time_suffix_type == 'second'
       backup_time_suffix = now_time.to_s
     elsif time_suffix_type == 'day'
@@ -48,6 +55,16 @@ while($running) do
     elsif time_suffix_type == "day"
       last_time = (backup_time_suffix + "030000").to_i
     end
+
+    #########################################################
+    ###########   delete temporary worker file and user dump file
+    #########################################################
+    ##############   first delete user dump file
+    `rm -rf #{user_dump_path+[Time.now.year, Time.now.month, Time.now.day-1].join('-')+'*'}`
+
+    #############   delete temporary worker file
+    `rm -rf #{log_path + 'dump_data_workers:dump_data:*'}`
+
   end
   sleep sleep_time
 end
