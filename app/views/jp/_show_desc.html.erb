@@ -112,7 +112,12 @@
 				<tr><td colspan=6 style="background-color:#87CEFA"></td></tr>
 		        <% odd_or_even =1 %>
 				<tr><td colspan=6 style="text-align:center;"><strong>内部構造</strong></td></tr>
-				<tr class='odd'><th>構造</th><td colspan=5><%= sub_structure.get_display_string %></td></tr>
+				<tr class='odd'>
+					<th>構造</th>
+					<td colspan=3><%= sub_structure.get_display_string %></td>
+					<th>状態</th>
+					<td><%= sub_structure.sth_tagging_state_item.tree_string %></td>
+				</tr>
 				<tr>
 					<% list_property.each_with_index{|item, index|
 						if index % 3 == 0 and index != 0

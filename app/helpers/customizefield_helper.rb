@@ -43,7 +43,7 @@ module CustomizefieldHelper
           roots << parent
           parent = parent.parent
         end
-        html_string << first_html_list_for_mdification(roots.reverse, type, prefix, domain, option)
+        html_string << first_html_list_for_mdification(roots.reverse, type, prefix.chop, domain, option)
       end
     else  ##chain display
       if id > 0
@@ -175,11 +175,12 @@ module CustomizefieldHelper
   
   private
   def first_html_list_for_mdification(roots=nil, type="", prefix="", domain="", option="", level=1)
+    prefix.blank? ? prefix = "" : prefix = prefix+"_"
     html_string = ""
     name = "level"+level.to_s
     html_string << "<span id='#{prefix}#{type}_#{name}_list' >\n"
     level == 1 ? id = 0 : id = roots[level-2].id
-    ajax_string = remote_function(:url=>{:controller=>domain, :action=>'update_property_list',  :type=>type, :domain=>domain, :prefix=>prefix, :state=>'modify', :id=>id, :level=>level, :option=>option}, :with=>"'#{name}='+value")
+    ajax_string = remote_function(:url=>{:controller=>domain, :action=>'update_property_list',  :type=>type, :domain=>domain, :prefix=>prefix.chop, :state=>'modify', :id=>id, :level=>level, :option=>option}, :with=>"'#{name}='+value")
     html_string << "<select id='#{prefix}#{type}_#{name}' name='#{prefix}#{type}[#{name}]' onchange=\"#{ajax_string}\" #{option}>\n"
     if level==1
       class_name = verify_domain(domain)["Property"]
@@ -196,7 +197,7 @@ module CustomizefieldHelper
     html_string << options_for_select(collection, roots[level-1].value)
     html_string << "</select>\n"
     if level < roots.size
-      html_string << first_html_list_for_mdification(roots, type, prefix, domain, option, level+1)
+      html_string << first_html_list_for_mdification(roots, type, prefix.chop, domain, option, level+1)
     else
       html_string << "<span id='#{prefix}#{type}_level#{(level+1).to_s}_list' >\n"
     end

@@ -74,8 +74,7 @@ end %>
 						<% if info[:from] == 'modification' and not first_modification.blank? %>
 							<td width="390"><%= display_property_list(:type=>"sth_tagging_state", :domain=>info[:domain], :prefix=>'top_meta0', :state=>"modify", :id=>modify_internal_struct[0].sth_tagging_state) %></td>
 				    	<% else %>
-							<td width="390">NEW</td>
-							<%= hidden_field_tag "top_meta0_sth_tagging_state", new_tag %>
+							<td width="390"><%= display_property_list(:type=>"sth_tagging_state", :domain=>info[:domain], :prefix=>'top_meta0', :state=>"modify", :id=>new_tag) %></td>
 						<% end %>
 					</tr>
 					<tr>
@@ -176,12 +175,13 @@ end %>
 										end %>
 										<td width="60"></td>
 										<td width="60"><strong><%= initial_property_name(info[:domain])['sth_tagging_state'] %></strong></td>
-										<td width="390">NEW</td>
-										<% if index == 0 %>
-											<%= hidden_field_tag 'new'+inner_index.to_s+'_meta0_sth_tagging_state', new_tag %>
-										<% elsif index == 1%>
-											<%= hidden_field_tag 'update'+inner_index.to_s+'_meta0_sth_tagging_state', new_tag %>
-										<% end %>
+										<td width="390">
+											<% if index == 0 %>
+												<%= display_property_list(:type=>"sth_tagging_state", :domain=>info[:domain], :prefix=>'new'+inner_index.to_s+'_meta0', :state=>"modify", :id=>new_tag) %>
+											<% elsif index == 1%>
+												<%= display_property_list(:type=>"sth_tagging_state", :domain=>info[:domain], :prefix=>'update'+inner_index.to_s+'_meta0', :state=>"modify", :id=>new_tag) %>
+											<% end %>
+										</td>
 									</tr>
 									<tr>
 								        <td><strong><%= initial_property_name(info[:domain])['log'] %></strong></td>

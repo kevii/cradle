@@ -569,6 +569,13 @@ class SyntheticController < ApplicationController
     else
       if option[:field_name] == "sth_struct"
         new_hash[eval(':'+option[:field_name])] = option[:value].split(',').map{|item| '-'+item+'-'}.join(',')
+      elsif option[:field_name] == "sth_tagging_state"
+        temp_string = get_ordered_string_from_params(option[:value])
+        if temp_string.blank?
+          new_hash[eval(':'+option[:field_name])] = nil
+        else
+          new_hash[eval(':'+option[:field_name])] = option[:property_class_name].constantize.find_item_by_tree_string_or_array(option[:field_name], temp_string).property_cat_id
+        end
       else
         new_hash[eval(':'+option[:field_name])] = option[:value]
       end
