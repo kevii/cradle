@@ -778,7 +778,10 @@ class JpController < ApplicationController
 		temp_conditions << " reading = '#{inner_reading}' " unless inner_reading.blank?
 		inner_pos.delete("operator")
 		temp_pos = JpProperty.find_item_by_tree_string_or_array('pos', get_ordered_string_from_params(inner_pos))
-		temp_conditions << " pos = #{temp_pos.property_cat_id} " unless temp_pos.blank?
+		unless temp_pos.blank?
+		  temp_pos_string = temp_pos.sub_tree_items.map(&:property_cat_id).join(",")
+		  temp_conditions << " pos in (#{temp_pos_string}) "
+		end
 		unless temp_conditions.blank?
 		  temp_ids = JpLexeme.find(:all, :select=>'id', :conditions=>temp_conditions.join(" and ")).map(&:id)
                   temp_lexeme_id = []
