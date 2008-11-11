@@ -211,7 +211,7 @@ class JpController < ApplicationController
         case key
           when "surface", "reading", "pronunciation", "log"
             value.blank? ? lexeme[key]=nil : lexeme[key]=value
-          when "pos", "ctype", "cform"
+          when "pos", "ctype", "cform", "tagging_state"
             temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(value.dup))
             temp.blank? ? lexeme[key] = nil : lexeme[key] = temp.property_cat_id
           when "dictionary"
@@ -322,7 +322,7 @@ class JpController < ApplicationController
               original_property[key] = params["lexeme"+indexes.to_s][key]
             when "dictionary"
               original_property[key] = params["lexeme"+indexes.to_s][key].split(',').map{|item| item.to_i}.sort.map{|item| '-'+item.to_s+'-'}.join(',')
-            when "pos", "ctype", "cform", "base_id"
+            when "pos", "ctype", "cform", "base_id", "tagging_state"
               original_property[key] = params["lexeme"+indexes.to_s][key].to_i
             else
               property = JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"])
@@ -346,7 +346,6 @@ class JpController < ApplicationController
     begin
       new_word = 0
       new_series = 0
-      tagging_state_for_new = JpProperty.find_item_by_tree_string_or_array("tagging_state", "NEW").property_cat_id
       if params[:base_type] == "1" ## base_id is order
         ## 1. one word, base_is is order 1
         ## 2. series, base is not registered, and base could be any number in series
@@ -356,7 +355,6 @@ class JpController < ApplicationController
           baselexeme = JpLexeme.new(lexemes[base_index])
           baselexeme.id = JpLexeme.maximum('id')+1
           baselexeme.base_id = baselexeme.id
-          baselexeme.tagging_state = tagging_state_for_new
           baselexeme.created_by = session[:user_id]
           if baselexeme.save!
             save_aux_properties(customize_property[base_index], baselexeme.id)
@@ -371,7 +369,6 @@ class JpController < ApplicationController
                 newlexeme = JpLexeme.new(lexemes[index])
                 newlexeme.id = JpLexeme.maximum('id')+1
                 newlexeme.base_id = baselexeme.id
-                newlexeme.tagging_state = tagging_state_for_new
                 newlexeme.created_by = session[:user_id]
                 if newlexeme.save!
                   save_aux_properties(customize_property[index], newlexeme.id)
@@ -390,7 +387,6 @@ class JpController < ApplicationController
         JpLexeme.transaction do
           firstlexeme = JpLexeme.new(lexemes[0])
           firstlexeme.id = JpLexeme.maximum('id')+1
-          firstlexeme.tagging_state = tagging_state_for_new
           firstlexeme.created_by = session[:user_id]
           firstlexeme.root_id = JpLexeme.find(firstlexeme.base_id).root_id
           if firstlexeme.save!
@@ -403,7 +399,6 @@ class JpController < ApplicationController
               if lexemes[index]["id"].blank?
                 newlexeme = JpLexeme.new(lexemes[index])
                 newlexeme.id = JpLexeme.maximum('id')+1
-                newlexeme.tagging_state = tagging_state_for_new
                 newlexeme.created_by = session[:user_id]
                 newlexeme.root_id = nil
                 if newlexeme.save!

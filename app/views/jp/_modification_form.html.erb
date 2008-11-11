@@ -80,10 +80,10 @@
 				</select>
 			</td>
 			<td></td>
+			<td><%= initial_property_name('jp')['tagging_state'] %></td>
 			<% if modification_form.blank? or modification_form.tagging_state.blank? %>
-				<td></td><td></td>
+				<td><%= display_property_list(:type=>"tagging_state", :domain=>"jp", :state=>"modify", :id=>JpProperty.find_item_by_tree_string_or_array("tagging_state", "NEW").property_cat_id) %></td>
 			<% else %>
-				<td><%= initial_property_name('jp')['tagging_state'] %></td>
 				<td><%= display_property_list(:type=>"tagging_state", :domain=>"jp", :state=>"modify", :id=>modification_form.tagging_state) %></td>
 			<% end %>
 		</tr>

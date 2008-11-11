@@ -49,6 +49,7 @@
 						<%= "<th>#{initial_property_name('jp')['ctype']}</th>" unless preview_news[0]["ctype"].blank? %>
 						<%= "<th>#{initial_property_name('jp')['cform']}</th>" unless preview_news[0]["cform"].blank? %>
 						<%= "<th>#{initial_property_name('jp')['dictionary']}</th>" unless preview_news[0]["dictionary"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['tagging_state']}</th>" unless preview_news[0]["tagging_state"].blank? %>
 						<%= "<th>#{initial_property_name('jp')['log']}</th>" unless preview_news[0]["log"].blank? %>
 						<% properties = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
 						unless properties.blank?
@@ -141,6 +142,14 @@
 									<%= display_dict.join("  ") %>
 								</td>
 							<% end %>
+							<% unless newlexeme["tagging_state"].blank? %>
+								<td align="left" >
+									<%= hidden_field_tag "lexeme"+order.to_s+'[tagging_state]', newlexeme["tagging_state"] %>
+									<% unless newlexeme["tagging_state"].blank? %>
+										<%= h(JpProperty.find(:first, :conditions=>["property_string='tagging_state' and property_cat_id=#{newlexeme["tagging_state"].to_i}"]).tree_string) %>
+									<% end %>
+								</td>
+							<% end %>
 							<% unless newlexeme["log"].blank? %>
 								<td align="left" >
 									<%= hidden_field_tag "lexeme"+order.to_s+'[log]', newlexeme["log"] %>
@@ -183,6 +192,7 @@
 						<%= "<th>#{initial_property_name('jp')['ctype']}</th>" unless preview_news[0]["ctype"].blank? %>
 						<%= "<th>#{initial_property_name('jp')['cform']}</th>" unless preview_news[0]["cform"].blank? %>
 						<%= "<th>#{initial_property_name('jp')['dictionary']}</th>" unless preview_news[0]["dictionary"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['tagging_state']}</th>" unless preview_news[0]["tagging_state"].blank? %>
 						<%= "<th>#{initial_property_name('jp')['log']}</th>" unless preview_news[0]["log"].blank? %>
 						<% properties = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
 						unless properties.blank?
