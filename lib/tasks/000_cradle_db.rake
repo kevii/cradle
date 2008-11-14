@@ -19,7 +19,7 @@ namespace :cradle do
           hashed_password  varchar(255) not null,
           salt             varchar(255),
           group_name       enum('user', 'admin')  not null,
-          lock_vertion     int default 0,
+          lock_version     int default 0,
           
           primary key (id),
   
@@ -46,7 +46,7 @@ namespace :cradle do
           created_by        int not null,
           modified_by       int,
           updated_at        timestamp,
-          lock_vertion      int default 0,
+          lock_version      int default 0,
           
           primary key (id),
   
@@ -77,7 +77,7 @@ namespace :cradle do
           log                 text,
           modified_by         int not null,
           updated_at          timestamp,
-          lock_vertion        int default 0,
+          lock_version        int default 0,
   
           primary key (id),
   
@@ -99,7 +99,7 @@ namespace :cradle do
           parent_id         int,
           seperator         varchar(64) default null,
           value             varchar(255) not null,
-          lock_vertion      int default 0,
+          lock_version      int default 0,
           
           primary key (id),
           
@@ -120,7 +120,7 @@ namespace :cradle do
           type_field        enum('category', 'text', 'time')  not null,
           description       text,
           default_value     text,
-          lock_vertion      int default 0,
+          lock_version      int default 0,
           
           primary key (id),
           
@@ -138,7 +138,7 @@ namespace :cradle do
           category          int unsigned,
           text              text,
           time              timestamp NULL DEFAULT 0,
-          lock_vertion      int default 0,
+          lock_version      int default 0,
           
           primary key (id),
           
@@ -159,7 +159,7 @@ namespace :cradle do
           category          int unsigned,
           text              text,
           time              timestamp NULL DEFAULT 0,
-          lock_vertion      int default 0,
+          lock_version      int default 0,
           
           primary key (id),
           
@@ -180,7 +180,7 @@ namespace :cradle do
           surface_end       varchar(64),
           reading_end       varchar(64),
           pronunciation_end varchar(64),
-          lock_vertion      int default 0,
+          lock_version      int default 0,
           
           primary key (id),
           

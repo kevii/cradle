@@ -534,10 +534,10 @@ class SyntheticController < ApplicationController
           elsif section[0] =~ /^update_(.*)$/
             string_part << $1
           elsif section[0] =~ /^meta_(.*)$/
+            string_part << 'meta_'+(new_count+1).to_s
             temp_hash, temp_count = get_meta_structure(:structure=>section, :domain=>option[:domain], :original_count=>new_count+1, :sth_ref_id=>meta_hash[new_count][:sth_ref_id])
-            new_count = temp_count
-            string_part << 'meta_'+temp_count.to_s
             meta_hash.update(temp_hash)
+            new_count = temp_count
           end
         end
       end

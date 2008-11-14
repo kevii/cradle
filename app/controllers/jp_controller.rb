@@ -432,7 +432,7 @@ class JpController < ApplicationController
     lexeme = JpLexeme.find(params[:id])
     base = lexeme.base
     begin
-      if JpSynthetic.exists?(["sth_struct like ?", "'%-#{params[:id]}-%'"])
+      if JpSynthetic.exists?(["sth_struct like ?", "%-#{lexeme.id}-%"])
         flash[:notice_err] = "<ul><li>ほかの単語の内部構造になっているので、削除できません！</li></ul>"
       else
         if lexeme.id != base.id  #word is in base series, but is not base
