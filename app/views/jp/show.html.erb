@@ -133,7 +133,7 @@
 				<div class="User-control" style="margin-left:20px; float:left;width:300px;">
 				    <fieldset style="padding-left:10px; padding-right:10px;padding-top:20px; background: #f7faff;text-align:center">
 						<legend style="background: #1e2078;">構造詳細</legend>
-							<% temp = JpSynthetic.find(:all, :conditions=>["sth_surface=?", @lexeme.surface]) %>
+							<% temp = JpSynthetic.find(:all, :conditions=>["sth_surface=? and sth_meta_id != 0", @lexeme.surface]) %>
 							<% unless temp.blank? %>
 								<strong style="color:red">この単語は以下の単語内部の【中間部分】として使われている</strong>
 								<table>

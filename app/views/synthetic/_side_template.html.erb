@@ -1,0 +1,116 @@
+<% case domain
+	when "jp"
+		select_string = "選択"
+		select_update_string = "更新"
+		intermediary_part_string = "分割の中間部分にする"
+		dummy_word_string = "Dummy語として指定"
+	when "cn"
+		select_string = "选择"
+		select_update_string = "更新"
+		intermediary_part_string = "设为中间虚置部分"
+		dummy_word_string = "在词典中登陆为虚词"
+	when "en"
+		select_string = "Select"
+		select_update_string = "Update"
+		intermediary_part_string = "Use as intermediary part"
+		dummy_word_string = "Register as dummy word"
+end %>
+
+<td class="list" valign='top' style="width:48%; text-align: center; border: 1px solid #fad163; padding:10px;">
+	<% meta_input_id = 'meta_'+side_tag %>
+	<% dummy_input_id = 'dummy_'+side_tag %>
+	<% if side_id == 'meta' or ( side_id == 'dummy' and side_template.size == 0) %>
+		<div style="padding-left:30px;text-align:left;">
+			<div onclick=<%= '$("'+meta_input_id+'").checked=true;' %>>
+				<%= radio_button_tag(side_tag, 'meta,'+side, side_id=='meta'?true:false, {:id=>meta_input_id})%>
+				<%= intermediary_part_string %>
+			</div>
+			<p>
+			<div onclick=<%= '$("'+dummy_input_id+'").checked=true;' %>>
+				<%= radio_button_tag(side_tag, 'dummy,'+side, side_id=='dummy'?true:false, {:id=>dummy_input_id})%>
+				<%= dummy_word_string %>
+			</div>
+		</div>
+	<% elsif side_template.size == 0 %>
+		<div style="padding-left:30px;text-align:left;">
+			<div onclick=<%= '$("'+meta_input_id+'").checked=true;' %>>
+				<%= radio_button_tag(side_tag, 'meta,'+side, false, {:id=>meta_input_id})%>
+				<%= intermediary_part_string %>
+			</div>
+			<p>
+			<div onclick=<%= '$("'+dummy_input_id+'").checked=true;' %>>
+				<%= radio_button_tag(side_tag, 'dummy,'+side, false, {:id=>dummy_input_id})%>
+				<%= dummy_word_string %>
+			</div>
+		</div>
+	<% else %>
+		<table>
+		    <thead>
+		        <tr>
+		        	<th><%= select_string %></th>
+					<th><%= select_update_string %></th>
+					<th><%= initial_property_name(domain)["id"] %></th>
+					<th><%= initial_property_name(domain)["surface"] %></th>
+					<th><%= initial_property_name(domain)["reading"] %></th>
+					<th><%= initial_property_name(domain)["pos"] %></th>
+					<th><%= initial_property_name(domain)["sth_struct"] %></th>
+					<th><%= initial_property_name(domain)["dictionary"] %></th>
+					<th><%= initial_property_name(domain)["tagging_state"] %></th>
+		        </tr>
+		    </thead>
+		    <tbody>
+		        <% odd_or_even = 0
+				count = 0 %>
+				<% for lexeme in side_template
+					count = count+1
+					select_id = 'select_' + side_tag + '_' + count.to_s
+		    		odd_or_even = 1 - odd_or_even %>
+			        <tr <%= "class='odd'" if odd_or_even == 0 %> >
+			        	
+					<% if side_id=~/^\d+$/ and lexeme.id==side_id.to_i %>
+						<td width=25px><%= radio_button_tag(side_tag, 'select,'+lexeme.id.to_s, true, {:id=>select_id})%></td>
+						<td width=25px><%= radio_button_tag(side_tag, 'update,'+lexeme.id.to_s, false) unless lexeme.struct.blank? %></td>
+					<% elsif side_id=~/^update_(.*)$/ and lexeme.id==$1.to_i %>
+						<td width=25px><%= radio_button_tag(side_tag, 'select,'+lexeme.id.to_s, false, {:id=>select_id})%></td>
+						<td width=25px><%= radio_button_tag(side_tag, 'update,'+lexeme.id.to_s, true) unless lexeme.struct.blank? %></td>
+					<% elsif side_template.size > 1 %>
+						<td width=25px><%= radio_button_tag(side_tag, 'select,'+lexeme.id.to_s, false, {:id=>select_id})%></td>
+						<td width=25px><%= radio_button_tag(side_tag, 'update,'+lexeme.id.to_s, false) unless lexeme.struct.blank? %></td>
+					<% else %>
+						<td width=25px><%= radio_button_tag(side_tag, 'select,'+lexeme.id.to_s, side_id=="dummy"?false:true, {:id=>select_id})%></td>
+						<td width=25px><%= radio_button_tag(side_tag, 'update,'+lexeme.id.to_s, false) unless lexeme.struct.blank? %></td>
+					<% end %>
+					<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.id) %></td>
+					<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.surface) %></td>
+					<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.reading) %></td>
+					<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.pos_item.tree_string) unless lexeme.pos.blank? %></td>
+					<td style="text-align:center;" onclick=<%= '$("'+select_id+'").checked=true;' %> >
+						<% unless lexeme.struct.blank? %>
+							<%= link_to_remote(image_tag("show_struct.jpg", :border=>0), :update=>'review_structure', :url=>{:action=>:review_structure, :id=>lexeme.id, :domain=>domain}) %>
+						<% end %>
+					</td>
+					<td style="text-align:center;" onclick=<%= '$("'+select_id+'").checked=true;' %> >
+						<% temp = []
+						lexeme.dictionary_item.list.each{|dict| temp << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>" } %>
+						<%= temp.join("  ") %>
+					</td>
+					<td onclick=<%= '$("'+select_id+'").checked=true;' %> ><%= h(lexeme.tagging_state_item.tree_string) %></td>
+			        </tr>
+		        <% end %>
+		    </tbody>
+		    <thead>
+		        <tr>
+		        	<th>Dummy<%= radio_button_tag(side_tag, 'dummy,'+side, side_id=="dummy"?true:false)%></th>
+					<th><%= select_update_string %></th>
+					<th><%= initial_property_name(domain)["id"] %></th>
+					<th><%= initial_property_name(domain)["surface"] %></th>
+					<th><%= initial_property_name(domain)["reading"] %></th>
+					<th><%= initial_property_name(domain)["pos"] %></th>
+					<th><%= initial_property_name(domain)["sth_struct"] %></th>
+					<th><%= initial_property_name(domain)["dictionary"] %></th>
+					<th><%= initial_property_name(domain)["tagging_state"] %></th>
+		        </tr>
+		    </thead>
+		</table>
+	<% end %>
+</td>

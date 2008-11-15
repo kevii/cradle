@@ -66,13 +66,13 @@ class SyntheticController < ApplicationController
         end
         structure = params[:structure]
     end
-    temp = get_create_and_update_structures(:structure=>structure, :domain=>params[:info][:domain])
+    temp = get_create_and_update_and_dummy_structures(:structure=>structure, :domain=>params[:info][:domain])
     string_structure = swap_structure_array_and_string('', structure.dup)
     root_structure = get_structure_display_string(:structure=>structure, :domain=>params[:info][:domain])
     render :update do |page|
       page["synthetic_struct"].replace :partial=>"show_internal_structure", :object=> structure,
                                        :locals=>{:info=>params[:info], :string_structure=>string_structure, :root_structure=>root_structure,
-                                                 :to_create=>temp[0], :to_update=>temp[1]}
+                                                 :to_create=>temp[0], :to_update=>temp[1], :to_dummy=>temp[2]}
     end
   end
 
@@ -115,19 +115,17 @@ class SyntheticController < ApplicationController
     if params[:first_modification].blank?
       params[:structure] = swap_structure_array_and_string(params[:structure].dup, [])
       top_structure = get_structure_display_string(:structure=>params[:structure], :domain=>params[:info][:domain])
-      to_create_structure, to_update_structure = get_create_and_update_structures(:structure=>params[:structure], :domain=>params[:info][:domain])
+      to_create_structure, to_update_structure, dummy_structure = get_create_and_update_and_dummy_structures(:structure=>params[:structure], :domain=>params[:info][:domain])
       not_defined = false
       not_defined = true if top_structure.include?('()') or top_structure.include?('[]')
       [to_create_structure, to_update_structure].each{|array| array.each{|string| not_defined = true if string.include?('()') or string.include?('[]')}}
       if not_defined == true
         flash.now[:notice_err] = get_error_message(params[:info][:domain], "modify_structure_1")
-        temp = get_create_and_update_structures(:structure=>params[:structure], :domain=>params[:info][:domain])
         string_structure = swap_structure_array_and_string('', params[:structure].dup)
-        root_structure = get_structure_display_string(:structure=>params[:structure], :domain=>params[:info][:domain])
         render :update do |page|
           page["synthetic_struct"].replace :partial=>"show_internal_structure", :object=>params[:structure],
-                                           :locals=>{:info=>params[:info], :string_structure=>string_structure, :root_structure=>root_structure,
-                                                     :to_create=>temp[0], :to_update=>temp[1]}
+                                           :locals=>{:info=>params[:info], :string_structure=>string_structure, :root_structure=>top_structure,
+                                                     :to_create=>to_create_structure, :to_update=>to_update_structure, :to_dummy=>dummy_structure}
         end
         return
       end
@@ -141,10 +139,10 @@ class SyntheticController < ApplicationController
       string_structure = swap_structure_array_and_string('', params[:structure].dup)
       render :update do |page|
         page["synthetic_struct"].replace :partial=>"modify_internal_struct",
-                                         :object=>[top_meta, create_meta_array, update_meta_array],
+                                         :object=>[top_meta, create_meta_array, update_meta_array, dummy_structure.split(',  ')],
                                          :locals=>{:top_structure=>top_structure,             :to_create_structure=>to_create_structure,
-                                                   :to_update_structure=>to_update_structure, :info=>params[:info], :first_modification=>'',
-                                                   :string_structure=>string_structure}
+                                                   :to_update_structure=>to_update_structure, :to_dummy_structure=>dummy_structure,
+                                                   :info=>params[:info], :first_modification=>'', :string_structure=>string_structure}
       end
       return
     else
@@ -189,7 +187,7 @@ class SyntheticController < ApplicationController
     top_word = {}
     new_words = []
     update_words = []
-    dummy_words = {}
+    dummy_lexemes = {}
     all_lexemes = []
     params.each{|item, value|
       case item
@@ -238,44 +236,38 @@ class SyntheticController < ApplicationController
                                                        :structure=>params[:structure], :err_msg=>err_msg
             return
           end
+        when /^dummy(\d+)_(.*)$/
+          word_id = $1
+          field_name = $2
+          dummy_lexemes[word_id] = {} if dummy_lexemes[word_id].blank?
+          if field_name == "pos"
+            dummy_lexemes[word_id][field_name] = property_class_name.constantize.find_item_by_tree_string_or_array("pos", get_ordered_string_from_params(value.dup)).property_cat_id
+          else
+            dummy_lexemes[word_id][field_name] = value
+          end
       end
     }
       
     if params[:first_modification].blank?
-      top_word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part|
-        if part=~/^\d+$/
-          all_lexemes << part.to_i
-        elsif (part=~/^\d+$/)==nil and (part=~/^meta_(\d+)$/)==nil and not dummy_words.has_key?(part)
-          dummy_words.store(part, nil)
-        end
-      }}
-      new_words.each{|word| word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part|
-        if part=~/^\d+$/
-          all_lexemes << part.to_i
-        elsif (part=~/^\d+$/)==nil and (part=~/^meta_(\d+)$/)==nil and not dummy_words.has_key?(part)
-          dummy_words.store(part, nil)
-        end
-      }}}
-      update_words.each{|word| word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part|
-        if part=~/^\d+$/
-          all_lexemes << part.to_i
-        elsif (part=~/^\d+$/)==nil and (part=~/^meta_(\d+)$/)==nil and not dummy_words.has_key?(part)
-          dummy_words.store(part, nil)
-        end
-      }}}
+      top_word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part| all_lexemes << part.to_i if part=~/^\d+$/}}
+      new_words.each{|word| word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part| all_lexemes << part.to_i if part=~/^\d+$/}}}
+      update_words.each{|word| word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part| all_lexemes << part.to_i if part=~/^\d+$/}}}
       dummy_tag = property_class_name.constantize.find_item_by_tree_string_or_array("tagging_state", 'DUMMY').property_cat_id
       root_dictionary = lexeme_class_name.constantize.find(params[:info][:original_id]).dictionary_item
       begin
+        dummy_words = {}
         class_name.constantize.transaction do
           #####################################
           ####   save dummy words
           lexeme_class_name.constantize.transaction do
-            dummy_words.each{|surface, value|
+            dummy_lexemes.each{|index, properties|
               max_id = lexeme_class_name.constantize.maximum('id')
-              temp = lexeme_class_name.constantize.new(:surface=>surface, :base_id=>max_id+1, :dictionary=>root_dictionary.to_s, :tagging_state=>dummy_tag, :created_by=>session[:user_id])
+              temp = lexeme_class_name.constantize.new(:surface=>properties["surface"], :reading=>properties["reading"], :pronunciation=>properties["pronunciation"],
+                                                       :pos=>properties["pos"], :base_id=>max_id+1, :dictionary=>root_dictionary.to_s,
+                                                       :tagging_state=>dummy_tag, :created_by=>session[:user_id])
               temp.id = max_id+1
               if temp.save!
-                dummy_words[surface] = temp.id.to_s
+                dummy_words.store(properties["surface"], temp.id.to_s)
               end
             }
           end
@@ -719,13 +711,15 @@ class SyntheticController < ApplicationController
     end
   end
 
-  def get_create_and_update_structures(option)
+  def get_create_and_update_and_dummy_structures(option)
+    dummy_words = []
+    option[:structure].flatten.each{|item| dummy_words << $1 if item=~/^dummy_(.*)$/}
     create_indexes, update_indexes = find_structure_indexes(:structure=>option[:structure])
     create_array = []
     update_array = []
     create_indexes.each{|index_string| create_array << get_structure_display_string(:structure=>eval('option[:structure]'+index_string), :domain=>option[:domain])}
     update_indexes.each{|index_string| update_array << get_structure_display_string(:structure=>eval('option[:structure]'+index_string), :domain=>option[:domain])}
-    return create_array, update_array
+    return create_array, update_array, dummy_words.uniq.join(",  ")
   end
   
   def swap_structure_array_and_string(string="", array=[], step=1)

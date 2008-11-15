@@ -64,6 +64,13 @@ class JpSynthetic < ActiveRecord::Base
   end
   
   ######################################################
+  ##### callback
+  ######################################################
+  def before_save
+    return false if self.class.exists?(:sth_ref_id=>sth_ref_id, :sth_meta_id=>sth_meta_id)
+  end
+  
+  ######################################################
   ##### method
   ######################################################
   def get_display_string

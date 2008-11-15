@@ -288,8 +288,11 @@ select, input {
 
 .text-field{
 	border: 1px solid #999999;
-	height:20px;
 	padding:2px;
+}
+
+input[type="text"].text-field {
+	height:20px; 
 }
 
 input[type="text"]:hover, input[type="password"]:hover, textarea:hover{

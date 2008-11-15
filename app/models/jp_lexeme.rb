@@ -108,6 +108,13 @@ class JpLexeme < ActiveRecord::Base
   validates_presence_of :id, :base_id, :dictionary, :tagging_state, :created_by
   
   ######################################################
+  ##### callback
+  ######################################################
+  def before_save
+    return false if self.class.exists?(:surface=>surface, :reading=>reading, :pronunciation=>pronunciation, :pos=>pos, :ctype=>ctype, :cform=>cform)
+  end
+  
+  ######################################################
   ##### method
   ######################################################
   def self.verify_dictionary(dic="")

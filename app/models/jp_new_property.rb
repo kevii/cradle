@@ -36,12 +36,12 @@ class JpNewProperty < ActiveRecord::Base
       when "category"
         if JpProperty.exists?(:property_string => self.property_string)
           errors.add_to_base("<ul><li>内部の子分類はまだあるので、【#{self.human_name}】を削除できません！</li></ul>")
-          return
+          return false
         end
       when "text", "time"
         if JpLexemeNewPropertyItem.exists?(["property_id = #{self.id}"]) or JpSyntheticNewPropertyItem.exists?(["property_id = #{self.id}"])
           errors.add_to_base("<ul><li>属性【#{self.human_name}】を保有する単語はまだあるので、属性を削除できません！</li></ul>")
-          return
+          return false
         end
     end 
   end

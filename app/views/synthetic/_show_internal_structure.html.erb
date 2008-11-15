@@ -72,6 +72,12 @@
 								<td><%= h(update_structure) %></td>
 							</tr>
 						<% } %>
+						<% unless to_dummy.blank? %>
+							<tr>
+								<td style="color:red;"><strong>Dummy:</strong></td>
+								<td><%= h(to_dummy) %></td>
+							</tr>
+						<% end %>
 					</table>
 				</td>
 			</tr>

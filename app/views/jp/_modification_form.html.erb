@@ -4,18 +4,18 @@
         	<td width="100"><%= initial_property_name('jp')['surface'] %></td>
             <td width="365">
             	<% if modification_form.blank? or modification_form.surface.blank? %>
-	            	<%= text_field_tag :surface, nil, :style=>"width:100%;" %>
+	            	<%= text_field_tag :surface, nil, :style=>"width:100%;", :class=>'text-field' %>
 				<% else %>
-					<%= text_field_tag :surface, modification_form.surface, :style=>"width:100%;" %>
+					<%= text_field_tag :surface, modification_form.surface, :style=>"width:100%;", :class=>'text-field' %>
 				<% end %>
 			</td>
 			<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td width="100"><%= initial_property_name('jp')['reading'] %></td>
             <td width="365">
             	<% if modification_form.blank? or modification_form.reading.blank? %>
-					<%= text_field_tag :reading, nil, :style=>"width:100%;" %>
+					<%= text_field_tag :reading, nil, :style=>"width:100%;", :class=>'text-field' %>
 				<% else %>
-					<%= text_field_tag :reading, modification_form.reading, :style=>"width:100%;" %>
+					<%= text_field_tag :reading, modification_form.reading, :style=>"width:100%;", :class=>'text-field' %>
 				<% end %>
 			</td>
 		</tr>
@@ -23,9 +23,9 @@
 	        <td><%= initial_property_name('jp')['pronunciation'] %></td>
             <td>
             	<% if modification_form.blank? or modification_form.pronunciation.blank? %>
-					<%= text_field_tag :pronunciation, nil, :style=>"width:100%;" %>
+					<%= text_field_tag :pronunciation, nil, :style=>"width:100%;", :class=>'text-field' %>
 				<% else %>
-					<%= text_field_tag :pronunciation, modification_form.pronunciation, :style=>"width:100%;" %>
+					<%= text_field_tag :pronunciation, modification_form.pronunciation, :style=>"width:100%;", :class=>'text-field' %>
 				<% end %>
 			</td>
 			<td></td>
@@ -92,9 +92,9 @@
 			<td><%= initial_property_name('jp')['log'] %></td>
 			<td>
 				<% if modification_form.blank? or modification_form.log.blank? %>
-					<%= text_area_tag :log, nil, :rows => 4, :style=>"width:100%;" %>
+					<%= text_area_tag :log, nil, :rows => 4, :style=>"width:100%;", :class=>'text-field' %>
 				<% else %>
-					<%= text_area_tag :log, modification_form.log, :rows => 4, :style=>"width:100%;" %>
+					<%= text_area_tag :log, modification_form.log, :rows => 4, :style=>"width:100%;", :class=>'text-field' %>
 				<% end %>
 			</td>
 		</tr>

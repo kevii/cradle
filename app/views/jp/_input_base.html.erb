@@ -10,7 +10,7 @@
 				 value=original_base
 			   end
 			%>
-			<span style="padding-left:10px;padding-right:10px;"><input onclick="clear()" <%= "value='#{value}'" %> name="base" id="base" type="text" SIZE=23 /></span>
+			<span style="padding-left:10px;padding-right:10px;"><input onclick="clear()" <%= "value='#{value}'" %> name="base" id="base" type="text" SIZE=23 class="text-field" /></span>
 			<%= observe_field("base", :update => "message", :url => {:action => :input_base}, :with => "'base_as_id='+value", :on => "changed") %>
 			<a href="#">==></a>
 		</td>
@@ -28,7 +28,7 @@
 		<td>
 			<input type="radio" name='base_type' id='base_type' value="id" onclick=<%= "\"#{remote_function(:update=>'base_field', :url=>{:action=>:input_base}, :with=>"'base_type='+value")}\"" %> />ID
 			<input type="radio" name='base_type' id='base_type' checked="checked" value="surface" onclick=<%= "\"#{remote_function(:update=>'base_field', :url=>{:action=>:input_base}, :with=>"'base_type='+value")}\"" %> />単語
-			<span style="padding-left:10px;padding-right:10px;"><input onclick="clear()" value="単語を入力して下さい" name="base" id="base" type="text" SIZE=23 /></span>
+			<span style="padding-left:10px;padding-right:10px;"><input onclick="clear()" value="単語を入力して下さい" name="base" id="base" type="text" SIZE=23 class="text-field" /></span>
 			<%= observe_field("base", :update => "message", :url => {:action => :input_base}, :with => "'base_as_surface='+value", :on => "changed") %>
 			<a href="#">==></a>
 		</td>

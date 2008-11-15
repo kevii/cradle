@@ -12,4 +12,11 @@ class JpLexemeNewPropertyItem < ActiveRecord::Base
   ##### validation
   ######################################################
   validates_presence_of :property_id, :ref_id
+  
+  ######################################################
+  ##### callback
+  ######################################################
+  def before_save
+    return false if self.class.exists?(:property_id=>property_id, :ref_id=>ref_id)
+  end
 end
