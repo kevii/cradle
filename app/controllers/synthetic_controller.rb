@@ -241,7 +241,8 @@ class SyntheticController < ApplicationController
           field_name = $2
           dummy_lexemes[word_id] = {} if dummy_lexemes[word_id].blank?
           if field_name == "pos"
-            dummy_lexemes[word_id][field_name] = property_class_name.constantize.find_item_by_tree_string_or_array("pos", get_ordered_string_from_params(value.dup)).property_cat_id
+            temp = property_class_name.constantize.find_item_by_tree_string_or_array("pos", get_ordered_string_from_params(value.dup))
+            temp.blank? ? dummy_lexemes[word_id][field_name]=nil : dummy_lexemes[word_id][field_name]=temp.property_cat_id
           else
             dummy_lexemes[word_id][field_name] = value
           end
