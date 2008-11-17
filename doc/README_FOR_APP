@@ -1,2 +1,48 @@
-Use this README file to introduce your application and point to useful places in the API for learning more.
-Run "rake doc:app" to generate API documentation for your models, controllers, helpers, and libraries.
+= Cradle On Rails: A dictionary managment system for ChaSen
+
+#Authors::   Jia Lu
+#Email::   jia-l@is.naist.jp
+
+=== Current function
+* User management
+* Japanese
+
+  All CRUD function for lexemes and synthetic structures.
+
+=== Command to make this documentation
+	rake doc:app title="Cradle Documentation"
+	
+=== Component being used
+
+* will_paginate
+
+  It is a gem which makes the pagination of rails very easy to implement.
+  
+  Reference: http://mislav.uniqpath.com/static/will_paginate/doc
+
+* javascript menu bar
+  
+  Reference: http://www.milonic.com
+
+* javascript progress bar
+  
+  Reference: http://www.bram.us/projects/js_bramus/jsprogressbarhandler
+		
+* javascript horizontal tree view
+  
+  Reference: http://www.codeproject.com/KB/scripting/graphic_javascript_tree.aspx
+
+* acts_as_tree plugin
+  
+  Used by properties tables in Cradle.
+
+* daemon gem and daemon_generator plugin
+
+  "daemon" is a ruby gem that cound run back office programme.
+  "daemon_generator" is a rails plugin that can manage multiple daemons used for rails.
+
+* starling gem and workling plugin
+
+  "starling" is a ruby gem that can manage queue function in background.
+  "workling" is rails plugin that is written for running backgroud tasks in rails.
+  Using starling and worling pair can manager user specific long run tasks in rails.

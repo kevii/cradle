@@ -66,7 +66,7 @@ class User < ActiveRecord::Base
       errors.add_to_base("You cannot delete yourself!")
       return false
     end
-    unless (created_jp_lexemes.blank? or modified_jp_lexemes.blank? or modified_jp_synthetics.blank?)
+    unless (created_jp_lexemes.blank? and modified_jp_lexemes.blank? and modified_jp_synthetics.blank?)
 ######## jia-l leave for cn
 #      (created_cn_lexemes.blank? or modified_cn_lexemes.blank? or modified_cn_synthetics.blank?)
       errors.add_to_base("Please merge this user to other user before deleting!")
