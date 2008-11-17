@@ -46,3 +46,6 @@
   "starling" is a ruby gem that can manage queue function in background.
   "workling" is rails plugin that is written for running backgroud tasks in rails.
   Using starling and worling pair can manager user specific long run tasks in rails.
+  
+* deploy using passenger(modrails)
+  Reference: http://www.modrails.com/documentation/Users%20guide.html
