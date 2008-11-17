@@ -55,15 +55,9 @@ class JpController < ApplicationController
       per_page = params[:per_page].to_i
     end
     if params[:dynamic_lexeme_condition].blank? and params[:dynamic_synthetic_condition].blank?
-      mysql_string = %Q| SELECT DISTINCT jp_lexemes.* | +
-                     %Q| FROM `jp_lexemes` LEFT OUTER JOIN `jp_synthetics` ON jp_synthetics.sth_ref_id = jp_lexemes.id | +
-                     %Q| WHERE | + params[:static_condition] +
-                     %Q| ORDER BY  jp_lexemes.id ASC |
-      @jplexemes = JpLexeme.paginate_by_sql(mysql_string, :per_page => per_page, :page => page)
-      
-#      @jplexemes = JpLexeme.paginate( :select=>" jp_lexemes.* ",   :conditions => params[:static_condition],
-#                                      :include => [:sub_structs],  :order => " jp_lexemes.id ASC ",
-#                                      :per_page => per_page,       :page => page )
+      @jplexemes = JpLexeme.paginate( :select=>" jp_lexemes.* ",   :conditions => params[:static_condition],
+                                      :include => [:sub_structs],  :order => " jp_lexemes.id ASC ",
+                                      :per_page => per_page,       :page => page )
     elsif params[:simple_search] == "true"
       mysql_condition_string = [params[:static_condition].gsub('jp_synthetics', 'dynamic_struct_properties_jp_lexemes_join'),params[:dynamic_lexeme_condition],params[:dynamic_synthetic_condition]]
       mysql_condition_string.delete("")

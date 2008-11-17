@@ -51,11 +51,9 @@ class DumpDataWorker < Workling::Base
   def find_all_jp_ids(options)
     final_id_arrays = []
     if options[:dynamic_lexeme_condition].blank? and options[:dynamic_synthetic_condition].blank?
-      mysql_string = %Q| SELECT DISTINCT jp_lexemes.id | +
-                     %Q| FROM `jp_lexemes` LEFT OUTER JOIN `jp_synthetics` ON jp_synthetics.sth_ref_id = jp_lexemes.id | +
-                     %Q| WHERE | + options[:static_condition] +
-                     %Q| ORDER BY  jp_lexemes.id ASC |
-      final_id_arrays = JpLexeme.find_by_sql(mysql_string).map{|item| item.id}
+      final_id_arrays = JpLexeme.find( :all, :select=>" jp_lexemes.id ",   :conditions => params[:static_condition],
+                                       :include => [:sub_structs],  :order => " jp_lexemes.id ASC ",
+                                       :per_page => per_page,       :page => page ).map{|item| item.id}
     elsif options[:simple_search] == "true"
       mysql_condition_string = [options[:static_condition].gsub('jp_synthetics', 'dynamic_struct_properties_jp_lexemes_join'), options[:dynamic_lexeme_condition], options[:dynamic_synthetic_condition]]
       mysql_condition_string.delete("")
