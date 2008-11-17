@@ -102,17 +102,12 @@ class JpLexeme < ActiveRecord::Base
   has_many :sub_structs,  :class_name=>"JpSynthetic", :foreign_key=>"sth_ref_id"
   has_many :dynamic_properties,  :class_name=>"JpLexemeNewPropertyItem", :foreign_key=>"ref_id"
   has_many :dynamic_struct_properties, :through=>:sub_structs, :source=>:other_properties
+  
   ######################################################
   ##### validation
   ######################################################
-  validates_presence_of :id, :base_id, :dictionary, :tagging_state, :created_by
-  
-  ######################################################
-  ##### callback
-  ######################################################
-  def before_save
-    return false if self.class.exists?(:surface=>surface, :reading=>reading, :pronunciation=>pronunciation, :pos=>pos, :ctype=>ctype, :cform=>cform)
-  end
+  validates_presence_of :id, :surface, :base_id, :dictionary, :tagging_state, :created_by
+  validates_uniqueness_of :surface, :scope => [:reading, :pronunciation, :pos, :ctype, :cform]
   
   ######################################################
   ##### method

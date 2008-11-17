@@ -7,11 +7,5 @@ class JpCtypeCformSeed < ActiveRecord::Base
   ######################################################
   validates_presence_of :ctype, :cform, :surface_end, :reading_end, :pronunciation_end,
                         :message=>"すべての語尾フィールドを入力してください！"
-                        
-  ######################################################
-  ##### callback
-  ######################################################
-  def before_save
-    return false if self.class.exists?(:cform=>cform, :ctype=>ctype)
-  end
+  validates_uniqueness_of :cform, :scope => [:ctype]
 end

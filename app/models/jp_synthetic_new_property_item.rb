@@ -6,11 +6,5 @@ class JpSyntheticNewPropertyItem < ActiveRecord::Base
   ##### table refenrence
   ######################################################
   belongs_to :property, :class_name => "JpNewProperty", :foreign_key =>"property_id"
-
-  ######################################################
-  ##### callback
-  ######################################################
-  def before_save
-    return false if self.class.exists?(:property_id=>property_id, :ref_id=>ref_id)
-  end
+  validates_uniqueness_of :property_id, :scope => [:ref_id]
 end

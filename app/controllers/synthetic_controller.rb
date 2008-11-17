@@ -272,7 +272,7 @@ class SyntheticController < ApplicationController
               end
             }
           end
-          
+
           #####################################
           #####   update dummy words' id in meta structure and all lexemes
           top_word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part|
@@ -292,7 +292,7 @@ class SyntheticController < ApplicationController
           }}}
           dummy_words.each{|key, value| all_lexemes << value.to_i}
           all_lexemes = all_lexemes.uniq
-          
+
           ######################################
           ####      save the update words
           old_struct_ids = []
@@ -304,12 +304,11 @@ class SyntheticController < ApplicationController
             class_name.constantize.find(structure_id).destroy
           }
           update_words.each{|word| save_word_structure(:word=>word, :class_name=>class_name, :user_id=>session[:user_id], :item_class_name=>item_class_name, :category_names=>category_names, :text_names=>text_names, :time_names=>time_names)}
-          
+
           ######################################
           ####      save the new words
           new_words.each{|word| save_word_structure(:word=>word, :class_name=>class_name, :user_id=>session[:user_id], :item_class_name=>item_class_name, :category_names=>category_names, :text_names=>text_names, :time_names=>time_names)}
-          
-          
+
           #####################################
           ####   delete old structure if from modification
           if params[:info][:from] == 'modification'
@@ -320,12 +319,11 @@ class SyntheticController < ApplicationController
               old_structure.destroy
             }
           end
-          
+
           ######################################
           ####      save root word
           save_word_structure(:word=>top_word, :class_name=>class_name, :user_id=>session[:user_id], :item_class_name=>item_class_name, :category_names=>category_names, :text_names=>text_names, :time_names=>time_names)
-          
-          
+
           ######################################
           ####     update existing meta part whose sth_surface matches with the root word
           all_intermedia = class_name.constantize.find(:all, :conditions=>["sth_surface=? and sth_meta_id != 0", top_word[0][:sth_surface]])

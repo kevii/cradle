@@ -64,11 +64,9 @@ class JpSynthetic < ActiveRecord::Base
   end
   
   ######################################################
-  ##### callback
+  ##### validation
   ######################################################
-  def before_save
-    return false if self.class.exists?(:sth_ref_id=>sth_ref_id, :sth_meta_id=>sth_meta_id)
-  end
+  validates_uniqueness_of :sth_ref_id, :scope => [:sth_meta_id]
   
   ######################################################
   ##### method
