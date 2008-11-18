@@ -597,7 +597,7 @@ class SyntheticController < ApplicationController
       if meta_id == 0
         structure_id = option[:class_name].constantize.create!(:sth_ref_id=>content[:sth_ref_id], :sth_meta_id=>meta_id, :sth_struct=>content[:sth_struct],
                                                                :sth_surface=>content[:sth_surface], :sth_tagging_state=>sth_tagging_state_tag,
-                                                               :log=>content[:log], :modified_by=>option[:user_id]).id
+                                                               :log=>content[:log].blank??nil:content[:log], :modified_by=>option[:user_id]).id
       else
         structure_id = option[:class_name].constantize.create!(:sth_ref_id=>content[:sth_ref_id], :sth_meta_id=>meta_id, :sth_struct=>content[:sth_struct],
                                                                :sth_surface=>content[:sth_surface], :modified_by=>option[:user_id],

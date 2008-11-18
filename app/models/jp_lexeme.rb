@@ -127,6 +127,7 @@ class JpLexeme < ActiveRecord::Base
     lexeme["pos"].blank? ? conditions << "pos is NULL" : conditions << "pos = "+lexeme["pos"].to_s
     lexeme["ctype"].blank? ? conditions << "ctype is NULL" : conditions << "ctype = "+lexeme["ctype"].to_s
     lexeme["cform"].blank? ? conditions << "cform is NULL" : conditions << "cform = "+lexeme["cform"].to_s
+    lexeme["log"].blank? ? conditions << "log is NULL" : conditions << "log = '"+lexeme["log"]+"'"
     maybe_exists = find(:all, :conditions=>conditions.join(' and '))
     unless maybe_exists.blank?
       maybe_exists.each{|temp_lexeme|
