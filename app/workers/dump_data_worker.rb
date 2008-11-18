@@ -51,9 +51,9 @@ class DumpDataWorker < Workling::Base
   def find_all_jp_ids(options)
     final_id_arrays = []
     if options[:dynamic_lexeme_condition].blank? and options[:dynamic_synthetic_condition].blank?
-      final_id_arrays = JpLexeme.find( :all, :select=>" jp_lexemes.id ",   :conditions => params[:static_condition],
-                                       :include => [:sub_structs],           :order => " jp_lexemes.id ASC ",
-                                       :per_page => per_page,       :page => page ).map{|item| item.id}
+      final_id_arrays = JpLexeme.find(:all, :select=>"jp_lexemes.id", :conditions=>params[:static_condition],
+				      :joins=>" left join jp_synthetics on jp_synthetics.sth_ref_id = jp_lexemes.id ",
+				      :order=>" jp_lexemes.id ASC ").map(&:id)
     elsif options[:simple_search] == "true"
       mysql_condition_string = [options[:static_condition].gsub('jp_synthetics', 'dynamic_struct_properties_jp_lexemes_join'), options[:dynamic_lexeme_condition], options[:dynamic_synthetic_condition]]
       mysql_condition_string.delete("")
@@ -86,7 +86,9 @@ class DumpDataWorker < Workling::Base
         collection = install_by_dividing(:ids=>dynamic_ids, :domain=>'jp')
         final_id_arrays = collection.map{|item| item.id}
       else
-        static_ids = JpLexeme.find(:all, :select=>" jp_lexemes.id ", :conditions=>options[:static_condition], :include=>[:sub_structs], :order=>" jp_lexemes.id ASC ").map{|item| item.id}
+        static_ids = JpLexeme.find(:all, :select=>"jp_lexemes.id", :conditions=>params[:static_condition],
+				   :joins=>" left join jp_synthetics on jp_synthetics.sth_ref_id = jp_lexemes.id ",
+				   :order=>" jp_lexemes.id ASC ").map(&:id)
         static_ids.size >= dynamic_ids.size ? final_id_arrays = dynamic_ids & static_ids : final_id_arrays = static_ids & dynamic_ids
       end
     end

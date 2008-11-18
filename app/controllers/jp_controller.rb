@@ -55,9 +55,9 @@ class JpController < ApplicationController
       per_page = params[:per_page].to_i
     end
     if params[:dynamic_lexeme_condition].blank? and params[:dynamic_synthetic_condition].blank?
-      @jplexemes = JpLexeme.paginate( :select=>" jp_lexemes.* ",   :conditions => params[:static_condition],
-                                      :include => [:sub_structs],    :order => " jp_lexemes.id ASC ",
-                                      :per_page => per_page,       :page => page )
+      @jplexemes = JpLexeme.paginate(:select=>"jp_lexemes.*", :conditions=>params[:static_condition],
+				     :joins=>" left join jp_synthetics on jp_synthetics.sth_ref_id = jp_lexemes.id ",
+				     :order=>" jp_lexemes.id ASC ", :per_page=>per_page, :page=>page)
     elsif params[:simple_search] == "true"
       mysql_condition_string = [params[:static_condition].gsub('jp_synthetics', 'dynamic_struct_properties_jp_lexemes_join'),params[:dynamic_lexeme_condition],params[:dynamic_synthetic_condition]]
       mysql_condition_string.delete("")
@@ -90,7 +90,9 @@ class JpController < ApplicationController
         collection = install_by_dividing(:ids=>dynamic_ids, :domain=>'jp')
         @jplexemes = collection.paginate(:page=>page, :per_page=>per_page)
       else
-        static_ids = JpLexeme.find(:all, :select=>" jp_lexemes.id ", :conditions => params[:static_condition], :include => [:sub_structs], :order => " jp_lexemes.id ASC ").map{|item| item.id}
+        static_ids = JpLexeme.find(:all, :select=>"jp_lexemes.id", :conditions=>params[:static_condition],
+				   :joins=>" left join jp_synthetics on jp_synthetics.sth_ref_id = jp_lexemes.id ",
+				   :order=>" jp_lexemes.id ASC ").map(&:id)
         static_ids.size >= dynamic_ids.size ? final_ids = dynamic_ids & static_ids : final_ids = static_ids & dynamic_ids
         @jplexemes = JpLexeme.paginate(:all, :conditions=>["id in (#{final_ids.join(',')})"], :page=>page, :per_page=>per_page)
       end

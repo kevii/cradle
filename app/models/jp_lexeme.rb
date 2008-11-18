@@ -26,7 +26,10 @@ class JpLexeme < ActiveRecord::Base
   end
   
   has_one :struct,  :class_name=>"JpSynthetic", :foreign_key=>"sth_ref_id", :conditions=>"sth_meta_id=0"
-  
+  has_many :sub_structs,  :class_name=>"JpSynthetic", :foreign_key=>"sth_ref_id"
+  has_many :dynamic_properties,  :class_name=>"JpLexemeNewPropertyItem", :foreign_key=>"ref_id"
+  has_many :dynamic_struct_properties, :through=>:sub_structs, :source=>:other_properties
+
   def pos_item
     JpProperty.find(:first, :conditions=>["property_string='pos' and property_cat_id=?", self.pos])
   end
@@ -98,10 +101,6 @@ class JpLexeme < ActiveRecord::Base
       super
     end
   end
-  
-  has_many :sub_structs,  :class_name=>"JpSynthetic", :foreign_key=>"sth_ref_id"
-  has_many :dynamic_properties,  :class_name=>"JpLexemeNewPropertyItem", :foreign_key=>"ref_id"
-  has_many :dynamic_struct_properties, :through=>:sub_structs, :source=>:other_properties
   
   ######################################################
   ##### validation
