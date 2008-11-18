@@ -134,9 +134,9 @@ class JpLexeme < ActiveRecord::Base
         same = []
         lexeme.each{|key, value|
           case key
-            when "surface", "reading", "pronunciation", "pos", "ctype", "cform"
+            when "surface", "reading", "pronunciation", "pos", "ctype", "cform", "log"
               next
-            when "base_id", "dictionary", "log", "id", "root_id", "tagging_state"
+            when "id", "base_id", "dictionary", "root_id", "tagging_state"
               next
             else
               if value == (eval "temp_lexeme."+key) or ( JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"]).type_field == "time" and (eval "not temp_lexeme."+key+".blank?")  and value==(eval "temp_lexeme."+key+".to_formatted_s(:db)") )
