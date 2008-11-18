@@ -106,7 +106,7 @@ class JpLexeme < ActiveRecord::Base
   ##### validation
   ######################################################
   validates_presence_of :id, :surface, :base_id, :dictionary, :tagging_state, :created_by
-  validates_uniqueness_of :surface, :scope => [:reading, :pronunciation, :pos, :ctype, :cform]
+  validates_uniqueness_of :surface, :scope => [:reading, :pronunciation, :pos, :ctype, :cform, :log]
   
   ######################################################
   ##### method
