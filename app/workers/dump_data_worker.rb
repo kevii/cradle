@@ -87,8 +87,8 @@ class DumpDataWorker < Workling::Base
         final_id_arrays = collection.map{|item| item.id}
       else
         static_ids = JpLexeme.find(:all, :select=>"jp_lexemes.id", :conditions=>params[:static_condition],
-				   :joins=>" left join jp_synthetics on jp_synthetics.sth_ref_id = jp_lexemes.id ",
-				   :order=>" jp_lexemes.id ASC ").map(&:id)
+                        				   :joins=>" left join jp_synthetics on jp_synthetics.sth_ref_id = jp_lexemes.id ",
+                        				   :group=>"jp_lexemes.id", :order=>" jp_lexemes.id ASC ").map(&:id)
         static_ids.size >= dynamic_ids.size ? final_id_arrays = dynamic_ids & static_ids : final_id_arrays = static_ids & dynamic_ids
       end
     end
