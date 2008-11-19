@@ -79,8 +79,8 @@ class SyntheticController < ApplicationController
   def split_word
     params[:structure] = swap_structure_array_and_string(params[:structure].dup, [])
     lexeme_class = verify_domain(params[:info][:domain])['Lexeme']
-    lexemes_left = lexeme_class.constantize.find(:all, :include=>[:struct], :conditions=>["surface=?", params[:left]], :order=>"id ASC")
-    lexemes_right = lexeme_class.constantize.find(:all, :include=>[:struct], :conditions=>["surface=?", params[:right]], :order=>"id ASC")
+    lexemes_left = lexeme_class.constantize.find(:all, :conditions=>["surface=?", params[:left]], :order=>"id ASC")
+    lexemes_right = lexeme_class.constantize.find(:all, :conditions=>["surface=?", params[:right]], :order=>"id ASC")
     case params[:split_action][:type]
       when "modify"
         left_id = get_type_or_id_from_structure(eval('params[:structure]'+params[:split_action][:left_hand_index]))
