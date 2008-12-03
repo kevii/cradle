@@ -169,13 +169,13 @@ class SyntheticController < ApplicationController
     case params[:info][:domain]
       when "jp"
         alert_string = "<ul><li>問題が発生しました、構造を新規できません</li></ul>"
-        success_string = "<ul><li>構造を新規しました！</li></ul>"
+        success_string = "<ul><li>構造を更新しました！</li></ul>"
       when "cn"
         alert_string = "<ul><li>问题发生，不能创建内部结构</li></ul>"
-        success_string = "<ul><li>内部结构已创建！</li></ul>"
+        success_string = "<ul><li>内部结构已更新！</li></ul>"
       when "en"
         alert_string = "<ul><li>Problem occurred, cannot create internal structure</li></ul>"
-        success_string = "<ul><li>Internal structure created!</li></ul>"
+        success_string = "<ul><li>Internal structure updated!</li></ul>"
     end
     category_names = {}
     new_property_class_name.constantize.find(:all, :conditions=>["section='synthetic' and type_field='category'"]).each{|item| category_names[item.property_string]=item.id}
@@ -248,7 +248,7 @@ class SyntheticController < ApplicationController
           end
       end
     }
-      
+
     if params[:first_modification].blank?
       top_word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part| all_lexemes << part.to_i if part=~/^\d+$/}}
       new_words.each{|word| word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part| all_lexemes << part.to_i if part=~/^\d+$/}}}
@@ -366,10 +366,9 @@ class SyntheticController < ApplicationController
           item_class_name.constantize.transaction do
             top_word.each{|meta_id, content| item_class_name.constantize.find(:all, :conditions=>["ref_id=?", content[:id]]).each{|temp| temp.destroy}}
           end
-          sth_tagging_state_tag = property_class_name.constantize.find_item_by_tree_string_or_array('sth_tagging_state', get_ordered_string_from_params(top_word[0][:sth_tagging_state])).property_cat_id
           top_word.each{|meta_id, content|
             structure = class_name.constantize.find(content[:id])
-            structure.update_attributes!(:sth_tagging_state=>sth_tagging_state_tag, :log=>content[:log], :modified_by=>session[:user_id])
+            structure.update_attributes!(:sth_tagging_state=>top_word[0][:sth_tagging_state], :log=>content[:log], :modified_by=>session[:user_id])
             save_word_structure_property(:item_class_name=>item_class_name, :content=>content, :category_names=>category_names,
                                          :text_names=>text_names, :time_names=>time_names, :structure_id=>structure.id)
           }
