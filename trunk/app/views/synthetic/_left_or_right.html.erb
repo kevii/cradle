@@ -1,0 +1,52 @@
+<% case info[:domain]
+	when "jp"
+		change_string = "変更"
+		confirm_string = "确定"
+	when "cn"
+		change_string = "变更"
+		confirm_string = "确定"
+	when "en"
+		change_string = "Change"
+		confirm_string = "Confirm"
+end %>
+
+<div id="candidate">
+	<table style="width:100%; text-align: center; margin:10px 0 10px 0;" >
+		<tr>
+			<td>
+				<% form_remote_tag :url=>{:action=>"split_word", :right=>right, :split_action=>split_action, :structure=>string_structure, :info=>info} do %>
+				   	<strong><%= left %></strong>
+					<%= text_field_tag 'left', nil, :size=>"15", :class=>'text-field' %>
+					<input name="commit" type="submit" value=<%= change_string %> />
+				<% end %>
+			</td>
+			<td></td>
+			<td>
+				<% form_remote_tag :url=>{:action=>"split_word", :left=>left,  :split_action=>split_action, :structure=>string_structure, :info=>info} do %>
+				   	<strong><%= right %></strong>
+					<%= text_field_tag 'right', nil, :size=>'15', :class=>'text-field' %>
+					<input name="commit" type="submit" value=<%= change_string %> />
+				<% end %>
+			</td>
+		</tr>
+	</table>
+	<% form_remote_tag :url => {:action=>"define_internal_structure", :split_action=>split_action, :structure=>string_structure, :info=>info} do %>		
+		<table>
+			<tr>
+				<%= render :partial=>'side_template', :object=>left_or_right[0], :locals=>{:domain=>info[:domain], :side_tag=>'left', :side=>left, :side_id=>left_id} %>
+				
+				<td valign='top' style="width:4%; text-align: center;">
+					<% if split_action[:divide_type] == "horizontal" %>
+						<%= image_tag("internal-horizontal.jpg", :border=>0, :style=>"padding-bottom:40px;") %>
+					<% elsif split_action[:divide_type] == "vertical" %>
+						<%= image_tag("internal-vertical.jpg", :border=>0, :style=>"padding-bottom:10px;") %>
+					<% end %>
+					<%= submit_tag confirm_string %>
+				</td>
+				
+				<%= render :partial=>'side_template', :object=>left_or_right[1], :locals=>{:domain=>info[:domain], :side_tag=>'right', :side=>right, :side_id=>right_id} %>
+			</tr>
+		</table>
+	<% end %>
+	<div id='review_structure'></div>
+</div>

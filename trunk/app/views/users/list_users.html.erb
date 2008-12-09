@@ -1,0 +1,53 @@
+<div class="User-control"  style="padding-left: 4%;">
+    <fieldset  style="width:30%;">
+        <legend>Cradle user list</legend>
+        <table>
+            <tr>
+                <th width="30px"></th>
+                <th align="left" style="padding-left:20px;">ID</th>
+                <th align="left" style="padding-left:20px;">Group</th>
+            </tr>
+            <% for user in @all_users %>                    
+                <tr>
+                <td width="30px" align=center>
+                    <% unless user.name=="cradle" or user.id==session[:user_id] %>
+                        <%= link_to image_tag("less.gif", :border=>0),
+                                { :controller => 'users', :action => 'delete_user', :id => user.id },
+                                { :confirm => "Really delete #{user.name}?", :method=>"post" } %>
+                    <% end %>
+                </td>
+                <td style="padding-left:20px;"><%= h(user.name) %></td>
+                <td style="padding-left:20px;"><%= h(user.group_name) %></td>
+                </tr>
+            <% end %>
+			<tr>
+				<td><%= button_to 'Create', {:controller=>'users', :action=>'add_user'}, {:method=>"get"} %></td>
+			</tr>
+        </table>
+    </fieldset>
+	<p>
+	<p>
+    <fieldset  style="width:30%;">
+        <legend>Merge user</legend>
+        <%= form_tag :action => "merge_user", :method => "post"%>
+	        <table>
+	            <tr>
+	            	<td width=50>Merge</td>
+					<td>
+	                    <select id="old_user" name="old_user" >
+                            <option selected value=""></option>
+                            <%= options_from_collection_for_select(User.find(:all, :order => "id"), :id, :name, selected_value=nil) %>
+	                    </select>
+					</td>
+					<td align=center width=50>to</td>
+					<td>
+	                    <select id="merge_user" name="merge_user" >
+                            <option selected value=""></option>
+                            <%= options_from_collection_for_select(User.find(:all, :order => "id"), :id, :name, selected_value=nil) %>
+	                    </select>						
+					</td>
+					<td align=center width=100><%= submit_tag "Merge" %></td>
+				</tr>
+	        </table>
+    </fieldset>	
+</div>

@@ -1,0 +1,52 @@
+<div id="modify_seed">
+	<% if not flash.now[:notice].blank? %>
+		<div id="notice" ><%= flash.now[:notice] %></div>
+	<% end %>
+</div>
+<fieldset align="left" style="width:960px; padding-top:10px; margin-bottom:30px; background: lightgrey;">
+    <legend style="background: steelblue;">単語系列</legend>
+	<table class="property_list">
+		<thead>
+			<tr>
+				<th width=80px style="text-align:center;"><%= button_to_remote("新規", :update=>"modify_seed", :url=>{:action => :modify_ctype_cform_seed})%></th>
+				<th width=50px></th>
+				<th width=150px>活用型</th>
+				<th width=120px>活用形</th>
+				<th width=120px>単語語尾</th>
+				<th width=120px>読み語尾</th>
+				<th width=120px>発音語尾</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% count = 1 %>
+			<% for index in 1..JpCtypeCformSeed.maximum("ctype") do %>
+				<% JpCtypeCformSeed.find(:all, :conditions=>["ctype = #{index}"], :order=>"cform ASC").each{|item| %>
+					<tr>
+						<td style="text-align:center;">
+	                        <%= link_to_remote(image_tag("less.gif", :border=>0), :url =>{:action => :delete_ctype_cform_seed, :id => item.id}, 
+																				  :confirm => "削除しますか?",
+																				  :before => "Element.show('spinner');",
+																				  :after=> "document.getElementById('top').focus();",
+																				  :complete => "Element.hide('spinner');") %>
+							&nbsp;&nbsp;&nbsp;
+							<%= link_to_remote(image_tag("plus.gif", :border=>0), :update => "modify_seed", :url => {:action => :modify_ctype_cform_seed, :id=>item.id})%>
+						</td>
+						<% if not show_ctype_cform_seeds.blank? and item.id == show_ctype_cform_seeds%>
+							<td style="background-color:red;">
+						<% else %>
+							<td>
+						<% end %>
+						<%= count %></td>
+						<td><%= h(JpProperty.find(:first, :conditions=>["property_string='ctype' and property_cat_id=?", index]).tree_string) if item.cform==1 %></td>
+						<td><%= h(JpProperty.find(:first, :conditions=>["property_string='cform' and property_cat_id=?", item.cform]).tree_string) %></td>
+						<td><%= h(item.surface_end) %></td>
+						<td><%= h(item.reading_end) %></td>
+						<td><%= h(item.pronunciation_end) %></td>
+					</tr>
+					<% count = count + 1 %>
+				<% } %>
+			<% end %>
+		</tbody>
+	</table>
+</fieldset>
+<%= javascript_tag render(:update) { |page| page['top'].focus } %>

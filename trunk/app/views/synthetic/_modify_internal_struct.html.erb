@@ -1,0 +1,287 @@
+<% case info[:domain]
+	when "jp"
+		change_string = "変更"
+		update_string = "更新"
+		reset_string = "リセット"
+		top_structs_string = "Top複合語属性"
+		new_structs_string = "New複合語属性"
+		update_structs_string = "Update複合語属性"
+		dummy_structs_string = "Dummy単語属性"
+		alert_string = "構造木を変更すると、全構造の属性がなくなる"
+	when "cn"
+		change_string = "变更"
+		update_string = "更新"
+		reset_string = "重置"
+		top_structs_string = "Top合成词属性"
+		new_structs_string = "New合成词属性"
+		update_structs_string = "Update合成词属性"
+		dummy_structs_string = "Dummy单词属性"
+		alert_string = "内部构造一旦改变，则目前所有的内部构造属性会全部被删除"
+	when "en"
+		change_string = "Change"
+		update_string = "Update"
+		reset_string = "Reset"
+		top_structs_string = "Top Synthetic Word Property"
+		new_structs_string = "New Synthetic Word Property"
+		update_structs_string = "Update Synthetic Word Property"
+		dummy_structs_string = "Dummy Word Property"
+		alert_string = "All present properties will be deleted if the internal structure is modified"
+end %>
+<% new_tag = verify_domain(info[:domain])['Property'].constantize.find_item_by_tree_string_or_array("sth_tagging_state", "NEW").property_cat_id %>
+
+<div id='synthetic_struct' class="User-control"  style="margin-left:2%;margin-right:2%;">
+	<% if not flash.now[:notice_err].blank? %>
+		<div id="notice_err" ><%= flash.now[:notice_err] %></div>
+    <% end %>
+	<strong style="color:red;"><%= alert_string %></strong>
+	<table>
+		<tr>
+			<td style="color:red;"><strong>Top:</strong></td>
+			<td><%= h(top_structure) %></td>
+			<td>
+				<%= button_to_remote(change_string, :url=>{:action=>:define_internal_structure, :split_action=>{:type => "define"},
+														   :info=>info, :structure=>string_structure}) %>
+			</td>
+		</tr>
+		<% if first_modification.blank? %>
+			<% unless to_create_structure.blank? %>
+				<% to_create_structure.each_with_index{|new_structure,index| %>
+					<tr>
+						<% if index == 0 %>
+							<td style="color:red;"><strong>New:</strong></td>
+						<% else %>
+							<td></td>
+						<% end %>
+						<td><%= h(new_structure) %></td>
+					</tr>
+				<% } %>
+			<% end %>
+			<% unless to_update_structure.blank? %>
+				<% to_update_structure.each_with_index{|update_structure,index| %>
+					<tr>
+						<% if index == 0 %>
+							<td style="color:red;"><strong>Update:</strong></td>
+						<% else %>
+							<td></td>
+						<% end %>
+						<td><%= h(update_structure) %></td>
+					</tr>
+				<% } %>
+			<% end %>
+			<% unless to_dummy_structure.blank? %>
+				<tr>
+					<td style="color:red;"><strong>Dummy:</strong></td>
+					<td><%= h(to_dummy_structure) %></td>
+				</tr>
+			<% end %>
+		<% end %>
+	</table>
+	<h2 style="text-align:center; background:#000099 none repeat scroll 0 0; border:1px solid black; color:#FFFFFF; font-size:large; font-weight:bold; padding:0.5em 1em;">
+		<%= top_structs_string %>
+	</h2>
+	<% form_remote_tag  :url => {:action => :save_internal_struct, :info=>info, :first_modification=>first_modification}, :html=>{:id=>"main_input"} do %>
+	    <fieldset>
+	        <legend><%= first_modification.blank? ? modify_internal_struct[0][0][:surface] : modify_internal_struct[0].sth_surface %></legend>
+			<div style="text-align:left;padding-left:15px;padding-top:10px;padding-right:15px;">
+				<table style="width:100%;">
+					<tr>
+				    	<td width="60"><strong><%= initial_property_name(info[:domain])['sth_struct'] %></strong></td>
+						<td width="390"><%= h(top_structure) %></td>
+						<td width="60"></td>
+						<td width="60"><%= initial_property_name(info[:domain])['sth_tagging_state'] %></td>
+						<% if info[:from] == 'modification' and not first_modification.blank? %>
+							<td width="390"><%= display_property_list(:type=>"sth_tagging_state", :domain=>info[:domain], :prefix=>'top_meta0', :state=>"modify", :id=>modify_internal_struct[0].sth_tagging_state) %></td>
+				    	<% else %>
+							<td width="390"><%= display_property_list(:type=>"sth_tagging_state", :domain=>info[:domain], :prefix=>'top_meta0', :state=>"modify", :id=>new_tag) %></td>
+						<% end %>
+					</tr>
+					<tr>
+				        <td><%= initial_property_name(info[:domain])['log'] %></td>
+				        <td colspan=4>
+				        	<% if first_modification.blank? %>
+								<%= text_area_tag 'top_meta0_log', nil, :rows=>3, :style=>"width:100%;", :class=>'text-field' %>
+							<% else %>
+								<%= text_area_tag 'top_meta0_log', modify_internal_struct[0].log, :rows=>3, :style=>"width:100%;", :class=>'text-field' %>
+							<% end %>
+						</td>
+					</tr>
+				</table>
+				<% if first_modification.blank? %>
+					<%= hidden_field_tag 'structure', string_structure %>
+					<% modify_internal_struct[0].each{|meta_id, meta_section| %>
+						<p>
+						<fieldset style="background: #f7faff;">
+							<legend style="background: #1e2078;"><%= meta_section[:surface] %></legend>
+							<div style="text-align:left;padding-left:15px;padding-top:10px;padding-right:15px;">
+								<table style="width:100%;">
+									<tr>
+										<td width="60"><strong><%= initial_property_name(info[:domain])['sth_struct'] %></strong></td>
+										<% temp = []
+										meta_section[:sth_struct].each{|item|
+											if item =~ /^\d+$/
+												temp << verify_domain(info[:domain])['Lexeme'].constantize.find(item.to_i).surface
+											elsif item =~ /^meta_(.*)$/
+												temp << modify_internal_struct[0][$1.to_i][:surface]
+											else
+												temp << item
+											end
+										} %>
+										<td width="390"><%= temp.join(',&nbsp;&nbsp;&nbsp;') %></td>
+										<%= hidden_field_tag 'top_meta'+meta_id.to_s+'_sth_struct', meta_section[:sth_struct].join(',') %>
+										<%= hidden_field_tag 'top_meta'+meta_id.to_s+'_sth_surface', meta_section[:surface] %>
+										<%= hidden_field_tag 'top_meta'+meta_id.to_s+'_sth_ref_id', meta_section[:sth_ref_id] %>
+										<td width="60"></td>
+										<td width="60"></td>
+										<td width="390"></td>
+									</tr>
+									<%= customize_field_html(:domain=>info[:domain], :section=>"synthetic", :state=>"new", :prefix=>'top_meta'+meta_id.to_s) %>
+								</table>
+							</div>
+						</fieldset>
+					<% } %>
+				<% else %>
+					<% modify_internal_struct.each_with_index{|meta_section, meta_id| %>
+						 <fieldset style="background: #f7faff;">
+							<legend style="background: #1e2078;"><%= meta_section.sth_surface %></legend>
+							<div style="text-align:left;padding-left:15px;padding-top:10px;padding-right:15px;">
+								<table style="width:100%;">
+									<tr>
+										<td width="60"><strong><%= initial_property_name(info[:domain])['sth_struct'] %></strong></td>
+										<td width="390"><%= meta_section.get_display_string %></td>
+										<%= hidden_field_tag 'top_meta'+meta_id.to_s+'_id', meta_section.id %>
+										<td width="60"></td>
+										<td width="60"></td>
+										<td width="390"></td>
+									</tr>
+									<%= customize_field_html(:domain=>info[:domain], :section=>"synthetic", :state=>"modify", :id=>meta_section.id, :prefix=>'top_meta'+meta_id.to_s) %>
+								</table>
+							</div>
+						</fieldset>
+					<% } %>
+				<% end %>
+			</div>
+	    </fieldset>
+		<% if first_modification.blank? %>
+			<% modify_internal_struct[1..2].each_with_index{|new_or_update, index|
+				unless new_or_update.blank? %>
+					<p>
+					<h2 style="text-align:center; background:#000099 none repeat scroll 0 0; border:1px solid black; color:#FFFFFF; font-size:large; font-weight:bold; padding:0.5em 1em;">
+						<%= index==0? new_structs_string : update_structs_string %>
+					</h2>
+					<% new_or_update.each_with_index{|word, inner_index| %>
+						<p>
+						<fieldset>
+							<legend><%= word[0][:surface] %></legend>
+							<div style="text-align:left;padding-left:15px;padding-top:10px;padding-right:15px;">
+								<table style="width:100%;">
+									<tr>
+								    	<td width="60"><strong><%= initial_property_name(info[:domain])['sth_struct'] %></strong></td>
+										<% if index == 0
+											to_create_structure.each{|structure_string|
+												if structure_string =~ /^#{word[0][:surface]}\(\d+\).*$/ %>
+													<td width="390"><%= h(structure_string) %></td>
+												<% end 
+											}
+										elsif index == 1
+											to_update_structure.each{|structure_string|
+												if structure_string =~ /^#{word[0][:surface]}\(\d+\).*$/ %>
+													<td width="390"><%= h(structure_string) %></td>
+												<% end
+											}
+										end %>
+										<td width="60"></td>
+										<td width="60"><%= initial_property_name(info[:domain])['sth_tagging_state'] %></td>
+										<td width="390">
+											<% if index == 0 %>
+												<%= display_property_list(:type=>"sth_tagging_state", :domain=>info[:domain], :prefix=>'new'+inner_index.to_s+'_meta0', :state=>"modify", :id=>new_tag) %>
+											<% elsif index == 1%>
+												<%= display_property_list(:type=>"sth_tagging_state", :domain=>info[:domain], :prefix=>'update'+inner_index.to_s+'_meta0', :state=>"modify", :id=>new_tag) %>
+											<% end %>
+										</td>
+									</tr>
+									<tr>
+								        <td><%= initial_property_name(info[:domain])['log'] %></td>
+								        <td colspan=4>
+											<% if index == 0 %>
+												<%= text_area_tag 'new'+inner_index.to_s+'_meta0_log', nil, :rows => 3, :style=>"width:100%;", :class=>'text-field' %>
+											<% elsif index == 1%>
+												<%= text_area_tag 'update'+inner_index.to_s+'_meta0_log', nil, :rows => 3, :style=>"width:100%;", :class=>'text-field' %>
+											<% end %>
+										</td>
+									</tr>
+								</table>
+								<% word.each{|meta_id, meta_section| %>
+									<p>
+									<fieldset style="background: #f7faff;">
+										<legend style="background: #1e2078;"><%= meta_section[:surface] %></legend>
+										<div style="text-align:left;padding-left:15px;padding-top:10px;padding-right:15px;">
+											<table style="width:100%;">
+												<tr>
+													<td width="60"><strong><%= initial_property_name(info[:domain])['sth_struct'] %></strong></td>
+													<% temp = []
+													meta_section[:sth_struct].each{|item|
+														if item =~ /^\d+$/
+															temp << verify_domain(info[:domain])['Lexeme'].constantize.find(item.to_i).surface
+														elsif item =~ /^meta_(.*)$/
+															temp << word[$1.to_i][:surface]
+														else
+															temp << item
+														end
+													} %>
+													<td width="390"><%= temp.join(',&nbsp;&nbsp;&nbsp;') %></td>
+													<% index==0 ? temp = 'new' : temp = 'update' %>
+													<%= hidden_field_tag temp+inner_index.to_s+'_meta'+meta_id.to_s+'_sth_struct', meta_section[:sth_struct].join(',') %>
+													<%= hidden_field_tag temp+inner_index.to_s+'_meta'+meta_id.to_s+'_sth_surface', meta_section[:surface] %>
+													<%= hidden_field_tag temp+inner_index.to_s+'_meta'+meta_id.to_s+'_sth_ref_id', meta_section[:sth_ref_id] %>
+													<td width="60"></td>
+													<td width="60"></td>
+													<td width="390"></td>
+												</tr>
+												<%= customize_field_html(:domain=>info[:domain], :section=>"synthetic", :state=>'new', :prefix=>temp+inner_index.to_s+'_meta'+meta_id.to_s) %>
+											</table>
+										</div>
+									</fieldset>
+								<% } %>
+							</div>
+					    </fieldset>
+					<% }
+				end
+             } %>
+			 <% unless modify_internal_struct[3].blank? %>
+				<h2 style="text-align:center; background:#000099 none repeat scroll 0 0; border:1px solid black; color:#FFFFFF; font-size:large; font-weight:bold; padding:0.5em 1em;">
+					<%= dummy_structs_string %>
+				</h2>
+				<% modify_internal_struct[3].each_with_index{|dummy_word, index| %>
+					<p>
+					<fieldset>
+						<legend><%= dummy_word %></legend>
+						<div style="text-align:left;padding-left:15px;padding-top:10px;padding-right:15px;">
+							<table style="width:100%;">
+								<tr>
+									<td width="60"><%= initial_property_name(info[:domain])['surface'] %></td>
+									<td width="390">
+										<%= dummy_word %>
+										<%= hidden_field_tag "dummy"+index.to_s+'_surface', dummy_word %>
+									</td>
+									<td width="60"></td>
+									<td width="60"><%= initial_property_name(info[:domain])['reading'] %></td>
+									<td width="390"><%= text_field_tag "dummy"+index.to_s+'_reading', nil, :style=>"width:100%;", :class=>'text-field' %></td>
+								</tr>
+								<tr>
+									<td width="60"><%= initial_property_name(info[:domain])['pronunciation'] %></td>
+									<td width="390"><%= text_field_tag "dummy"+index.to_s+'_pronunciation', nil, :style=>"width:100%;", :class=>'text-field' %></td>
+									<td width="60"></td>
+									<td width="60"><%= initial_property_name(info[:domain])['pos'] %></td>
+									<td width="390"><%= display_property_list(:type=>"pos", :domain=>info[:domain], :state=>"new", :prefix=>"dummy"+index.to_s) %></td>
+								</tr>
+							</table>
+						</div>
+					</fieldset>
+				<% } %>
+			 <% end %>
+		<% end %>
+		<p>
+		<%= button_to_function(reset_string, "Form.reset('main_input')") %>
+		<%= submit_tag update_string %>
+	<% end %>
+</div>

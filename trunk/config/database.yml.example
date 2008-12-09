@@ -1,0 +1,26 @@
+chinese:
+  adapter: mysql
+  database: cor-cn
+  username: jia-l
+  password: rails
+  host: localhost
+  encoding: utf8
+  timeout: 5000
+
+english:
+  adapter: mysql
+  database: cor-en
+  username: jia-l
+  password: rails
+  host: localhost
+  encoding: utf8
+  timeout: 5000
+
+production:
+  adapter: mysql
+  database: cor-jp
+  username: jia-l
+  password: rails
+  host: localhost
+  encoding: utf8
+  timeout: 5000

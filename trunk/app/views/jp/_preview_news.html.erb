@@ -1,0 +1,211 @@
+<% if not flash.now[:notice].blank? %>
+	<div id="notice" ><%= flash.now[:notice] %></div>
+<% elsif not flash.now[:notice_err].blank? %>
+	<div id="notice_err" ><%= flash.now[:notice_err] %></div>
+<% else %>
+	<div style="padding-bottom:15px;">
+		<%= button_to_function "辞書<=>色", visual_effect(:toggle_slide, "dictionary_list") %>
+	</div>
+	<div id ="dictionary_list" align=center onclick="Effect.SlideUp('dictionary_list');" style='display:none;'>
+		<table>
+			<tr height=30>
+				<% dicts = JpProperty.find(:all, :order=>"property_cat_id ASC", :conditions=>["property_string='dictionary' and property_cat_id > 0"]) %>
+				<% dicts.each_with_index{|dict, index| %>
+					<td><span style='<%= "background-color:#{dictionary_color[dict.property_cat_id]};" %>'>&nbsp;&nbsp;</span>&nbsp;<%= dict.tree_string %></td>
+					<% if (index+1) % 5 == 0 %>
+						</tr><tr height=30>
+					<% else %>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+					<% end %>
+				<% } %>
+			</tr>
+		</table>
+	</div>
+	<div id="new_lexeme" class="list" >
+		<% if preview_news.size > 1 %>
+			<p>
+				<ul>
+					<li>
+						<span style="color:red;" ><b>※</b></span>マークの単語は既に辞書に保存しているため、新規を実行する場合、
+						<span style="color:red;" >これらの単語のすべての属性に更新を行います！</span>
+					</li>
+					<% if base_type == "2" %>
+						<li><span style="color:red;" >系列のBase単語はすでに登録されているので、系列のbaseはこの単語に設定します。しかし、このBase単語のすべての属性に更新を行います！</span></li>
+					<% end %>
+					<li><span style="color:red;" >系列のRootはすべて空に設定します。</span></li>
+				</ul>
+			</p>
+		<% end %>
+		<% form_tag({ :action => "create"}, {:id => 'preview', :name => 'preview'}) do %>
+			<table>
+    			<thead>
+	        		<tr>
+	        			<th></th>
+						<%= "<th>#{initial_property_name('jp')['surface']}</th>" unless preview_news[0]["surface"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['reading']}</th>" unless preview_news[0]["reading"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['pronunciation']}</th>" unless preview_news[0]["pronunciation"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['base_id']}</th>" %>
+						<%= "<th>#{initial_property_name('jp')['pos']}</th>" unless preview_news[0]["pos"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['ctype']}</th>" unless preview_news[0]["ctype"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['cform']}</th>" unless preview_news[0]["cform"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['dictionary']}</th>" unless preview_news[0]["dictionary"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['tagging_state']}</th>" unless preview_news[0]["tagging_state"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['log']}</th>" unless preview_news[0]["log"].blank? %>
+						<% properties = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
+						unless properties.blank?
+							properties.each{|item|
+								temp_string = item.human_name.scan(/./).size > 5 ? "style='width:70px;'" : "style='white-space:nowrap;'" %>
+								<%= %Q|<th #{temp_string}>#{item.human_name}</th>| unless preview_news[0][item.property_string].blank? %>
+							<% }
+						end %>
+					</tr>
+    			</thead>
+
+				<tbody>
+					<% odd_or_even = 0
+					preview_news.each{|newlexeme|
+						odd_or_even = 1 - odd_or_even %>
+						<tr <%= "class='odd'" if odd_or_even == 0 %> >
+	                		<td width=35px>
+	                			<% order=preview_news.index(newlexeme)+1 %>
+								<% if point_base == "false" %>
+									<% exist_one = JpLexeme.find(:all, :conditions=>["surface=? and reading=? and pronunciation=? and ctype=? and cform=?", newlexeme["surface"], newlexeme["reading"], newlexeme["pronunciation"], newlexeme["ctype"], newlexeme["cform"]]) %>
+									<% unless exist_one.blank? %>
+										&nbsp;<span style="color:red;" ><b>※</b></span>
+										<%= hidden_field_tag "lexeme"+order.to_s+'[id]', exist_one[0].id %>
+									<% end %>
+								<% end %>
+								<%= h(order) %>
+							</td>
+							<% unless newlexeme["surface"].blank? %>
+								<td align="left" >
+									<%= hidden_field_tag "lexeme"+order.to_s+'[surface]', newlexeme["surface"] %>
+									<%= h(newlexeme["surface"]) %>
+								</td>
+							<% end %>
+							<% unless newlexeme["reading"].blank? %>
+								<td align="left" >
+									<%= hidden_field_tag "lexeme"+order.to_s+'[reading]', newlexeme["reading"] %>
+									<%= h(newlexeme["reading"]) %>
+								</td>
+							<% end %>
+							<% unless newlexeme["pronunciation"].blank? %>
+								<td align="left" >
+									<%= hidden_field_tag "lexeme"+order.to_s+'[pronunciation]', newlexeme["pronunciation"] %>
+									<%= h(newlexeme["pronunciation"]) %>
+								</td>
+							<% end %>
+							<td align="left" >
+								<%= hidden_field_tag "lexeme"+order.to_s+'[base_id]', newlexeme["base_id"] %>
+								<%= hidden_field_tag "base_type", base_type %>
+								<% if point_base == "true" %>
+									<%= h(JpLexeme.find(newlexeme["base_id"].to_i).surface) %>
+								<% else 
+									case base_type
+										when "1" %>
+											<%= h(preview_news[newlexeme["base_id"].to_i-1]["surface"]) %>
+										<% when "2" %>
+											<%= h(JpLexeme.find(newlexeme["base_id"].to_i).surface) %>
+									<% end %>
+								<% end %>
+							</td>
+							<% unless newlexeme["pos"].blank? %>
+								<td align="left" >
+									<%= hidden_field_tag "lexeme"+order.to_s+'[pos]', newlexeme["pos"] %>
+									<% unless newlexeme["pos"].blank? %>
+										<%= h(JpProperty.find(:first, :conditions=>["property_string='pos' and property_cat_id=#{newlexeme["pos"].to_i}"]).tree_string) %>
+									<% end %>
+								</td>
+							<% end %>
+							<% unless newlexeme["ctype"].blank? %>
+								<td align="left" >
+									<%= hidden_field_tag "lexeme"+order.to_s+'[ctype]', newlexeme["ctype"] %>
+									<% unless newlexeme["ctype"].blank? %>
+										<%= h(JpProperty.find(:first, :conditions=>["property_string='ctype' and property_cat_id=#{newlexeme["ctype"].to_i}"]).tree_string) %>
+									<% end %>
+								</td>
+							<% end %>
+							<% unless newlexeme["cform"].blank? %>
+								<td align="left" >
+									<%= hidden_field_tag "lexeme"+order.to_s+'[cform]', newlexeme["cform"] %>
+									<% unless newlexeme["cform"].blank? %>
+										<%= h(JpProperty.find(:first, :conditions=>["property_string='cform' and property_cat_id=#{newlexeme["cform"].to_i}"]).tree_string) %>
+									<% end %>
+								</td>
+							<% end %>
+							<% unless newlexeme["dictionary"].blank? %>
+								<td style="text-align:center" >
+									<%	display_dict = []
+										newlexeme["dictionary"].split(",").each{|dict|	display_dict << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>" }
+									%>
+									<%= hidden_field_tag "lexeme"+order.to_s+'[dictionary]', newlexeme["dictionary"] %>
+									<%= display_dict.join("  ") %>
+								</td>
+							<% end %>
+							<% unless newlexeme["tagging_state"].blank? %>
+								<td align="left" >
+									<%= hidden_field_tag "lexeme"+order.to_s+'[tagging_state]', newlexeme["tagging_state"] %>
+									<% unless newlexeme["tagging_state"].blank? %>
+										<%= h(JpProperty.find(:first, :conditions=>["property_string='tagging_state' and property_cat_id=#{newlexeme["tagging_state"].to_i}"]).tree_string) %>
+									<% end %>
+								</td>
+							<% end %>
+							<% unless newlexeme["log"].blank? %>
+								<td align="left" >
+									<%= hidden_field_tag "lexeme"+order.to_s+'[log]', newlexeme["log"] %>
+									<%= h(newlexeme["log"]) %>
+								</td>
+							<% end %>
+							<% properties = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
+							unless properties.blank?
+								properties.each{|item| 
+									unless newlexeme[item.property_string].blank?
+										case item.type_field
+											when "category" %>
+												<td align="left" >
+													<%= hidden_field_tag "lexeme"+order.to_s+'['+item.property_string+']', newlexeme[item.property_string] %>
+													<%= JpProperty.find(:first, :conditions=>["property_string='#{item.property_string}' and property_cat_id=#{newlexeme[item.property_string].to_i}"]).tree_string %>
+												</td>
+											<% when "text", "time" %>
+												<td align="left" >
+													<%= hidden_field_tag "lexeme"+order.to_s+'['+item.property_string+']', newlexeme[item.property_string] %>
+													<%= h(newlexeme[item.property_string]) %>
+												</td>
+										<% end
+									end
+								}
+							end %>
+														
+							
+						</tr>
+					<% } %>
+				</tbody>
+
+    			<thead>
+	        		<tr>
+	        			<th></th>
+						<%= "<th>#{initial_property_name('jp')['surface']}</th>" unless preview_news[0]["surface"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['reading']}</th>" unless preview_news[0]["reading"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['pronunciation']}</th>" unless preview_news[0]["pronunciation"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['base_id']}</th>" %>
+						<%= "<th>#{initial_property_name('jp')['pos']}</th>" unless preview_news[0]["pos"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['ctype']}</th>" unless preview_news[0]["ctype"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['cform']}</th>" unless preview_news[0]["cform"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['dictionary']}</th>" unless preview_news[0]["dictionary"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['tagging_state']}</th>" unless preview_news[0]["tagging_state"].blank? %>
+						<%= "<th>#{initial_property_name('jp')['log']}</th>" unless preview_news[0]["log"].blank? %>
+						<% properties = JpNewProperty.find(:all, :conditions=>["section='lexeme'"])
+						unless properties.blank?
+							properties.each{|item|
+								temp_string = item.human_name.scan(/./).size > 5 ? "style='width:70px;'" : "style='white-space:nowrap;'" %>
+								<%= %Q|<th #{temp_string}>#{item.human_name}</th>| unless preview_news[0][item.property_string].blank? %>
+							<% }
+						end %>
+					</tr>
+    			</thead>
+			</table>
+			<p>
+			<div><%= submit_tag "新規" %></div>
+		<% end %>
+	</div>
+<% end %>
