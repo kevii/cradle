@@ -68,27 +68,12 @@ class JpLexeme < ActiveRecord::Base
       item = JpLexemeNewPropertyItem.find(:first, :conditions=>["property_id=? and ref_id=?", property.id, self.id])
       if equals == 1
         unless type_field != "category" or JpProperty.exists?(:property_string=>method, :property_cat_id=>args[0])
-          flash[:notice_err] = "<ul><li>単語 method_missing problem！</li></ul>"
-          return
+          raise "undefined method"
         end
         if item.blank?
-          begin
-            JpLexemeNewPropertyItem.create!(:property_id=>property.id, :ref_id=>self.id, type_field=>args[0])
-          rescue
-            flash[:notice_err] = "<ul><li>単語 method_missing problem！</li></ul>"
-            return
-          else
-            return
-          end
+          return JpLexemeNewPropertyItem.create!(:property_id=>property.id, :ref_id=>self.id, type_field=>args[0]) rescue raise "undefined method"
         else
-          begin
-            temp.update_attributes!(type_field=>args[0])
-          rescue
-            flash[:notice_err] = "<ul><li>単語 method_missing problem！</li></ul>"
-            return
-          else
-            return
-          end
+          return item.update_attributes!(type_field=>args[0]) rescue raise "undefined method"
         end
       elsif equals == 0
         if item.blank?

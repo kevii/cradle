@@ -29,27 +29,12 @@ class JpSynthetic < ActiveRecord::Base
       item = JpSyntheticNewPropertyItem.find(:first, :conditions=>["property_id=? and ref_id=?", property.id, self.id])
       if equals == 1
         unless type_field != "category" or JpProperty.exists?(:property_string=>method, :property_cat_id=>args[0])
-          flash[:notice_err] = "<ul><li>複合語 method_missing problem！</li></ul>"
-          return
+          raise "undefined method"
         end
         if item.blank?
-          begin
-            JpSyntheticNewPropertyItem.create!(:property_id=>property.id, :ref_id=>self.id, type_field=>args[0])
-          rescue
-            flash[:notice_err] = "<ul><li>複合語 method_missing problem！</li></ul>"
-            return
-          else
-            return
-          end
+          return JpSyntheticNewPropertyItem.create!(:property_id=>property.id, :ref_id=>self.id, type_field=>args[0]) rescue raise "undefined method"
         else
-          begin
-            temp.update_attributes!(type_field=>args[0])
-          rescue
-            flash[:notice_err] = "<ul><li複合語 method_missing problem！</li></ul>"
-            return
-          else
-            return
-          end
+          return item.update_attributes!(type_field=>args[0]) rescue raise "undefined method"
         end
       elsif equals == 0
         if item.blank?
@@ -83,16 +68,35 @@ class JpSynthetic < ActiveRecord::Base
     return string_array.join(',&nbsp;&nbsp;&nbsp;')
   end
   
-  def get_dump_string
+  def get_dump_string(property_list)
     dump_string_array = []
+    unless property_list.blank?
+      property_string = []
+      property_list.each{|property|
+        valid_pro = eval('self.'+property[0])
+        if valid_pro.blank?
+          property_string << property[0]+'='
+        else
+          case property[2]
+            when 'category'
+              property_string << property[0]+'='+JpProperty.find(:first, :conditions=>["property_string=? and property_cat_id=?", property[0], valid_pro]).tree_string 
+            when 'text'
+              property_string << property[0]+'='+valid_pro
+            when 'time'
+              debugger
+              property_string << property[0]+'='+valid_pro.to_formatted_s(:number)
+          end
+        end
+      }
+      dump_string_array << '('+property_string.join(",")+')'
+    end
     sth_struct.split(',').map{|item| item.delete('-')}.each{|part|
       if part =~ /^\d+$/
-        dump_string_array << JpLexeme.find(part.to_i).surface + '(' + part + ')'
+        dump_string_array << JpLexeme.find(part.to_i).surface + '[' + part + ']'
       elsif part =~ /^meta_(.*)$/
-        dump_string_array << '(' + JpSynthetic.find(:first, :conditions=>["sth_ref_id=? and sth_meta_id=?", sth_ref_id, $1.to_i]).get_dump_string + ')'
+        dump_string_array << '(' + JpSynthetic.find(:first, :conditions=>["sth_ref_id=? and sth_meta_id=?", sth_ref_id, $1.to_i]).get_dump_string(property_list) + ')'
       end
     }
     return dump_string_array.join(',')
   end
-  
 end

@@ -41,13 +41,13 @@
 		</tr>
 		<tr height=30>
 			<% if User.find_by_id(session[:user_id]) %>
-				<td><%= check_box_tag '100_sth_struct', 'true', field_list.include?("100_sth_struct")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('jp')['sth_struct'] %></td>
+				<td><%= check_box_tag '100_sth_struct', 'true', field_list.include?("100_sth_struct")?true:false, {:style=>"vertical-align:middle;", :onclick=>"set_new_syn_pros_cb_to_false();"} %></td><td><%= initial_property_name('jp')['sth_struct'] %></td>
 				<td><%= check_box_tag '101_sth_tagging_state', 'true', field_list.include?("101_sth_tagging_state")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('jp')['sth_tagging_state'] %></td>
 				<td><%= check_box_tag '102_sth_log', 'true', field_list.include?("102_sth_log")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('jp')['log'] %></td>
 				<td><%= check_box_tag '103_sth_modified_by', 'true', field_list.include?("103_sth_modified_by")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('jp')['modified_by'] %></td>
 				<td><%= check_box_tag '104_sth_updated_at', 'true', field_list.include?("104_sth_updated_at")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('jp')['updated_at'] %></td>
 			<% else %>
-				<td><%= check_box_tag '100_sth_struct', 'true', field_list.include?("100_sth_struct")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('jp')['sth_struct'] %></td>
+				<td><%= check_box_tag '100_sth_struct', 'true', field_list.include?("100_sth_struct")?true:false, {:style=>"vertical-align:middle;", :onclick=>"set_new_syn_pros_cb_to_false();"} %></td><td><%= initial_property_name('jp')['sth_struct'] %></td>
 			<% end %>
 		</tr>
 		<tr height=30>

@@ -8,7 +8,7 @@ class DumpDataWorker < Workling::Base
                                     :static_condition=>options[:static_condition], :simple_search=>options[:simple_search])
         lexeme_class = 'JpLexeme'
         first_line = "出力条件： "+options[:show_conditions].delete('&nbsp;')
-        header = generate_header(:section_list=>options[:section_list], :domain=>'jp')
+        header, syn_list = generate_header_and_syn_list(:section_list=>options[:section_list], :domain=>'jp')
         field_list = header.map{|item| item[0]}.join("\t")
       when 'cn'
 #       id_array = find_all_cn_ids()
@@ -22,19 +22,20 @@ class DumpDataWorker < Workling::Base
     start_index = 0
     each_part = 100
     count = 0
-    file_path = '/user_dump_file/' + Time.now.to_s(:db).gsub(/[^\d]/, '-')
-    output_file = File.open(RAILS_ROOT+'/public'+file_path, "w")
+    file_path = 'user_dump_file/' + Time.now.to_s(:db).gsub(/[^\d]/, '-')
+    output_file = File.open(RAILS_ROOT+'/public/'+file_path, "w")
     output_file.puts first_line
     output_file.puts field_list
     while(count < 100) do
       if each_part > whole_number
-        dump_to_file(:result_array=>lexeme_class.constantize.find(id_array), :file_handler=>output_file, :header=>header, :domain=>options[:domain])
+        dump_to_file(:result_array=>lexeme_class.constantize.find(id_array), :file_handler=>output_file,
+                     :header=>header, :syn_list=>syn_list, :domain=>options[:domain])
         count = 100
       else
         end_index = start_index+each_part
         end_index = whole_number-1 if end_index > whole_number-1
         dump_to_file(:result_array=>lexeme_class.constantize.find(id_array[start_index..end_index]),
-                     :file_handler=>output_file, :header=>header, :domain=>options[:domain])
+                     :file_handler=>output_file, :header=>header, :syn_list=>syn_list, :domain=>options[:domain])
         start_index = end_index+1
         count = start_index / step
         count = 100 if start_index == whole_number
@@ -94,10 +95,12 @@ class DumpDataWorker < Workling::Base
     return final_id_arrays.uniq.sort
   end
   
-  def generate_header(options)
+  def generate_header_and_syn_list(options)
     case options[:domain]
       when "jp"
         header = [['ID','id', 'lexeme', nil]]
+        syn_string = []
+        syn_list = []
         options[:section_list].each{|item|
           item =~ /^(\d+)_(.*)/
           index = $1.to_i
@@ -106,9 +109,15 @@ class DumpDataWorker < Workling::Base
           section = nil
           if JpNewProperty.exists?(:property_string=>property_string)
             temp = JpNewProperty.find_by_property_string(property_string)
-            human_name = temp.human_name
-            section = temp.section
-            type = temp.type_field
+            if temp.section == 'lexeme'
+              human_name = temp.human_name
+              section = temp.section
+              type = temp.type_field
+            else
+              syn_string << temp.human_name+':'+property_string
+              syn_list << [property_string, temp.id, temp.type_field]
+              next
+            end
           else
             case property_string
               when "sth_log"
@@ -128,7 +137,7 @@ class DumpDataWorker < Workling::Base
                 section = 'synthetic'
                 type = nil
               when "sth_tagging_state"
-                human_name = initial_property_name('jp')["sth_tagging_state"]
+                human_name = '構造'+initial_property_name('jp')["sth_tagging_state"]
                 section = 'synthetic'
                 type = 'category'
               else
@@ -157,7 +166,13 @@ class DumpDataWorker < Workling::Base
           header[index] = ['Root', 'root.surface', 'lexeme', nil]
           header.insert(index+1, ['Root_value', 'root_id', 'lexeme', nil])
         end
-        header = header.compact
+        if header.include?([initial_property_name('jp')["sth_struct"], 'sth_struct', 'synthetic', nil]) and not syn_string.blank?
+          index = header.index([initial_property_name('jp')["sth_struct"], 'sth_struct', 'synthetic', nil])
+          header[index] = [initial_property_name('jp')["sth_struct"]+'('+ syn_string.join(", ") +')', 'sth_struct', 'synthetic', nil]
+        elsif not header.include?([initial_property_name('jp')["sth_struct"], 'sth_struct', 'synthetic', nil]) and not syn_string.blank?
+          syn_list = []
+        end
+        return header.compact, syn_list
       when "cn"
       when "en"
     end
@@ -168,20 +183,35 @@ class DumpDataWorker < Workling::Base
       options[:result_array].each{|lexeme|
         temp_line = []
         options[:header].each{|item|
-          if item[2] == 'synthetic' and lexeme.struct.blank?
-            temp_line << ""
-          else
+          if item[2] == 'synthetic'
+            if lexeme.struct.blank?
+              temp_line << ""
+            else
+              case item[1]
+                when "sth_log"
+                  temp_line << lexeme.struct.log
+                when "sth_modified_by"
+                  temp_line << lexeme.struct.annotator.name
+                when "sth_updated_at"
+                  temp_line << lexeme.struct.updated_at.to_formatted_s(:number)
+                when "sth_tagging_state"
+                  temp_line << lexeme.struct.sth_tagging_state_item.tree_string
+                when "sth_struct"
+                  temp_line << lexeme.struct.get_dump_string(options[:syn_list])
+              end
+            end
+          elsif item[2] == 'lexeme'
             case item[3]
               when "category"
-                item[2] == 'lexeme' ? temp_id = eval('lexeme.'+item[1]) : temp_id = eval('lexeme.struct.'+item[1])
+                temp_id = eval('lexeme.'+item[1])
                 temp_id.blank? ? temp_line << "" : temp_line << JpProperty.find(:first, :conditions=>["property_string=? and property_cat_id=?", item[1], temp_id]).tree_string
               when "text"
-                item[2] == 'lexeme' ? temp_line << eval('lexeme.'+item[1]) : temp_line << eval('lexeme.struct.'+item[1])
+                temp_line << eval('lexeme.'+item[1])
               when "time"
-                item[2] == 'lexeme' ? temp_line << eval('lexeme.'+item[1]).to_s(:db) : temp_line << eval('lexeme.struct.'+item[1]).to_s(:db)
+                temp_line << eval('lexeme.'+item[1]).to_formatted_s(:number)
               when "user"
-                item[2] == 'lexeme' ? temp_line << User.find(eval('lexeme.'+item[1])).name : temp_line << User.find(eval('lexeme.struct.'+item[1])).name
-              else  ##nil      base_id, base.surface, root_id, root.surface, id, dictionary, sth_struct
+                temp_line << User.find(eval('lexeme.'+item[1])).name
+              else  ##nil      base_id, base.surface, root_id, root.surface, id, dictionary
                 case item[1]
                   when 'base_id', 'base.surface' , 'id', 'root_id'
                     temp_line << eval('lexeme.'+item[1])
@@ -193,8 +223,6 @@ class DumpDataWorker < Workling::Base
                     end
                   when 'dictionary'
                     temp_line << lexeme.dictionary_item.list.map{|item| JpProperty.find(:first, :conditions=>["property_string='dictionary' and property_cat_id=?", item]).tree_string}.join(',')
-                  when 'sth_struct'
-                    temp_line << lexeme.struct.get_dump_string
                 end
             end
           end

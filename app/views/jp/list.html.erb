@@ -57,6 +57,8 @@
 					</tr>
 				</table>
 			</div>
+		<% else %>
+			<div id ="dictionary_list" style='display:none;'></div>
 		<% end %>
 	</div>
 	
@@ -182,7 +184,7 @@
 										if lexeme.struct.blank?
 											temp = ""
 										else
-											temp = eval('lexeme.struct.'+item)
+											temp = eval('lexeme.struct.dup.'+item)
 										end
 									end
 									if temp.blank? %>

@@ -46,10 +46,8 @@ class ApplicationController < ActionController::Base
                                            :dynamic_lexeme_condition=>params[:dynamic_lexeme_condition],
                                            :dynamic_synthetic_condition=>params[:dynamic_synthetic_condition],
                                            :show_conditions=>params[:show_conditions],
-                                           :simple_search=>params[:simple_search],
-                                           :section_list=>section_list,
-                                           :domain=>params[:domain],
-                                           :prefix=>request.relative_url_root)
+                                           :simple_search=>params[:simple_search], :section_list=>section_list,
+                                           :domain=>params[:domain], :prefix=>root_url)
     render(:update){|page|
       page[:period_caller].replace_html :inline=>"<%= periodically_call_remote(:url=>{:action=>'update_indicator', :uid=>@uid}, :frequency=>'1', :variable=>'progress_indicator') %>"
       page[:indicator].show
