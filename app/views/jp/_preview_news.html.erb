@@ -103,7 +103,7 @@
 								<% else 
 									case base_type
 										when "1" %>
-											<%= h(preview_news[newlexeme["base_id"].to_i-1]["surface"]) %>
+											<%= h(preview_news[newlexeme["base_id"].to_i]["surface"]) %>
 										<% when "2" %>
 											<%= h(JpLexeme.find(newlexeme["base_id"].to_i).surface) %>
 									<% end %>
