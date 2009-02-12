@@ -74,6 +74,7 @@
 						</tr>
 						<%	odd_or_even = 0
 						JpNewProperty.find(:all, :conditions=>["section='lexeme'"]).each{|item|
+							next unless session[:jp_dict_id].include?(item.dictionary_id)
 							odd_or_even = 1 - odd_or_even %>
 							<tr <%= "class='odd'" if odd_or_even == 0 %> >
 								<th><%= h(item.human_name) %></th>
@@ -205,6 +206,7 @@
 								</tr>
 								<% odd_or_even =1
 								JpNewProperty.find(:all, :conditions=>["section='synthetic'"]).each{|property|
+									next unless session[:jp_dict_id].include?(property.dictionary_id)
 									odd_or_even = 1 - odd_or_even %>
 									<tr <%= "class='odd'" if odd_or_even == 0 %> >
 										<th><%= h(property.human_name) %></th>

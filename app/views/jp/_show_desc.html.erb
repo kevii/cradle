@@ -120,6 +120,7 @@
 				</tr>
 				<tr>
 					<% list_property.each_with_index{|item, index|
+						next unless session[:jp_dict_id].include?(item.dictionary_id)
 						if index % 3 == 0 and index != 0
 							odd_or_even = 1 - odd_or_even %>
 							</tr><tr <%= "class='odd'" if odd_or_even == 0 %> >

@@ -91,6 +91,7 @@ module CustomizefieldHelper
     properties = verify_domain(domain)["NewProperty"].constantize.find(:all, :conditions=>["section=?", section])
 
     properties.each_with_index{|item, index|
+      next unless verify_domain(domain)["session_dic_id_array"].include?(item.dictionary_id)
       next if item.type_field=="category" and not property_class_name.constantize.exists?(:property_string=>item.property_string)
       html_string << "<tr>\n" if index % 2 == 0
       html_string << "<td>\n"+item.human_name+"</td>\n"

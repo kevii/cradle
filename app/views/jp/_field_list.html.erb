@@ -29,7 +29,8 @@
 			</tr>
 		<% end %>
 		<tr height=30>
-			<% JpNewProperty.find(:all, :order=>"id ASC" ,:conditions=>["section=?", 'lexeme']).each_with_index{|property, index| %>
+			<% JpNewProperty.find(:all, :order=>"id ASC" ,:conditions=>["section=?", 'lexeme']).each_with_index{|property, index|
+				next unless session[:jp_dict_id].include?(property.dictionary_id) %>
 				<td><%= check_box_tag (15+index).to_s+'_'+property.property_string, 'true', field_list.include?((15+index).to_s+'_'+property.property_string)?true:false, :style=>"vertical-align:middle;" %></td><td><%= property.human_name %></td>
 				<% if (index+1) % 10 == 0 %>
 					</tr><tr height=30>
@@ -51,7 +52,8 @@
 			<% end %>
 		</tr>
 		<tr height=30>
-			<% JpNewProperty.find(:all, :order=>"id ASC" ,:conditions=>["section=?", 'synthetic']).each_with_index{|property, index| %>
+			<% JpNewProperty.find(:all, :order=>"id ASC" ,:conditions=>["section=?", 'synthetic']).each_with_index{|property, index|
+				next unless session[:jp_dict_id].include?(property.dictionary_id) %>
 				<td><%= check_box_tag (105+index).to_s+'_'+property.property_string, 'true', field_list.include?((105+index).to_s+'_'+property.property_string)?true:false, :style=>"vertical-align:middle;" %></td><td><%= property.human_name %></td>
 				<% if (index+1) % 10 == 0 %>
 					</tr><tr height=30>

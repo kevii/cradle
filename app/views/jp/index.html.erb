@@ -94,7 +94,9 @@
 							<td rowspan=3>
 								<select id="value_dictionary" name="dictionary[value][]" multiple size=5 style="width:100%;">
 									<option selected value=''></option>
-									<%= options_for_select(JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]})%>
+									<% temp = JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]}
+									   temp.each_with_index{|item, index| temp.delete_at(index) unless session[:jp_dict_id].include?(item[1])} %>
+									<%= options_for_select(temp)%>
 								</select>
 							</td>
 							<td rowspan=3></td>

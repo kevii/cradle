@@ -49,15 +49,14 @@ end %>
 					<% else %>
 						<% temp = verify_domain(params[:domain])['Property'].constantize.find(@property_id).sub_tree_items.size %>
 						<% if temp > 1 %>
-						<% case params[:domain]
-							when "jp" %>
-								フィールドを変更すると、このitem以下の<span style="color:red;"><%= temp %>個</span>のitemをすべて変更します。
-							<% when "cn" %>
-								更新后、这个item以下的<span style="color:red;"><%= temp %>个</span>item全部自动更新。
-							<% when "en" %>
-								After modified、there are <span style="color:red;"><%= temp %>items</span> under this item will all be updated.
-						<% end %>
-
+							<% case params[:domain]
+								when "jp" %>
+									フィールドを変更すると、このitem以下の<span style="color:red;"><%= temp %>個</span>のitemをすべて変更します。
+								<% when "cn" %>
+									更新后、这个item以下的<span style="color:red;"><%= temp %>个</span>item全部自动更新。
+								<% when "en" %>
+									After modified、there are <span style="color:red;"><%= temp %>items</span> under this item will all be updated.
+							<% end %>
 						<% end %>
 					<% end %>
 				</td>

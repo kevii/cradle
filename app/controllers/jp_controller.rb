@@ -3,8 +3,11 @@ class JpController < ApplicationController
   before_filter :authorize, :only => [:input_base, :new, :create, :destroy, :edit, :update, :define_root, :save_roots]
 
   def index
-    if session[:jp_section_list].blank?
+    if session[:user_id].blank?
       session[:jp_section_list] = ['1_surface', '2_reading', '3_pronunciation', '4_base_id', '5_root_id', '6_dictionary', '7_pos', '8_ctype', '9_cform', '100_sth_struct']
+      session[:jp_dict_id] = JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).select{|item| item.value !~ /\*$/}.map{|dict| dict.property_cat_id}
+    else
+      session[:jp_dict_id] = JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| dict.property_cat_id}
     end
   end
   
@@ -54,6 +57,16 @@ class JpController < ApplicationController
     else
       per_page = params[:per_page].to_i
     end
+    
+    if session[:user_id].blank? or User.find_by_id(session[:user_id]).blank?
+      temp = session[:jp_dict_id].inject([]){|condition_string, dict_id| condition_string << " ( jp_lexemes.dictionary like '%-#{dict_id}-%' ) "}
+      if temp.size == 1
+        params[:static_condition] << " and " + temp[0]
+      else
+        params[:static_condition] << " and ( " + temp.join(" or ") + " ) "
+      end
+    end
+    
     if params[:dynamic_lexeme_condition].blank? and params[:dynamic_synthetic_condition].blank?
       @jplexemes = JpLexeme.paginate(:conditions=>params[:static_condition], :include=>[:struct], :order=>" jp_lexemes.id ASC ", :per_page=>per_page, :page=>page)
     elsif params[:simple_search] == "true"

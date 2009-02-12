@@ -9,6 +9,7 @@ module CradleModule
         class_name["NewProperty"] = "JpNewProperty"
         class_name["LexemeNewPropertyItem"] = "JpLexemeNewPropertyItem"
         class_name["SyntheticNewPropertyItem"] = "JpSyntheticNewPropertyItem"
+        class_name["session_dic_id_array"] = session[:jp_dict_id]
       when "cn"
         class_name["Lexeme"] = "CnLexeme"
         class_name["Synthetic"] = "CnSynthetic"
@@ -16,6 +17,7 @@ module CradleModule
         class_name["NewProperty"] = "CnNewProperty"
         class_name["LexemeNewPropertyItem"] = "CnLexemeNewPropertyItem"
         class_name["SyntheticNewPropertyItem"] = "CnSyntheticNewPropertyItem"
+        class_name["session_dic_id_array"] = session[:cn_dict_id]
       when "en"
         class_name["Lexeme"] = "EnLexeme"
         class_name["Synthetic"] = "EnSynthetic"
@@ -23,6 +25,7 @@ module CradleModule
         class_name["NewProperty"] = "EnNewProperty"
         class_name["LexemeNewPropertyItem"] = "EnLexemeNewPropertyItem"
         class_name["SyntheticNewPropertyItem"] = "EnSyntheticNewPropertyItem"
+        class_name["session_dic_id_array"] = session[:en_dict_id]
     end
     return class_name
   end
@@ -47,7 +50,7 @@ module CradleModule
         return {"id"=>"単語ID",                    "surface"=>"単語表記",               "reading"=>"単語読み",
                 "pronunciation"=>"単語発音",        "base_id"=>"単語のBase",             "root_id"=>"単語のRoot",
                 "pos"=>"品詞情報",                  "ctype"=>"活用型情報",                "cform"=>"活用形情報",
-                "dictionary"=>"辞書情報",           "tagging_state"=>"タグ状態",          "log" => "備考内容",
+                "dictionary"=>"辞書情報(“*”の意味は匿名検索禁止)",           "tagging_state"=>"タグ状態",          "log" => "備考内容",
                 "created_by"=>"新規者情報",         "modified_by"=>"更新者情報",           "updated_at"=>"更新時間情報",
                 "sth_struct"=>"内部構造",           "sth_tagging_state"=>"タグ状態"}
       when "cn"

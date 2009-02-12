@@ -120,6 +120,7 @@ namespace :cradle do
           type_field        enum('category', 'text', 'time')  not null,
           description       text,
           default_value     text,
+          dictionary_id     int not null,
           lock_version      int default 0,
           
           primary key (id),

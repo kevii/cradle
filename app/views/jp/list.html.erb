@@ -46,7 +46,8 @@
 				<table>
 					<tr height=30>
 						<% dicts = JpProperty.find(:all, :order=>"property_cat_id ASC", :conditions=>["property_string='dictionary' and property_cat_id > 0"]) %>
-						<% dicts.each_with_index{|dict, index| %>
+						<% dicts.each_with_index{|dict, index|
+						   next unless session[:jp_dict_id].include?(dict.property_cat_id) %>
 							<td><span style='<%= "background-color:#{dictionary_color[dict.property_cat_id]};" %>'>&nbsp;&nbsp;</span>&nbsp;<%= dict.tree_string %></td>
 							<% if (index+1) % 5 == 0 %>
 								</tr><tr height=30>
@@ -150,7 +151,10 @@
 										<% when "dictionary" %>
 											<td style="text-align:center;" >
 												<%	temp = []
-													lexeme.dictionary_item.list.each{|dict| temp << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>" }
+													lexeme.dictionary_item.list.each{|dict|
+														next unless session[:jp_dict_id].include?(dict.to_i)
+														temp << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>"
+													}
 												%>
 												<%= temp.join("  ") %>
 											</td>

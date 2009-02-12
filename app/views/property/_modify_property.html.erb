@@ -12,6 +12,7 @@
 		name_title_string = "表示用名前"
 		desc_title_string = "記述"
 		default_title_string = "デフォルト値"
+		dependency_dic = "依存辞書"
 	when "cn"
 		create_category_property_string = "新建分类属性"
 		modify_category_property_string = "编辑分类属性"
@@ -25,6 +26,7 @@
 		name_title_string = "显示用名称"
 		desc_title_string = "描述"
 		default_title_string = "默认值"
+		dependency_dic = "关联辞典"
 	when "en"
 		create_category_property_string = "Create Category Property"
 		modify_category_property_string = "Modify Category Property"
@@ -38,6 +40,7 @@
 		name_title_string = "Display Name"
 		desc_title_string = "Description"
 		default_title_string = "Default Value"
+		dependency_dic = "Dictionary Dependency"
 end %>
 <% if not flash.now[:notice_err].blank? %>
 	<div id="notice_err" ><%= flash.now[:notice_err] %></div>
@@ -96,7 +99,19 @@ end %>
 					
 					<% case @type_field
 						when "category" %>
-							<td colspan=3></td>
+							<td></td>
+							<th><%= dependency_dic %></th>
+							<td>
+								<% if modify_property.blank? %>
+									<select id="dic_dependency" name="dic_dependency">
+										<%= options_for_select(JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]})%>
+									</select>
+								<% else %>
+									<select id="dic_dependency" name="dic_dependency">
+										<%= options_for_select(JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]}, modify_property.dictionary_id)%>
+									</select>
+								<% end %>
+							</td>
 						<% when "text" %>
 							<td></td>
 							<th><%= default_title_string %></th>
@@ -122,9 +137,23 @@ end %>
 								<% end %>
 							</td>
 					<% end %>
-					
-					
 				</tr>
+				<% if ["text", "time"].include?(@type_field) %>
+					<tr>
+						<th><%= dependency_dic %></th>
+						<td>
+							<% if modify_property.blank? %>
+								<select id="dic_dependency" name="dic_dependency">
+									<%= options_for_select(JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]})%>
+								</select>
+							<% else %>
+								<select id="dic_dependency" name="dic_dependency">
+									<%= options_for_select(JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]}, modify_property.dictionary_id)%>
+								</select>
+							<% end %>
+						</td>
+					</tr>
+				<% end %>
 			</thead>
 		</table>
 	<% end %>
