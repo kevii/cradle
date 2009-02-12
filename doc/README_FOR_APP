@@ -8,7 +8,10 @@
 * Japanese
 
   All CRUD function for lexemes and synthetic structures.
-
+  
+=== Bug reporting
+	Please report bug to http://boblu.lighthouseapp.com/projects/24453-cradle
+	
 === Component being used
 
 * will_paginate
@@ -16,10 +19,6 @@
   It is a gem which makes the pagination of rails very easy to implement.
   
   Reference: http://mislav.uniqpath.com/static/will_paginate/doc
-
-* javascript menu bar
-  
-  Reference: http://www.milonic.com
 
 * javascript progress bar
   
