@@ -9,9 +9,6 @@
 
   All CRUD function for lexemes and synthetic structures.
 
-=== Command to make this documentation
-	rake doc:app title="Cradle Documentation"
-	
 === Component being used
 
 * will_paginate
