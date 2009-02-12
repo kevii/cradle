@@ -225,16 +225,19 @@ class PropertyController < ApplicationController
       when 'jp'
         error_msg_1 = "<ul><li>左上詰めで入力してください！</li></ul>"
         error_msg_2 = "<ul><li>項目すでに登録されています！</li></ul>"
+        error_msg_3 = "<ul><li>一レベル上の属性を先に登録してください！"
         success_save_msg = "<ul><li>新規Itemを保存しました。</li></ul>"
         success_update_msg = "<ul><li>Itemを保存しました。</li></ul>"
       when 'cn'
         error_msg_1 = "<ul><li>靠左输入各段内容，各段间不能有空段！</li></ul>"
         error_msg_2 = "<ul><li>这个属性已经登录！</li></ul>"
+        error_msg_3 = "<ul><li>请先保存上一级的属性！"
         success_save_msg = "<ul><li>新建属性已保存。</li></ul>"
         success_update_msg = "<ul><li>属性已更新。</li></ul>"
       when 'en'
         error_msg_1 = "<ul><li>Please fill in the field from left and do not leave blank field in between!</li></ul>"
         error_msg_2 = "<ul><li>This property exists!</li></ul>"
+        error_msg_3 = "<ul><li>Please first create the upper level property!"
         success_save_msg = "<ul><li>Property successfully created.</li></ul>"
         success_update_msg = "<ul><li>Property successfully updated.</li></ul>"
     end
@@ -247,6 +250,10 @@ class PropertyController < ApplicationController
         return
       elsif not verify_domain(params[:domain])['Property'].constantize.find_item_by_tree_string_or_array(params[:string], property_item, 'validation').blank?
         flash.now[:notice_err] = error_msg_2
+        render(:update){|page| page[:modify_category_item].replace_html :inline=>"<div id='notice_err' ><%= flash.now[:notice_err] %></div>"}
+        return
+      elsif property_item.size>1 and verify_domain(params[:domain])['Property'].constantize.find_item_by_tree_string_or_array(params[:string], property_item[0..-2], 'validation').blank?
+        flash.now[:notice_err] = error_msg_3
         render(:update){|page| page[:modify_category_item].replace_html :inline=>"<div id='notice_err' ><%= flash.now[:notice_err] %></div>"}
         return
       end
@@ -303,6 +310,7 @@ class PropertyController < ApplicationController
     @human_name = params[:human_name]
     @string = params[:string]
     @desc = params[:desc]
+    
     if exist == true
       case params[:domain]
         when 'jp'
