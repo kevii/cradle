@@ -1,0 +1,159 @@
+/* ===== CSS drop-down list ===== */
+
+/* ===== Top-level property ====== */
+.top_menu {
+	position:relative;	/* establish a menu-relative positioning context */
+	float:left;			/* play nicely with others */
+	height:25px;		/* the menu's overall height */
+	width:300px;		/* we always want our menu to fill the available space */
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:12px;		/* this (and also below) sets the menu's font size */
+}
+
+.top_menu ul {
+	padding:0;
+	margin:0;
+	border:0;
+	list-style-type:none;	/* don't view the list as a list */
+	line-height:25px;		/* globally set the menu's item spacing. note */
+}
+
+.top_menu li {
+	display:block;
+	float:left;			/* this creates the side-by-side array of top-level buttons */
+	position:relative;	/* create local positioning contexts for each button */
+	text-align:left;
+	cursor:pointer; 
+}
+
+.top_menu ul li a,
+.top_menu ul li a:visited {
+	text-decoration:none;
+	display:block;
+	color:black;
+	height:100%;
+	width:100%;
+}
+
+.top_menu ul li:hover,
+.top_menu ul li a:hover {
+	text-decoration:none;
+	display:block;
+	height:100%;
+	width:100%;
+	color:white;
+	background:rgb(77,127,200);
+}
+
+.top_menu ul li.first_level_first {
+	display:block;
+	height:25px;
+	width:80px;
+	background-color: #E5ECF9;
+	border: 1px solid rgb(153, 153, 153);
+	text-align:center;
+}
+
+.top_menu ul li.first_level {
+	display:block;
+	height:25px;
+	width:80px;
+	background-color: #E5ECF9;
+	border: 1px solid rgb(153, 153, 153);
+	border-left: none;
+	text-align:center;
+}
+
+
+/* ===== 2nd level property ===== */
+.top_menu ul li ul {
+	display:none;		/* initially hide the entire list hierarchy */
+}
+
+.top_menu ul li:hover ul,
+.top_menu ul li a:hover ul {		/* 2nd level drop-down box */
+	display:block;
+	position:absolute;
+	top:1px;			/* place us just up underneath the top-level images */
+	left:-1px;			/* left-align our drop-down to the previous button border */
+	height:auto;		/* the drop-down height will be determiend by line count */
+	margin-top:25px;	/* sets the position relative to the top level buttons  */
+	width:80px;
+}
+
+.top_menu ul li:hover ul li {
+	display:block;
+	height:25px;
+	width:80px;
+	background-color: #E5ECF9;
+	border: 1px solid rgb(153, 153, 153);
+	border-top:none;
+}
+
+.top_menu ul li:hover ul li a,
+.top_menu ul li a:hover ul li a {	/* 2nd level unselected items */
+	height:100%;
+	width:100%;
+	padding-left:10px;
+}
+
+.top_menu ul li:hover ul li a:hover,
+.top_menu ul li a:hover ul li a:hover {	/* 2nd level selected item */
+	color:white;
+	background:rgb(77,127,200);	/* sets the hover color */
+	width:70px;					/* sets the width of the hover */
+	height:100%;
+}
+
+
+/* ===== 3rd level property ===== */
+.top_menu ul li:hover ul li ul,
+.top_menu ul li a:hover ul li a ul {	/* hide inactive 3rd-level menus */
+	display:none;
+}
+
+.top_menu ul li:hover ul li:hover ul,
+.top_menu ul li a:hover ul li a:hover ul {	/* 3rd level drop-down box */
+	display:block;
+	position:absolute;
+	margin-top:-2px;	/* bring the top edge of the 3rd level menu up one */
+	left:80px;
+	width:80px;
+}
+
+.top_menu ul li:hover ul li:hover ul li,
+.top_menu ul li a:hover ul li a:hover ul li{
+	display:block;
+	float:left;
+	height:25px;
+	width:80px;
+	background-color: #E5ECF9;
+	border: 1px solid rgb(153, 153, 153);
+}
+
+.top_menu ul li:hover ul li:hover ul li.third_level_first,
+.top_menu ul li a:hover ul li a:hover ul li.third_level_first{
+	display:block;
+	float:left;
+	height:25px;
+	width:80px;
+	background-color: #E5ECF9;
+	border: 1px solid rgb(153, 153, 153);
+	border-bottom:none;
+}
+
+
+.top_menu ul li:hover ul li:hover ul li a,
+.top_menu ul li a:hover ul li a:hover ul li a {	/* 3rd level unselected items */
+	height:100%;
+	width:100%;
+	padding-left:10px;
+}
+
+.top_menu ul li:hover ul li:hover ul li a:hover,
+.top_menu ul li a:hover ul li a:hover ul li a:hover {	/* level3 selected items */
+	color:white;
+	background:rgb(77,127,200);	/* sets the hover color */
+	width:70px;					/* sets the width of the hover */
+	height:100%;
+}
