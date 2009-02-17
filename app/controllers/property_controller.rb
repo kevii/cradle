@@ -243,17 +243,25 @@ class PropertyController < ApplicationController
     item = nil
     if params[:id] == "0"
       property_item = get_ordered_string_from_params(params[params[:string]])
+      change_to_valid_property = nil
       if property_item.blank?
         flash.now[:notice_err] = error_msg_1
         render(:update){|page| page[:modify_category_item].replace_html :inline=>"<div id='notice_err' ><%= flash.now[:notice_err] %></div>"}
         return
-      elsif not verify_domain(params[:domain])['Property'].constantize.find_item_by_tree_string_or_array(params[:string], property_item, 'validation').blank?
-        flash.now[:notice_err] = error_msg_2
-        render(:update){|page| page[:modify_category_item].replace_html :inline=>"<div id='notice_err' ><%= flash.now[:notice_err] %></div>"}
-        return
+      else
+        change_to_valid_property = verify_domain(params[:domain])['Property'].constantize.find_item_by_tree_string_or_array(params[:string], property_item, 'validation')
+        if not change_to_valid_property.blank? and change_to_valid_property.property_cat_id > 0
+          flash.now[:notice_err] = error_msg_2
+          render(:update){|page| page[:modify_category_item].replace_html :inline=>"<div id='notice_err' ><%= flash.now[:notice_err] %></div>"}
+          return
+        end
       end
       begin
-        item = verify_domain(params[:domain])['Property'].constantize.save_property_tree(params[:string], property_item, params[:seperator])
+        if change_to_valid_property.blank?
+          item = verify_domain(params[:domain])['Property'].constantize.save_property_tree(params[:string], property_item, params[:seperator])
+        else
+          item = change_to_valid_property.update_attributes!(:property_cat_id=>verify_domain(params[:domain])['Property'].constantize.maximum("property_cat_id", :conditions=>["property_string=?", params[:string]])+1)
+        end
       rescue
         flash.now[:notice_err] = get_validation_error(item, "save", params[:domain])
         render(:update){|page| page[:modify_category_item].replace_html :inline=>"<div id='notice_err' ><%= flash.now[:notice_err] %></div>"}

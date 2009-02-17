@@ -409,8 +409,8 @@ ECOTree._firstWalk = function (tree, node, level) {
             if(leftSibling != null)
                 node.prelim = leftSibling.prelim + tree._getNodeSize(leftSibling) + tree.config.iSiblingSeparation;
             else
-                //node.prelim = 0;
-        		node.prelim = 60;
+                node.prelim = 5;
+        		//node.prelim = 30;
 		} 
         else
         {
@@ -785,7 +785,13 @@ ECOTree.prototype.toString = function () {
 	{
 		case "CANVAS":
 			//s.push('<canvas id="ECOTreecanvas" width=2000 height=2000></canvas>');
-			s.push('<canvas class="relative" id="ECOTreecanvas" width=768 height=768></canvas>');
+			//s.push('<canvas class="relative" id="ECOTreecanvas" width=768 height=768></canvas>');
+			var temp_width = 20
+			for (i = 0; i < this.maxLevelWidth.length; i++) {
+				temp_width = temp_width + this.maxLevelWidth[i]
+			}
+			var temp_height = 90*(this.maxLevelHeight.length-1)
+			s.push('<canvas class="relative" id="ECOTreecanvas" width='+temp_width+' height='+temp_height+'></canvas>');
 			break;
 			
 		case "HTML":
