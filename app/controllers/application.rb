@@ -42,12 +42,15 @@ class ApplicationController < ActionController::Base
       when 'en'
         section_list = session[:en_section_list]
     end
-    @uid = DumpDataWorker.asynch_dump_data(:static_condition=>params[:static_condition],
-                                           :dynamic_lexeme_condition=>params[:dynamic_lexeme_condition],
-                                           :dynamic_synthetic_condition=>params[:dynamic_synthetic_condition],
-                                           :show_conditions=>params[:show_conditions],
-                                           :simple_search=>params[:simple_search], :section_list=>section_list,
-                                           :domain=>params[:domain], :prefix=>root_url)
+    @uid = DumpDataWorker.asynch_dump_data(:static_condition => params[:static_condition],
+                                           :dynamic_lexeme_condition => params[:dynamic_lexeme_condition],
+                                           :dynamic_synthetic_condition => params[:dynamic_synthetic_condition],
+                                           :show_conditions => params[:show_conditions],
+                                           :simple_search => params[:simple_search],
+                                           :section_list => section_list,
+                                           :domain => params[:domain],
+                                           :prefix => root_url,
+                                           :dependency => params[:dependency].blank? ? nil : 1)
     render(:update){|page|
       page[:period_caller].replace_html :inline=>"<%= periodically_call_remote(:url=>{:action=>'update_indicator', :uid=>@uid}, :frequency=>'1', :variable=>'progress_indicator') %>"
       page[:indicator].show

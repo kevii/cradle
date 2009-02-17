@@ -1,11 +1,14 @@
 class DumpDataWorker < Workling::Base
-  include SearchModule
-  
-  def dump_data(options)
-    case options[:domain]
-      when 'jp'
-        id_array = find_all_jp_ids(:dynamic_lexeme_condition=>options[:dynamic_lexeme_condition], :dynamic_synthetic_condition=>options[:dynamic_synthetic_condition],
-                                    :static_condition=>options[:static_condition], :simple_search=>options[:simple_search])
+	include SearchModule
+
+	def dump_data(options)
+		case options[:domain]
+		when 'jp'
+			id_array = find_all_jp_ids(	:dynamic_lexeme_condition => options[:dynamic_lexeme_condition],
+																	:dynamic_synthetic_condition => options[:dynamic_synthetic_condition],
+																	:static_condition => options[:static_condition],
+																	:simple_search => options[:simple_search],
+																	:dependency => options[:dependency])
         lexeme_class = 'JpLexeme'
         first_line = "出力条件： "+options[:show_conditions].delete('&nbsp;')
         header, syn_list = generate_header_and_syn_list(:section_list=>options[:section_list], :domain=>'jp')
@@ -47,51 +50,77 @@ class DumpDataWorker < Workling::Base
     Workling::Return::Store.set(options[:uid], options[:prefix]+file_path)
   end
 
-  private
-  def find_all_jp_ids(options)
-    final_id_arrays = []
-    if options[:dynamic_lexeme_condition].blank? and options[:dynamic_synthetic_condition].blank?
-      final_id_arrays = JpLexeme.find(:all, :select=>"jp_lexemes.id", :conditions=>options[:static_condition],
-                                      :include=>[:struct], :order=>" jp_lexemes.id ASC ").map(&:id)
-    elsif options[:simple_search] == "true"
-      mysql_condition_string = [options[:static_condition].gsub('jp_synthetics', 'dynamic_struct_properties_jp_lexemes_join'), options[:dynamic_lexeme_condition], options[:dynamic_synthetic_condition]]
-      mysql_condition_string.delete("")
-      mysql_string = %Q| SELECT DISTINCT jp_lexemes.id | +
-                     %Q| FROM jp_lexemes LEFT OUTER JOIN jp_lexeme_new_property_items ON jp_lexeme_new_property_items.ref_id = jp_lexemes.id | +
-                     %Q| LEFT OUTER JOIN jp_synthetics dynamic_struct_properties_jp_lexemes_join ON (jp_lexemes.id = dynamic_struct_properties_jp_lexemes_join.sth_ref_id) | +
-                     %Q| LEFT OUTER JOIN jp_synthetic_new_property_items ON (jp_synthetic_new_property_items.ref_id = dynamic_struct_properties_jp_lexemes_join.id) | +
-                     %Q| WHERE | + mysql_condition_string.join(' and ') +
-                     %Q| ORDER BY  jp_lexemes.id ASC |
-      final_id_arrays = JpLexeme.find_by_sql(mysql_string).map{|item| item.id}
-    else
-      dynamic_lexeme_ids = []
-      dynamic_synthetic_refs = []
-      dynamic_ids = []
-      collection = []
-      unless options[:dynamic_lexeme_condition].blank?
-        dynamic_lexeme_ids = get_lexeme_ids_from_new_property_items(:conditions=>options[:dynamic_lexeme_condition], :domain=>'jp', :section=>'lexeme')
-      end
-      unless options[:dynamic_synthetic_condition].blank?
-        dynamic_synthetic_refs = get_lexeme_ids_from_new_property_items(:conditions=>options[:dynamic_synthetic_condition], :domain=>'jp', :section=>'synthetic')
-      end
-      if options[:dynamic_synthetic_condition].blank?
-        dynamic_ids = dynamic_lexeme_ids
-      elsif options[:dynamic_lexeme_condition].blank?
-        dynamic_ids = dynamic_synthetic_refs
-      else
-        dynamic_lexeme_ids.size >= dynamic_synthetic_refs.size ? dynamic_ids = dynamic_synthetic_refs & dynamic_lexeme_ids : dynamic_ids = dynamic_lexeme_ids & dynamic_synthetic_refs
-      end
-      if options[:static_condition].blank?
-        collection = install_by_dividing(:ids=>dynamic_ids, :domain=>'jp')
-        final_id_arrays = collection.map{|item| item.id}
-      else
-        static_ids = JpLexeme.find(:all, :select=>"jp_lexemes.id", :conditions=>options[:static_condition],
-                        				   :joins=>" left join jp_synthetics on jp_synthetics.sth_ref_id = jp_lexemes.id ",
-                        				   :group=>"jp_lexemes.id", :order=>" jp_lexemes.id ASC ").map(&:id)
+	private
+	def find_all_jp_ids(options)
+		final_id_arrays = []
+		if options[:dynamic_lexeme_condition].blank? and options[:dynamic_synthetic_condition].blank?
+			final_id_arrays = JpLexeme.find( :all,
+																			 :conditions=>options[:static_condition],
+																			 :joins=>[:struct] ).map(&:id).sort
+		elsif options[:simple_search] == "true"
+			mysql_condition_string = [options[:static_condition].gsub('jp_synthetics', 'dynamic_struct_properties_jp_lexemes_join'), options[:dynamic_lexeme_condition], options[:dynamic_synthetic_condition]]
+			mysql_condition_string.delete("")
+			mysql_string = %Q| SELECT DISTINCT jp_lexemes.id | + 
+										 %Q| FROM jp_lexemes LEFT OUTER JOIN jp_lexeme_new_property_items ON jp_lexeme_new_property_items.ref_id = jp_lexemes.id | +
+										 %Q| LEFT OUTER JOIN jp_synthetics dynamic_struct_properties_jp_lexemes_join ON (jp_lexemes.id = dynamic_struct_properties_jp_lexemes_join.sth_ref_id) | +
+										 %Q| LEFT OUTER JOIN jp_synthetic_new_property_items ON (jp_synthetic_new_property_items.ref_id = dynamic_struct_properties_jp_lexemes_join.id) | +
+										 %Q| WHERE | + mysql_condition_string.join(' and ') +
+										 %Q| ORDER BY  jp_lexemes.id ASC |
+			final_id_arrays = JpLexeme.find_by_sql(mysql_string).map(&:id)
+		else
+			dynamic_lexeme_ids = []
+			dynamic_synthetic_refs = []
+			dynamic_ids = []
+			collection = []
+			unless options[:dynamic_lexeme_condition].blank?
+				dynamic_lexeme_ids = get_lexeme_ids_from_new_property_items(:conditions=>options[:dynamic_lexeme_condition], :domain=>'jp', :section=>'lexeme')
+			end
+			unless options[:dynamic_synthetic_condition].blank?
+				dynamic_synthetic_refs = get_lexeme_ids_from_new_property_items(:conditions=>options[:dynamic_synthetic_condition], :domain=>'jp', :section=>'synthetic')
+			end
+			if options[:dynamic_synthetic_condition].blank?
+				dynamic_ids = dynamic_lexeme_ids
+			elsif options[:dynamic_lexeme_condition].blank?
+				dynamic_ids = dynamic_synthetic_refs
+			else
+				dynamic_lexeme_ids.size >= dynamic_synthetic_refs.size ? dynamic_ids = dynamic_synthetic_refs & dynamic_lexeme_ids : dynamic_ids = dynamic_lexeme_ids & dynamic_synthetic_refs
+			end
+			if options[:static_condition].blank?
+				collection = install_by_dividing(:ids=>dynamic_ids, :domain=>'jp')
+				final_id_arrays = collection.map(&:id)
+			else
+				static_ids = JpLexeme.find(	:all,
+																		:select=>"jp_lexemes.id",
+																		:conditions=>options[:static_condition],
+																		:joins=>" left join jp_synthetics on jp_synthetics.sth_ref_id = jp_lexemes.id ",
+																		:group=>"jp_lexemes.id" ).map(&:id).sort
         static_ids.size >= dynamic_ids.size ? final_id_arrays = dynamic_ids & static_ids : final_id_arrays = static_ids & dynamic_ids
       end
     end
-    return final_id_arrays.uniq.sort
+    if options[:dependency].blank?
+    	return final_id_arrays.uniq.sort
+    else
+    	temp_id_arrays = final_id_arrays.dup
+    	return final_id_arrays.inject(temp_id_arrays){|id_arrays, index_id|
+    		id_arrays.concat(find_jp_ids_with_dependency(index_id, id_arrays)).uniq.sort
+    	}
+    end
+  end
+  
+  def find_jp_ids_with_dependency(id, original_ids_array)
+		if JpLexeme.find(id).struct.blank?
+			return []
+		else
+    	dependency_ids = JpSynthetic.find(:all, :conditions=>["sth_ref_id=?", id]).map(&:sth_struct).inject([]){|id_array, item| item.split(',').map{|temp| temp[1..-2]}.each{|temp_string| id_array << temp_string.to_i if temp_string =~ /^\d+$/}; id_array}
+  		dependency_ids.dup.each{|item|
+		 		if original_ids_array.include?(item)
+	  			next
+	  		else
+	  			dependency_ids.concat(find_jp_ids_with_dependency(item, original_ids_array))
+	  		end
+	  	}
+			return dependency_ids.uniq.sort
+		end
   end
   
   def generate_header_and_syn_list(options)
