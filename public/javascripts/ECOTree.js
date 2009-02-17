@@ -784,11 +784,25 @@ ECOTree.prototype.toString = function () {
 	switch (this.render)
 	{
 		case "CANVAS":
-			//s.push('<canvas id="ECOTreecanvas" width=2000 height=2000></canvas>');
 			//s.push('<canvas class="relative" id="ECOTreecanvas" width=768 height=768></canvas>');
 			var temp_width = 20
-			for (i = 0; i < this.maxLevelWidth.length; i++) {
-				temp_width = temp_width + this.maxLevelWidth[i]
+			for (i = 0; i < this.previousLevelNode.length; i++) {
+				var inter_width = 0
+				switch (i) {
+					case 0:
+						inter_width = this.previousLevelNode[i].XPosition;
+						break;
+					case 1:
+						inter_width = this.previousLevelNode[i].w;
+						break;
+					default:
+						if ((this.previousLevelNode[i].pid - this.previousLevelNode[i-1].pid) >= 3) {
+							inter_width = this.previousLevelNode[i].w;
+						}
+						else {inter_width = this.previousLevelNode[i].w/2;}
+						break;
+				}
+				temp_width = temp_width + inter_width
 			}
 			var temp_height = 90*(this.maxLevelHeight.length-1)
 			s.push('<canvas class="relative" id="ECOTreecanvas" width='+temp_width+' height='+temp_height+'></canvas>');

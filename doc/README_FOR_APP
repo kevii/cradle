@@ -3,7 +3,6 @@
 #Authors::   Jia Lu
 #Email::   jia-l@is.naist.jp
 
-
 === Current function
 * User management
 * Japanese and Chinese's all CRUD function for lexemes and synthetic structures.
