@@ -68,7 +68,7 @@ class JpController < ApplicationController
     end
     
     if params[:dynamic_lexeme_condition].blank? and params[:dynamic_synthetic_condition].blank?
-      @jplexemes = JpLexeme.paginate(:conditions=>params[:static_condition], :include=>[:struct], :order=>" jp_lexemes.id ASC ", :per_page=>per_page, :page=>page)
+      @jplexemes = JpLexeme.paginate(:conditions=>params[:static_condition], :joins=>[:struct], :order=>" jp_lexemes.id ASC ", :per_page=>per_page, :page=>page)
     elsif params[:simple_search] == "true"
       mysql_condition_string = [params[:static_condition].gsub('jp_synthetics', 'dynamic_struct_properties_jp_lexemes_join'),params[:dynamic_lexeme_condition],params[:dynamic_synthetic_condition]]
       mysql_condition_string.delete("")
