@@ -43,30 +43,30 @@
 	    <% if not @user.blank? %>
 			<div class="top_menu">
 				<ul>
-					<li class="first_level_first"><a href="/jp">日本語辞書</a>
+					<li class="first_level_first"><%= link_to '日本語辞書', :controller => :jp, :action => :index %>
 						<ul>
-							<li><a href="/jp">Top</a></li>
-							<li><a href="/jp/new">新規単語</a></li>
-							<li><a href="/jp/define_root">Root編集</a></li>
+							<li><%= link_to 'Top', :controller => :jp, :action => :index %></li>
+							<li><%= link_to '新規単語', :controller => :jp, :action => :new %></li>
+							<li><%= link_to 'Root編集', :controller => :jp, :action => :define_root %></li>
 							<% if @user.group_name == 'admin' %>
-								<li><a href="/property/lexeme_property_index?domain=jp">属性管理</a>
+								<li><%= link_to '属性管理', :controller => :property, :action => :lexeme_property_index, :domain => 'jp' %>
 									<ul>
-										<li class="third_level_first"><a href="/property/lexeme_property_index?domain=jp">単語属性</a></li>
-										<li><a href="/property/synthetic_property_index?domain=jp">複合語属性</a></li>
+										<li class="third_level_first"><%= link_to '単語属性', :controller => :property, :action => :lexeme_property_index, :domain => 'jp' %></li>
+										<li><%= link_to '複合語属性', :controller => :property, :action => :synthetic_property_index, :domain => 'jp' %></li>
 									</ul>
 								</li>
 							<% end %>	
 						</ul>
 					</li>
-					<li class="first_level"><a href="/cn">中文辞典</a>
+					<li class="first_level"><%= link_to '中文辞典', :controller => :cn, :action => :index %>
 						<ul>
-							<li><a href="/cn">Top</a></li>
-							<li><a href="/cn/new">创建单词</a></li>
+							<li><%= link_to 'Top', :controller => :cn, :action => :index %></li>
+							<li><%= link_to '创建单词', :controller => :cn, :action => :new %></li>
 							<% if @user.group_name == 'admin' %>
-								<li><a href="/property/lexeme_property_index?domain=cn">属性管理</a>
+								<li><%= link_to '属性管理', :controller => :property, :action => :lexeme_property_index, :domain => 'cn' %>
 									<ul>
-										<li class="third_level_first"><a href="/property/lexeme_property_index?domain=cn">单词属性</a></li>
-										<li><a href="/property/synthetic_property_index?domain=cn">合成词属性</a></li>
+										<li class="third_level_first"><%= link_to '单词属性', :controller => :property, :action => :lexeme_property_index, :domain => 'cn' %></li>
+										<li><%= link_to '合成词属性', :controller => :property, :action => :synthetic_property_index, :domain => 'cn' %></li>
 									</ul>
 								</li>
 							<% end %>
