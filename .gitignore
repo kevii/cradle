@@ -1,0 +1,9 @@
+log/*
+tmp/**/*
+.DS_Store
+Capfile
+config/database.yml
+config/deploy.rb
+public/javascripts/jsProgressBarHandler.js
+public/user_dump_file/*
+dumped_data/**/*
