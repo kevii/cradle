@@ -104,11 +104,11 @@ end %>
 							<td>
 								<% if modify_property.blank? %>
 									<select id="dic_dependency" name="dic_dependency">
-										<%= options_for_select(JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]})%>
+										<%= options_for_select(verify_domain(params[:domain])['Property'].constantize.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]})%>
 									</select>
 								<% else %>
 									<select id="dic_dependency" name="dic_dependency">
-										<%= options_for_select(JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]}, modify_property.dictionary_id)%>
+										<%= options_for_select(verify_domain(params[:domain])['Property'].constantize.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]}, modify_property.dictionary_id)%>
 									</select>
 								<% end %>
 							</td>
@@ -144,11 +144,11 @@ end %>
 						<td>
 							<% if modify_property.blank? %>
 								<select id="dic_dependency" name="dic_dependency">
-									<%= options_for_select(JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]})%>
+									<%= options_for_select(verify_domain(params[:domain])['Property'].constantize.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]})%>
 								</select>
 							<% else %>
 								<select id="dic_dependency" name="dic_dependency">
-									<%= options_for_select(JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]}, modify_property.dictionary_id)%>
+									<%= options_for_select(verify_domain(params[:domain])['Property'].constantize.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]}, modify_property.dictionary_id)%>
 								</select>
 							<% end %>
 						</td>

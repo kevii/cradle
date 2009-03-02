@@ -13,7 +13,7 @@ class PropertyController < ApplicationController
       when 'jp'
         @lexeme_cat_property.concat([["ctype", initial_property_name('jp')["ctype"], initial_property_desc('jp')["ctype"]],
                                      ["cform", initial_property_name('jp')["cform"], initial_property_desc('jp')["cform"]]])
-      when 'cn'
+      when 'cn'  ## nothing for cn
       when 'en'
     end
     verify_domain(params[:domain])['NewProperty'].constantize.find_by_section_and_type('lexeme', 'category').each{|item| @lexeme_cat_property << [item.property_string, item.human_name, item.description]}
@@ -290,10 +290,9 @@ class PropertyController < ApplicationController
     exist = false
     if params[:section] == "lexeme"
       case params[:domain]
-        when 'jp'
-          special_array = ["pos", "ctype", "cform", "tagging_state"]
-        when 'cn'
-        when 'en'
+      when 'jp'	then special_array = ["pos", "ctype", "cform", "tagging_state"]
+      when 'cn' then special_array = ["pos", "tagging_state"]
+      when 'en'
       end
       if special_array.include?(temp.property_string)
         exist = true if verify_domain(params[:domain])['Lexeme'].constantize.exists?( temp.property_string => temp.property_cat_id )

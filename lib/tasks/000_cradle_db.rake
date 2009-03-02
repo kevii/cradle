@@ -11,7 +11,7 @@ namespace :cradle do
       }
       ActiveRecord::Base.establish_connection(config)
       puts "STEP 1: create tables in japanese database"
-      ### uses table
+      ### users table
       ActiveRecord::Base.connection.execute <<-"ENB"
         create table users (
           id               int  unsigned  not null  auto_increment,
@@ -294,11 +294,174 @@ namespace :cradle do
         end
       }
       ActiveRecord::Base.establish_connection(config)
+      puts "STEP 1: create tables in chinese database"
+      ### cn_lexemes table
       ActiveRecord::Base.connection.execute <<-"ENB"
         create table cn_lexemes (
-
+          id                bigint  unsigned  not null,
+          surface           varchar(255),
+          reading						varchar(255),
+          pos               int unsigned,
+          dictionary        text   not null,
+          tagging_state     int unsigned  not null,
+          log               text,
+          created_by        int not null,
+          modified_by       int,
+          updated_at        timestamp,
+          lock_version      int default 0,
+          
+          primary key (id),
+  
+          index   index_surface         (surface),
+          index   index_reading         (reading),
+          index   index_pos             (pos),
+          index   index_tagging_state   (tagging_state),
+          index   index_created_by      (created_by),
+          index   index_modified_by     (modified_by),
+          index   index_updated_at      (updated_at)
         ) ENGINE=INNODB
       ENB
+
+      ### cn_synthetics table
+      ActiveRecord::Base.connection.execute <<-"ENB"
+        create table cn_synthetics (
+          id                  bigint  unsigned  not null  auto_increment,
+          sth_ref_id          bigint  unsigned  not null,
+          sth_meta_id         int not null,
+          sth_struct          text not null,
+          sth_surface         varchar(255) not null,
+          sth_tagging_state   int unsigned  not null,
+          log                 text,
+          modified_by         int not null,
+          updated_at          timestamp,
+          lock_version        int default 0,
+  
+          primary key (id),
+  
+          index   index_ref                (sth_ref_id),
+          index   index_meta_id            (sth_meta_id),
+          index   index_sth_surface        (sth_surface),
+          index   index_sth_tagging_state  (sth_tagging_state),
+          index   index_modified           (modified_by),
+          index   index_updated            (updated_at)
+        ) ENGINE=INNODB
+      ENB
+
+      ### cn_properties table
+      ActiveRecord::Base.connection.execute <<-"ENB"
+        create table cn_properties (
+          id                int unsigned  not null  auto_increment,
+          property_string   varchar(255)   not null,
+          property_cat_id   int unsigned not null,
+          parent_id         int,
+          seperator         varchar(64) default null,
+          value             varchar(255) not null,
+          lock_version      int default 0,
+          
+          primary key (id),
+          
+          index   index_property    (property_string),
+          index   index_item        (property_string, property_cat_id),
+          index   index_seperator   (seperator),
+          index   index_value       (value)
+        ) ENGINE=INNODB
+      ENB
+
+      ### cn_new_properties table
+      ActiveRecord::Base.connection.execute <<-"ENB"
+        create table cn_new_properties (
+          id                int unsigned  not null  auto_increment,
+          property_string   varchar(255)   not null,
+          human_name        varchar(255)   not null,
+          section           enum('lexeme', 'synthetic')  not null,
+          type_field        enum('category', 'text', 'time')  not null,
+          description       text,
+          default_value     text,
+          dictionary_id     int not null,
+          lock_version      int default 0,
+          
+          primary key (id),
+          
+          unique  index  index_property (property_string),
+          index   index_human_name      (human_name)
+        ) ENGINE=INNODB
+      ENB
+
+      ### cn_lexeme_new_property_items table
+      ActiveRecord::Base.connection.execute <<-"ENB"
+        create table cn_lexeme_new_property_items (
+          id                bigint  unsigned  not null auto_increment,
+          property_id       int not null,
+          ref_id         		bigint  unsigned  not null,
+          category          int unsigned,
+          text              text,
+          time              timestamp NULL DEFAULT 0,
+          lock_version      int default 0,
+          
+          primary key (id),
+          
+          index   index_property   (property_id),
+          index   index_lexeme     (ref_id),
+          index   index_item       (property_id, ref_id),
+          index   index_category   (category),
+          index   index_time       (time)
+        ) ENGINE=INNODB
+      ENB
+
+      ### cn_synthetic_new_property_items table
+      ActiveRecord::Base.connection.execute <<-"ENB"
+        create table cn_synthetic_new_property_items (
+          id                bigint  unsigned  not null auto_increment,
+          property_id       int not null,
+          ref_id            bigint  unsigned  not null,
+          category          int unsigned,
+          text              text,
+          time              timestamp NULL DEFAULT 0,
+          lock_version      int default 0,
+          
+          primary key (id),
+          
+          index   index_property   (property_id),
+          index   index_synthetic  (ref_id),
+          index   index_item       (property_id, ref_id),
+          index   index_category   (category),
+          index   index_time       (time)
+        ) ENGINE=INNODB
+      ENB
+      
+      puts "STEP 2: loading initial lexeme properties into database"
+      puts "    loading pos into table cn_properties"
+      ActiveRecord::Base.connection.execute <<-"ENB"
+        TRUNCATE TABLE cn_properties
+      ENB
+      File.read("#{RAILS_ROOT}/initial_lexeme_property/cn_parts_of_speech").each{|line|
+        temp = line.chomp.split("\t")
+        begin
+          CnProperty.save_property_tree("pos", temp[1..4], "-")
+        rescue => ex
+          puts ex.message+"\n"
+        end
+      }
+            
+			puts "    loading tagging_state into table cn_properties"
+      File.read("#{RAILS_ROOT}/initial_lexeme_property/cn_tagging_states").each{|line|
+        temp = line.chomp.split("\t")
+        begin
+          CnProperty.save_property_tree("tagging_state", [temp[1]], nil)
+        rescue => ex
+          puts ex.message+"\n"
+        end
+      }
+            
+      puts "    loading sth_tagging_state into table cn_properties"
+      File.read("#{RAILS_ROOT}/initial_lexeme_property/cn_tagging_states").each{|line|
+        temp = line.chomp.split("\t")
+        begin
+          CnProperty.save_property_tree("sth_tagging_state", [temp[1]], nil)
+        rescue => ex
+          puts ex.message+"\n"
+        end
+      }
     end
   end
 end

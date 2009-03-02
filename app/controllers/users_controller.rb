@@ -67,10 +67,7 @@ class UsersController < ApplicationController
     ActiveRecord::Base.connection.execute("update jp_lexemes set created_by=#{params[:merge_user].to_i} where created_by=#{params[:old_user].to_i};")
     ActiveRecord::Base.connection.execute("update jp_lexemes set modified_by=#{params[:merge_user].to_i} where modified_by=#{params[:old_user].to_i};")
     ActiveRecord::Base.connection.execute("update jp_synthetics set modified_by=#{params[:merge_user].to_i} where modified_by=#{params[:old_user].to_i};")
-######## jia-l leave for cn
-#    ActiveRecord::Base.connection.execute("update cn_lexemes set created_by=#{params[:merge_user].to_i} where created_by=#{params[:old_user].to_i};")
-#    ActiveRecord::Base.connection.execute("update cn_lexemes set modified_by=#{params[:merge_user].to_i} where modified_by=#{params[:old_user].to_i};")
-#    ActiveRecord::Base.connection.execute("update cn_synthetics set modified_by=#{params[:merge_user].to_i} where modified_by=#{params[:old_user].to_i};")
+    Chinese.merge_user(params[:merge_user].to_i, params[:old_user].to_i)
     flash[:notice] = "<ul><li>Merge user succeeded!</li></ul>"
     redirect_to(:action => :list_users)
   end

@@ -7,3 +7,4 @@ config/deploy.rb
 public/javascripts/jsProgressBarHandler.js
 public/user_dump_file/*
 dumped_data/**/*
+initial_lexeme_property/*

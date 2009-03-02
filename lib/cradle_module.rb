@@ -40,6 +40,11 @@ module CradleModule
                 "created_by"=>"新規者",          "modified_by"=>"更新者",             "updated_at"=>"更新時間",
                 "sth_struct"=>"構造",            "sth_tagging_state"=>"状態",        "character_number"=>"文字数"}
       when "cn"
+        return {"id"=>"ID",                     "surface"=>"单词",                  "reading"=>"拼音",
+                "pos"=>"词性",                   "dictionary"=>"辞典",            	  "tagging_state"=>"状态",
+                "log"=>"备注",										"created_by"=>"创建者",          		"modified_by"=>"更新者",
+                "updated_at"=>"更新时间",					"sth_struct"=>"结构",            		"sth_tagging_state"=>"状态",
+                "character_number"=>"字数"}
       when "en"
     end  
   end
@@ -54,6 +59,11 @@ module CradleModule
                 "created_by"=>"新規者情報",         "modified_by"=>"更新者情報",           "updated_at"=>"更新時間情報",
                 "sth_struct"=>"内部構造",           "sth_tagging_state"=>"タグ状態"}
       when "cn"
+        return {"id"=>"单词ID",                    "surface"=>"单词写法",               "reading"=>"单词拼音",
+                "pos"=>"词性信息",                  "dictionary"=>"辞典信息(最后的“*”表示禁止匿名检索)",
+                "tagging_state"=>"标注状态",        "log" => "备注",										"created_by"=>"创建者信息",
+                "modified_by"=>"更新者信息",        "updated_at"=>"更新时间信息",					"sth_struct"=>"内部结构",
+                "sth_tagging_state"=>"标注状态"}
       when "en"
     end  
   end

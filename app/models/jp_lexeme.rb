@@ -263,5 +263,4 @@ class JpLexeme < ActiveRecord::Base
       return result
     end
   end
-  
 end
