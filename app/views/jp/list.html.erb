@@ -42,15 +42,6 @@
 									<%= submit_tag '結果出力' %>
 									<%= check_box_tag 'dependency' %>include dependency
 						  	<% end %>
-<!--
-								<%= button_to_remote '結果出力', :url => {	:action => :start_dump,
-																										  		:static_condition => @pass[:static_condition],
-							          	                         	  		:dynamic_lexeme_condition => @pass[:dynamic_lexeme_condition],
-							            	                       	  		:dynamic_synthetic_condition => @pass[:dynamic_synthetic_condition],
-																												  :show_conditions => @pass[:show_conditions],
-																												  :simple_search => @pass[:simple_search],
-																												  :domain => 'jp'} %>
--->
 							</span>
 							<span id='indicator' style="display:none;">
 								Dumping:&nbsp;&nbsp;&nbsp;								
