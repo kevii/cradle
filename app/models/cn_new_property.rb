@@ -17,7 +17,7 @@ class CnNewProperty < Chinese
   validates_uniqueness_of :property_string,
                           :message=> "此“ID”已经被使用，请重新输入！"
   validates_exclusion_of :property_string,
-                         :in => CnLexeme.column_names.concat(CnSynthetic.column_names).uniq,
+                         :in => CnLexeme.column_names.dup.concat(CnSynthetic.column_names).uniq,
                          :message => "不能使用该“ID”！"
   validates_presence_of :section, :type_field
   

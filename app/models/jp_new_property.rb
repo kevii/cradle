@@ -17,7 +17,7 @@ class JpNewProperty < ActiveRecord::Base
   validates_uniqueness_of :property_string,
                           :message=> "入力した【保存用ID】はすでに使われているので、変更して入力してください！"
   validates_exclusion_of :property_string,
-                         :in => JpLexeme.column_names.concat(JpSynthetic.column_names).uniq,
+                         :in => JpLexeme.column_names.dup.concat(JpSynthetic.column_names).uniq,
                          :message => "入力した【保存用ID】は使用禁止です！"
   validates_presence_of :section, :type_field
   
