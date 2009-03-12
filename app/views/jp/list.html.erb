@@ -155,12 +155,10 @@
 													<%= h(eval('lexeme.'+item+'_item.tree_string')) %>
 												<% end %>
 											</td>
-										<% when "created_by", "modified_by" %>
-											<td>
-												<% unless lexeme[item].blank? %>
-													<%= h(User.find(lexeme[item].to_i).name) %>
-												<% end %>
-											</td>
+										<% when "created_by" %>
+											<td><%= h(lexeme.creator.name) unless lexeme[item].blank? %></td>
+										<% when "modified_by" %>
+											<td><%= h(lexeme.annotator.name) unless lexeme[item].blank? %></td>
 										<% when "updated_at" %>
 											<td>
 												<% unless lexeme.updated_at.blank? %>

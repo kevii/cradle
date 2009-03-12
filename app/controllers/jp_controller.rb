@@ -12,6 +12,7 @@ class JpController < ApplicationController
   end
   
   def search
+    simple_search = "true"
     if params[:search_type].blank?
       search_conditions, show_conditions, notice = verification( params )
       unless notice == ""
@@ -20,7 +21,6 @@ class JpController < ApplicationController
         return
       end
       static_condition = search_conditions[0].join(" and ")
-      simple_search = "true"
       dynamic_lexeme_condition = search_conditions[1].join(" **and** ")
       simple_search = "false" if search_conditions[1].size > 1
       dynamic_synthetic_condition = search_conditions[2].join(" **and** ")
@@ -28,8 +28,8 @@ class JpController < ApplicationController
     elsif params[:search_type] == "base"
       show_conditions = "Base="+JpLexeme.find(params[:base_id].to_i).surface
       static_condition = " jp_lexemes.base_id = #{params[:base_id]} "
-      dynamic_lexeme_condition = ""
-      dynamic_synthetic_condition = ""
+      dynamic_lexeme_condition = nil
+      dynamic_synthetic_condition = nil
       flash[:notice] = flash[:notice]
     elsif params[:search_type] == "root"
       if (params[:root_id] =~ /^R/) != nil
@@ -38,8 +38,8 @@ class JpController < ApplicationController
         show_conditions = "Root="+JpLexeme.find(params[:root_id].to_i).surface
       end
       static_condition = " jp_lexemes.root_id = '#{params[:root_id]}' "
-      dynamic_lexeme_condition = ""
-      dynamic_synthetic_condition = ""
+      dynamic_lexeme_condition = nil
+      dynamic_synthetic_condition = nil
       flash[:notice] = flash[:notice]
     end
     redirect_to :action => "list", :static_condition=>static_condition,
@@ -66,19 +66,16 @@ class JpController < ApplicationController
         params[:static_condition] << " and ( " + temp.join(" or ") + " ) "
       end
     end
-    
-    if params[:dynamic_lexeme_condition].blank? and params[:dynamic_synthetic_condition].blank?
-      @jplexemes = JpLexeme.paginate(:conditions=>params[:static_condition], :joins=>[:struct], :order=>" jp_lexemes.id ASC ", :per_page=>per_page, :page=>page)
-    elsif params[:simple_search] == "true"
-      mysql_condition_string = [params[:static_condition].gsub('jp_synthetics', 'dynamic_struct_properties_jp_lexemes_join'),params[:dynamic_lexeme_condition],params[:dynamic_synthetic_condition]]
-      mysql_condition_string.delete("")
-      mysql_string = %Q| SELECT DISTINCT jp_lexemes.* | +
-                     %Q| FROM jp_lexemes LEFT OUTER JOIN jp_lexeme_new_property_items ON jp_lexeme_new_property_items.ref_id = jp_lexemes.id | +
-                     %Q| LEFT OUTER JOIN jp_synthetics dynamic_struct_properties_jp_lexemes_join ON (jp_lexemes.id = dynamic_struct_properties_jp_lexemes_join.sth_ref_id) | +
-                     %Q| LEFT OUTER JOIN jp_synthetic_new_property_items ON (jp_synthetic_new_property_items.ref_id = dynamic_struct_properties_jp_lexemes_join.id) | +
-                     %Q| WHERE | + mysql_condition_string.join(' and ') +
-                     %Q| ORDER BY  jp_lexemes.id ASC |
-      @jplexemes = JpLexeme.paginate_by_sql(mysql_string, :per_page => per_page, :page => page )  
+
+    if params[:simple_search] == "true"
+      temp_conditions = [params[:static_condition], params[:dynamic_lexeme_condition], params[:dynamic_synthetic_condition]].compact
+      temp_conditions.delete('')
+      temp_conditions = temp_conditions.join(' and ')
+      @jplexemes = JpLexeme.paginate(:conditions=>temp_conditions,
+      															 :include=>[:dynamic_properties, {:sub_structs=>[:other_properties]}],
+      															 :order=>" jp_lexemes.id ASC ",
+      															 :per_page=>per_page,
+      															 :page=>page)
     else
       dynamic_lexeme_ids = []
       dynamic_synthetic_refs = []
@@ -101,9 +98,7 @@ class JpController < ApplicationController
         collection = install_by_dividing(:ids=>dynamic_ids, :domain=>'jp')
         @jplexemes = collection.paginate(:page=>page, :per_page=>per_page)
       else
-        static_ids = JpLexeme.find(:all, :select=>"jp_lexemes.id", :conditions=>params[:static_condition],
-                        				   :joins=>" left join jp_synthetics on jp_synthetics.sth_ref_id = jp_lexemes.id ",
-                        				   :group=>"jp_lexemes.id", :order=>" jp_lexemes.id ASC ").map(&:id)
+      	static_ids = JpLexeme.find_by_sql("SELECT DISTINCT jp_lexemes.id FROM jp_lexemes LEFT OUTER JOIN jp_synthetics ON jp_synthetics.sth_ref_id = jp_lexemes.id WHERE ( #{params[:static_condition]} ) ORDER BY jp_lexemes.id ASC").map(&:id)
         static_ids.size >= dynamic_ids.size ? final_ids = dynamic_ids & static_ids : final_ids = static_ids & dynamic_ids
         @jplexemes = JpLexeme.paginate(:all, :conditions=>["id in (#{final_ids.join(',')})"], :page=>page, :per_page=>per_page)
       end
@@ -758,234 +753,227 @@ class JpController < ApplicationController
     return "", "", "<ul><li>IDは数字だけで指定して下さい！</li></ul>" if not params[:id][:value].blank? and %r[^\d+$].match(params[:id][:value]) == nil
     params.each{|key, value|
       case key
-        when "commit", "authenticity_token", "controller", "action", "search_type"
-          next
-        else
-          if initial_property_name('jp')[key] != nil or ["sth_modified_by", "sth_updated_at", "sth_pos", "sth_reading"].include?(key)
-            case key
-              when "character_number"
-                unless params[key][:value].blank?
-                  result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
-                  condition[0]<<" char_length(jp_lexemes.surface) #{params[key][:operator]} #{params[key][:value].to_i} "
-                end
-              when "sth_struct", "sth_reading", "sth_pos"
-		inner_surface = params['sth_struct'][:value].dup
-		inner_reading = params['sth_reading'][:value].dup
-		inner_pos = params['sth_pos'].dup
-		params.delete('sth_struct')
-		params.delete('sth_reading')
-		params.delete('sth_pos')
-		temp_conditions = []
-		temp_conditions << " surface = '#{inner_surface}' " unless inner_surface.blank?
-		temp_conditions << " reading = '#{inner_reading}' " unless inner_reading.blank?
-		inner_pos.delete("operator")
-		temp_pos = JpProperty.find_item_by_tree_string_or_array('pos', get_ordered_string_from_params(inner_pos))
-		unless temp_pos.blank?
-		  temp_pos_string = temp_pos.sub_tree_items.map(&:property_cat_id).join(",")
-		  temp_conditions << " pos in (#{temp_pos_string}) "
-		end
-		unless temp_conditions.blank?
-		  temp_ids = JpLexeme.find(:all, :select=>'id', :conditions=>temp_conditions.join(" and ")).map(&:id)
-                  temp_lexeme_id = []
-                  temp_ids.each{|temp_id|
-                    temp_structs = JpSynthetic.find(:all, :select=>"sth_ref_id", :conditions=>["sth_struct like ?", '%-'+temp_id.to_s+'-%']).map(&:sth_ref_id).uniq
-                    temp_lexeme_id = temp_lexeme_id.concat(temp_structs).uniq unless temp_structs.blank?
-                  }
-                  unless temp_lexeme_id.blank?
-		    show_result = []
-		    show_result << "構造内部表記include#{inner_surface}" unless inner_surface.blank?
-		    show_result << "構造内部読みinclude#{inner_reading}" unless inner_reading.blank?
-		    show_result << "構造内部品詞incluce#{temp_pos.tree_string}" unless temp_pos.blank?
-		    result << show_result.join(',&nbsp;&nbsp;&nbsp;')
-                    condition[0] << " jp_lexemes.id in (#{temp_lexeme_id.join(',')}) "
-                  end
-                end
-              when "id"
-                unless params[key][:value].blank?
-                  result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
-                  condition[0]<<" jp_lexemes.#{key} #{params[key][:operator]} #{params[key][:value].to_i} "
-                end
-              when "surface", "reading", "pronunciation"
-                unless params[key][:value].blank?
-                  if params[key][:operator] == "like"
-                    regexp="%"
-                    case params[key][:value]
-                      when '%'
-                        temp = '\\%'
-                      when '\''
-                        temp = "\\\'"
-                      when '_'
-                        temp = '\_'
-                      else
-                        temp = params[key][:value]
-                    end
-                  else
-                    regexp=""
-                    case params[key][:value]
-                      when '\''
-                        temp = "\\\'"
-                      else
-                        temp = params[key][:value]
-                    end
-                  end
-                  result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
-                  condition[0]<<" jp_lexemes.#{key} #{params[key][:operator]} '#{regexp}#{temp}#{regexp}' "
-                end
-              when "base_id"
-                unless params[key][:value].blank?
-                  result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
-                  if params[key][:operator] == "="
-                    specific_base = JpLexeme.find(:all, :conditions=>["surface='#{params[key][:value]}'"])
-                  elsif params[key][:operator] == "like"
-                    specific_base = JpLexeme.find(:all, :conditions=>[" surface like ? ", '%'+params[key][:value]+'%'])
-                  end
-                  if specific_base.blank?
-                    condition[0]<<" jp_lexemes.#{key} is NULL "
-                  else
-                    same_base_array = []
-                    specific_base.each{|item| same_base_array.concat(item.same_base_lexemes.map{|lexeme| lexeme.id}) }
-                    condition[0]<<" jp_lexemes.#{key} in (#{same_base_array.join(',')}) "
-                  end
-                end
-              when "pos", "ctype", "cform", "tagging_state", "sth_tagging_state"
-                values = params[key].dup
-                values.delete("operator")
-                temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(values))
-                case params[key][:operator]
-                  when "in", "not in"
-                    unless temp.blank?
-                      series = temp.sub_tree_items.map{|item| item.property_cat_id}.uniq
-                      series.delete(0)
-                      case key
-                        when "sth_tagging_state"
-                          result << "構造#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
-                          condition[0] << " jp_synthetics.#{key} #{params[key][:operator]} (#{series.join(',')}) "
-                        when "pos", "ctype", "cform", "tagging_state"
-                          result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
-                          condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} (#{series.join(',')}) "  
-                      end
-                    end
-                  when "=", "!="
-                    unless temp.blank?
-                      case key
-                        when "sth_tagging_state"
-                          result << "構造#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
-                          condition[0] << " jp_synthetics.#{key} #{params[key][:operator]} #{temp.property_cat_id} "
-                        when "pos", "ctype", "cform", "tagging_state"
-                          result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
-                          condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} #{temp.property_cat_id} "
-                      end
-                    end
-                end
-              when "created_by", "modified_by", "sth_modified_by"
-                unless params[key][:value].blank?
-                  if ["created_by", "modified_by"].include?(key)
-                    result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{User.find(params[key][:value].to_i).name}"
-                    condition[0]<<" jp_lexemes.#{key} #{params[key][:operator]} '#{params[key][:value].to_i}' "
-                  elsif key == "sth_modified_by"
-                    result << "構造#{initial_property_name('jp')["modified_by"]}#{operator0[params[key][:operator]]}#{User.find(params[key][:value].to_i).name}"
-                    condition[0]<<" jp_synthetics.modified_by #{params[key][:operator]} #{params[key][:value].to_i} "
-                  end
-                end
-              when "dictionary"
-                unless params[key][:value] == [""]
-                  dic_names_array = []
-                  dic_num = []
-                  params[key][:value].each{|item|
-                    dic_names_array << JpProperty.find(:first, :conditions=>["property_string='dictionary' and property_cat_id=?", item.to_i]).tree_string
-                    dic_num << item.to_i
-                  }
-                  result << "#{initial_property_name('jp')[key]}:(#{dic_names_array.join(operator0[params[key][:operator]])})"
-                  temp_section = []
-                  if params[key][:operator] == "and"
-                    dic_num.sort.each{|num| temp_section << "%-#{num.to_s}-%"}
-                    condition[0] << %Q| jp_lexemes.dictionary like '#{temp_section.join(",")}' |
-                  elsif params[key][:operator] == "or"
-                    dic_num.each{|num| temp_section << " jp_lexemes.dictionary like '%-#{num}-%' "}
-                    condition[0] << " ("+temp_section.join(' '+params[key][:operator]+' ')+") "
-                  end
-                end
-              when "updated_at", "sth_updated_at"
-                temp = params[key].dup
-                temp.delete("operator")
-                unless temp.values.join("") == ""
-                  time_error, time_string = verify_time_property(:value=>temp, :domain=>'jp')
-                  if time_error.blank?
-                    time = time_string
-                    if key == "sth_updated_at"
-                      result << "構造#{initial_property_name('jp')["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
-                      condition[0] << " jp_synthetics.updated_at #{params[key][:operator]} '#{time}' "
-                    elsif key == "updated_at"
-                      result << "#{initial_property_name('jp')["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
-                      condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} '#{time}' "
-                    end
-                  else
-                    return "", "", time_error
-                  end
-                end
+      when "commit", "authenticity_token", "controller", "action", "search_type" then next
+      else
+        if initial_property_name('jp')[key] != nil or ["sth_modified_by", "sth_updated_at", "sth_pos", "sth_reading"].include?(key)
+          case key
+          when "character_number"
+            unless params[key][:value].blank?
+              result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
+              condition[0]<<" char_length(jp_lexemes.surface) #{params[key][:operator]} #{params[key][:value].to_i} "
             end
-          else
-            property = JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"])
-            case property.type_field
-              when "category"
-                values = params[key].dup
-                values.delete("operator")
-                temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(values))
-                case params[key][:operator]
-                  when "in", "not in"
-                    unless temp.blank?
-                      result << "#{property.human_name}#{operator0[params[key][:operator]]}#{temp.tree_string}"
-                      series = temp.sub_tree_items.map{|item| item.property_cat_id}.uniq
-                      series.delete(0)
-                      case property.section
-                        when "synthetic"
-                          condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.category #{params[key][:operator]} (#{series.join(',')}) "
-                        when "lexeme"
-                          condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.category #{params[key][:operator]} (#{series.join(',')}) "
-                      end
-                    end
-                  when "=", "!="
-                    unless temp.blank?
-                      result << "#{property.human_name}#{operator0[params[key][:operator]]}#{temp.tree_string}"
-                      case property.section
-                        when "synthetic"
-                          condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.category #{params[key][:operator]} #{temp.property_cat_id} "
-                        when "lexeme"
-                          condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.category #{params[key][:operator]} #{temp.property_cat_id} "
-                      end
-                    end
+          when "sth_struct", "sth_reading", "sth_pos"
+						inner_surface = params['sth_struct'][:value].dup
+						inner_reading = params['sth_reading'][:value].dup
+						inner_pos = params['sth_pos'].dup
+						params.delete('sth_struct')
+						params.delete('sth_reading')
+						params.delete('sth_pos')
+						temp_conditions = []
+						temp_conditions << " surface = '#{inner_surface}' " unless inner_surface.blank?
+						temp_conditions << " reading = '#{inner_reading}' " unless inner_reading.blank?
+						inner_pos.delete("operator")
+						temp_pos = JpProperty.find_item_by_tree_string_or_array('pos', get_ordered_string_from_params(inner_pos))
+						unless temp_pos.blank?
+						  temp_pos_string = temp_pos.sub_tree_items.map(&:property_cat_id).join(",")
+						  temp_conditions << " pos in (#{temp_pos_string}) "
+						end
+						unless temp_conditions.blank?
+						  temp_ids = JpLexeme.find(:all, :select=>'id', :conditions=>temp_conditions.join(" and ")).map(&:id)
+              temp_lexeme_id = []
+              temp_ids.each{|temp_id|
+                temp_structs = JpSynthetic.find(:all, :select=>"sth_ref_id", :conditions=>["sth_struct like ?", '%-'+temp_id.to_s+'-%']).map(&:sth_ref_id).uniq
+                temp_lexeme_id = temp_lexeme_id.concat(temp_structs).uniq unless temp_structs.blank?
+              }
+              unless temp_lexeme_id.blank?
+						    show_result = []
+						    show_result << "構造内部表記include#{inner_surface}" unless inner_surface.blank?
+						    show_result << "構造内部読みinclude#{inner_reading}" unless inner_reading.blank?
+						    show_result << "構造内部品詞incluce#{temp_pos.tree_string}" unless temp_pos.blank?
+						    result << show_result.join(',&nbsp;&nbsp;&nbsp;')
+                condition[0] << " jp_lexemes.id in (#{temp_lexeme_id.join(',')}) "
+              end
+            end
+          when "id"
+            unless params[key][:value].blank?
+              result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
+              condition[0]<<" jp_lexemes.#{key} #{params[key][:operator]} #{params[key][:value].to_i} "
+            end
+          when "surface", "reading", "pronunciation"
+            unless params[key][:value].blank?
+              if params[key][:operator] == "like"
+                regexp="%"
+                case params[key][:value]
+                when '%' then temp = '\\%'
+                when '\'' then temp = "\\\'"
+                when '_' then temp = '\_'
+                else temp = params[key][:value]
                 end
-              when "text"
-                unless params[key][:value].blank?
-                  result << "#{property.human_name}#{operator0[params[key][:operator]]}#{params[key][:value]}"
-                  params[key][:operator] == "like" ? regexp="%" : regexp=""
-                  case property.section
-                    when "synthetic"
-                      condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.text #{params[key][:operator]} '#{regexp}#{params[key][:value]}#{regexp}' "
-                    when "lexeme"
-                      condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.text #{params[key][:operator]} '#{regexp}#{params[key][:value]}#{regexp}' "
-                  end               
+              else
+                regexp=""
+                case params[key][:value]
+                when '\'' then temp = "\\\'"
+                else temp = params[key][:value]
                 end
-              when "time"
-                temp = params[key].dup
-                temp.delete("operator")
-                unless temp.values.join("") == ""
-                  time_error, time_string = verify_time_property(:value=>temp, :domain=>'jp')
-                  if time_error.blank?
-                    time = time_string
-                    result << "#{name_string}#{operator0[params[key][:operator]]}#{time}"
-                    case property.section
-                      when "synthetic"
-                        condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.time #{params[key][:operator]} '#{time}' "
-                      when "lexeme"
-                        condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.time #{params[key][:operator]} '#{time}' "
-                    end
-                  else
-                    return "", "", time_error
-                  end
+              end
+              result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
+              condition[0]<<" jp_lexemes.#{key} #{params[key][:operator]} '#{regexp}#{temp}#{regexp}' "
+            end
+          when "base_id"
+            unless params[key][:value].blank?
+              result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{params[key][:value]}"
+              if params[key][:operator] == "="
+                specific_base = JpLexeme.find(:all, :conditions=>["surface='#{params[key][:value]}'"])
+              elsif params[key][:operator] == "like"
+                specific_base = JpLexeme.find(:all, :conditions=>[" surface like ? ", '%'+params[key][:value]+'%'])
+              end
+              if specific_base.blank?
+                condition[0]<<" jp_lexemes.#{key} is NULL "
+              else
+                same_base_array = []
+                specific_base.each{|item| same_base_array.concat(item.same_base_lexemes.map{|lexeme| lexeme.id}) }
+                condition[0]<<" jp_lexemes.#{key} in (#{same_base_array.join(',')}) "
+              end
+            end
+          when "pos", "ctype", "cform", "tagging_state", "sth_tagging_state"
+            values = params[key].dup
+            values.delete("operator")
+            temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(values))
+            case params[key][:operator]
+            when "in", "not in"
+              unless temp.blank?
+                series = temp.sub_tree_items.map{|item| item.property_cat_id}.uniq
+                series.delete(0)
+                case key
+                when "sth_tagging_state"
+                  result << "構造#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
+                  condition[0] << " jp_synthetics.#{key} #{params[key][:operator]} (#{series.join(',')}) "
+                when "pos", "ctype", "cform", "tagging_state"
+                  result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
+                  condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} (#{series.join(',')}) "  
                 end
+              end
+            when "=", "!="
+              unless temp.blank?
+                case key
+                when "sth_tagging_state"
+                  result << "構造#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
+                  condition[0] << " jp_synthetics.#{key} #{params[key][:operator]} #{temp.property_cat_id} "
+                when "pos", "ctype", "cform", "tagging_state"
+                  result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{temp.tree_string}"
+                  condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} #{temp.property_cat_id} "
+                end
+              end
+            end
+          when "created_by", "modified_by", "sth_modified_by"
+            unless params[key][:value].blank?
+              if ["created_by", "modified_by"].include?(key)
+                result << "#{initial_property_name('jp')[key]}#{operator0[params[key][:operator]]}#{User.find(params[key][:value].to_i).name}"
+                condition[0]<<" jp_lexemes.#{key} #{params[key][:operator]} '#{params[key][:value].to_i}' "
+              elsif key == "sth_modified_by"
+                result << "構造#{initial_property_name('jp')["modified_by"]}#{operator0[params[key][:operator]]}#{User.find(params[key][:value].to_i).name}"
+                condition[0]<<" jp_synthetics.modified_by #{params[key][:operator]} #{params[key][:value].to_i} "
+              end
+            end
+          when "dictionary"
+            unless params[key][:value] == [""]
+              dic_names_array = []
+              dic_num = []
+              params[key][:value].each{|item|
+                dic_names_array << JpProperty.find(:first, :conditions=>["property_string='dictionary' and property_cat_id=?", item.to_i]).tree_string
+                dic_num << item.to_i
+              }
+              result << "#{initial_property_name('jp')[key]}:(#{dic_names_array.join(operator0[params[key][:operator]])})"
+              temp_section = []
+              if params[key][:operator] == "and"
+                dic_num.sort.each{|num| temp_section << "%-#{num.to_s}-%"}
+                condition[0] << %Q| jp_lexemes.dictionary like '#{temp_section.join(",")}' |
+              elsif params[key][:operator] == "or"
+                dic_num.each{|num| temp_section << " jp_lexemes.dictionary like '%-#{num}-%' "}
+                condition[0] << " ("+temp_section.join(' '+params[key][:operator]+' ')+") "
+              end
+            end
+          when "updated_at", "sth_updated_at"
+            temp = params[key].dup
+            temp.delete("operator")
+            unless temp.values.join("") == ""
+              time_error, time_string = verify_time_property(:value=>temp, :domain=>'jp')
+              if time_error.blank?
+                time = time_string
+	              if key == "sth_updated_at"
+	                result << "構造#{initial_property_name('jp')["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
+	                condition[0] << " jp_synthetics.updated_at #{params[key][:operator]} '#{time}' "
+	              elsif key == "updated_at"
+                  result << "#{initial_property_name('jp')["updated_at"]}#{operator0[params[key][:operator]]}#{time}"
+                  condition[0] << " jp_lexemes.#{key} #{params[key][:operator]} '#{time}' "
+                end
+              else
+                return "", "", time_error
+              end
             end
           end
+        else
+          property = JpNewProperty.find(:first, :conditions=>["property_string='#{key}'"])
+          case property.type_field
+          when "category"
+            values = params[key].dup
+            values.delete("operator")
+            temp = JpProperty.find_item_by_tree_string_or_array(key, get_ordered_string_from_params(values))
+            case params[key][:operator]
+            when "in", "not in"
+              unless temp.blank?
+                result << "#{property.human_name}#{operator0[params[key][:operator]]}#{temp.tree_string}"
+                series = temp.sub_tree_items.map{|item| item.property_cat_id}.uniq
+                series.delete(0)
+                case property.section
+                when "synthetic"
+                  condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.category #{params[key][:operator]} (#{series.join(',')}) "
+                when "lexeme"
+                  condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.category #{params[key][:operator]} (#{series.join(',')}) "
+                end
+              end
+            when "=", "!="
+              unless temp.blank?
+                result << "#{property.human_name}#{operator0[params[key][:operator]]}#{temp.tree_string}"
+                case property.section
+                when "synthetic"
+                  condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.category #{params[key][:operator]} #{temp.property_cat_id} "
+                when "lexeme"
+                  condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.category #{params[key][:operator]} #{temp.property_cat_id} "
+                end
+              end
+            end
+          when "text"
+            unless params[key][:value].blank?
+              result << "#{property.human_name}#{operator0[params[key][:operator]]}#{params[key][:value]}"
+              params[key][:operator] == "like" ? regexp="%" : regexp=""
+              case property.section
+              when "synthetic"
+                condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.text #{params[key][:operator]} '#{regexp}#{params[key][:value]}#{regexp}' "
+              when "lexeme"
+                condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.text #{params[key][:operator]} '#{regexp}#{params[key][:value]}#{regexp}' "
+              end               
+            end
+          when "time"
+            temp = params[key].dup
+            temp.delete("operator")
+            unless temp.values.join("") == ""
+              time_error, time_string = verify_time_property(:value=>temp, :domain=>'jp')
+              if time_error.blank?
+                time = time_string
+                result << "#{name_string}#{operator0[params[key][:operator]]}#{time}"
+                case property.section
+                when "synthetic"
+                  condition[2] << " jp_synthetic_new_property_items.property_id = '#{property.id}' and jp_synthetic_new_property_items.time #{params[key][:operator]} '#{time}' "
+                when "lexeme"
+                  condition[1] << " jp_lexeme_new_property_items.property_id = '#{property.id}' and jp_lexeme_new_property_items.time #{params[key][:operator]} '#{time}' "
+                end
+              else
+                return "", "", time_error
+              end
+            end
+          end
+        end
       end
     }
     if result.empty?
