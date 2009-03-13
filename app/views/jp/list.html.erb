@@ -85,7 +85,7 @@
 
 	<div style="width:100%;">
 		<div style="padding-top:15px; padding-bottom:15px;">
-			<%= will_paginate @jplexemes, :params => { :per_page=>@pass[:per_page], 
+			<%= will_paginate @lexemes, :params => { :per_page=>@pass[:per_page], 
 													   :static_condition=>@pass[:static_condition],
 				                                   	   :dynamic_lexeme_condition=>@pass[:dynamic_lexeme_condition],
 				                                   	   :dynamic_synthetic_condition=>@pass[:dynamic_synthetic_condition],
@@ -98,7 +98,7 @@
 				    <tr>
 				        <th scope="row" align=left width=30px>条件:</th>
 		                <td colspan=<%= @list.size %>><%= @pass[:show_conditions] %></td>
-		                <th align="right" ><%= @jplexemes.total_entries %>&nbsp;&nbsp;&nbsp;Hits</th>
+		                <th align="right" ><%= @lexemes.total_entries %>&nbsp;&nbsp;&nbsp;Hits</th>
 			        </tr>
 			    </thead>
 			    <thead>
@@ -120,7 +120,7 @@
 			    </thead>
 			    <tbody>
 			        <% odd_or_even =0 %>
-					<% for lexeme in @jplexemes do
+					<% for lexeme in @lexemes do
 			    		odd_or_even = 1 - odd_or_even %> 
 				        <tr <%= "class='odd'" if odd_or_even == 0 %> >
 				            <td align="center" >
@@ -137,7 +137,7 @@
 											<td><%= h(lexeme[item]) %></td>
 										<% when "base_id" %>
 											<td>
-												<%= link_to( h(lexeme.base.surface), :action=>"search", :search_type=>"base", :base_id=>lexeme.base_id ) %>
+												<%= link_to( h(lexeme.base.surface), :action=>"search", :search_type=>"base", :base_id=>lexeme.base_id, :domain=>'jp' ) %>
 											</td>
 										<% when "root_id" %>
 											<td style="text-align:center;" >
@@ -145,7 +145,7 @@
 													<% if lexeme.root_id =~ /^R/ %>
 														<%= link_to( "<span style='background-color:#047;'>&nbsp;&nbsp;</span>", :action=>"search", :search_type=>"root", :root_id=>lexeme.root_id ) %>
 													<% else %>
-														<%= link_to( h(lexeme.root.surface), :action=>"search", :search_type=>"root", :root_id=>lexeme.root_id )%>
+														<%= link_to( h(lexeme.root.surface), :action=>"search", :search_type=>"root", :root_id=>lexeme.root_id, :domain=>'jp' )%>
 													<% end %>
 												<% end %>
 											</td>
@@ -246,7 +246,7 @@
 			</table>
 		</div>
 		<div style="padding-top:15px; padding-bottom:15px;">
-			<%= will_paginate @jplexemes, :params => { :per_page=>@pass[:per_page], 
+			<%= will_paginate @lexemes, :params => { :per_page=>@pass[:per_page], 
 													   :static_condition=>@pass[:static_condition],
 				                                   	   :dynamic_lexeme_condition=>@pass[:dynamic_lexeme_condition],
 				                                   	   :dynamic_synthetic_condition=>@pass[:dynamic_synthetic_condition],

@@ -4,7 +4,6 @@ require 'date'
 class ApplicationController < ActionController::Base
   layout 'cradle'
   helper :all
-  include SearchModule
 
 	### for maintenance
   include MaintenanceMode

@@ -147,6 +147,7 @@ namespace :cradle do
           index   index_lexeme     (ref_id),
           index   index_item       (property_id, ref_id),
           index   index_category   (category),
+          index		index_text			 (text(255)),
           index   index_time       (time)
         ) ENGINE=INNODB
       ENB
@@ -168,6 +169,7 @@ namespace :cradle do
           index   index_synthetic  (ref_id),
           index   index_item       (property_id, ref_id),
           index   index_category   (category),
+          index		index_text			 (text(255)),
           index   index_time       (time)
         ) ENGINE=INNODB
       ENB
@@ -404,6 +406,7 @@ namespace :cradle do
           index   index_lexeme     (ref_id),
           index   index_item       (property_id, ref_id),
           index   index_category   (category),
+          index		index_text			 (text(255)),
           index   index_time       (time)
         ) ENGINE=INNODB
       ENB
@@ -425,6 +428,7 @@ namespace :cradle do
           index   index_synthetic  (ref_id),
           index   index_item       (property_id, ref_id),
           index   index_category   (category),
+          index		index_text			 (text(255)),
           index   index_time       (time)
         ) ENGINE=INNODB
       ENB

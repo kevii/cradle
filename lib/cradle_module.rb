@@ -9,7 +9,6 @@ module CradleModule
         class_name["NewProperty"] = "JpNewProperty"
         class_name["LexemeNewPropertyItem"] = "JpLexemeNewPropertyItem"
         class_name["SyntheticNewPropertyItem"] = "JpSyntheticNewPropertyItem"
-        class_name["session_dic_id_array"] = session[:jp_dict_id]
       when "cn"
         class_name["Lexeme"] = "CnLexeme"
         class_name["Synthetic"] = "CnSynthetic"
@@ -17,7 +16,6 @@ module CradleModule
         class_name["NewProperty"] = "CnNewProperty"
         class_name["LexemeNewPropertyItem"] = "CnLexemeNewPropertyItem"
         class_name["SyntheticNewPropertyItem"] = "CnSyntheticNewPropertyItem"
-        class_name["session_dic_id_array"] = session[:cn_dict_id]
       when "en"
         class_name["Lexeme"] = "EnLexeme"
         class_name["Synthetic"] = "EnSynthetic"
@@ -25,7 +23,6 @@ module CradleModule
         class_name["NewProperty"] = "EnNewProperty"
         class_name["LexemeNewPropertyItem"] = "EnLexemeNewPropertyItem"
         class_name["SyntheticNewPropertyItem"] = "EnSyntheticNewPropertyItem"
-        class_name["session_dic_id_array"] = session[:en_dict_id]
     end
     return class_name
   end
