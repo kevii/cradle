@@ -108,4 +108,8 @@ class CnProperty < Chinese
     end
     return tree_node_array
   end
+  
+  def self.find_inside(type, conditions)
+  	find(:all, :conditions=>["property_string=? and "+conditions, type])
+  end
 end
