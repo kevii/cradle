@@ -1,0 +1,57 @@
+<% form_remote_tag  :url => {:action => :change_section_list} do %>
+	<table CELLSPACING=0>
+		<tr height=30 style="background: #E5ECF9;color:#1e2078;padding: 0.2em 1em;">
+			<td colspan=19 align="center" style="padding-left:200px;"><strong style="font-size:125%;">单词属性</strong></td>
+			<td width=200 align="right">
+				<%= button_to_function("取消", "Effect.SlideUp('field_list');Effect.remove(this);") %>
+				<%= submit_tag "保存" %>
+			</td>
+		</tr>
+		<tr height=30>
+			<td style="width:20px;"><%= check_box_tag '0_id', 'true', true, :disabled=>true, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['id'] %></td>
+			<td style="width:20px;"><%= check_box_tag '1_surface', 'true', field_list.include?("1_surface")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['surface'] %></td>
+			<td style="width:20px;"><%= check_box_tag '2_reading', 'true', field_list.include?("2_reading")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['reading'] %></td>
+			<td style="width:20px;"><%= check_box_tag '3_dictionary', 'true', field_list.include?("3_dictionary")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['dictionary'] %></td>
+			<td style="width:20px;"><%= check_box_tag '4_pos', 'true', field_list.include?("4_pos")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['pos'] %></td>
+			<% if User.find_by_id(session[:user_id]) %>
+				<td><%= check_box_tag '5_tagging_state', 'true', field_list.include?("5_tagging_state")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['tagging_state'] %></td>
+				<td><%= check_box_tag '6_log', 'true', field_list.include?("6_log")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['log'] %></td>
+				<td><%= check_box_tag '7_created_by', 'true', field_list.include?("7_created_by")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['created_by'] %></td>
+				<td><%= check_box_tag '8_modified_by', 'true', field_list.include?("8_modified_by")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['modified_by'] %></td>
+				<td><%= check_box_tag '9_updated_at', 'true', field_list.include?("9_updated_at")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['updated_at'] %></td>
+			<% end %>
+		</tr>
+		<tr height=30>
+			<% CnNewProperty.find(:all, :order=>"id ASC" ,:conditions=>["section=?", 'lexeme']).each_with_index{|property, index|
+				next unless session[:cn_dict_id].include?(property.dictionary_id) %>
+				<td><%= check_box_tag (10+index).to_s+'_'+property.property_string, 'true', field_list.include?((10+index).to_s+'_'+property.property_string)?true:false, :style=>"vertical-align:middle;" %></td><td><%= property.human_name %></td>
+				<% if (index+1) % 10 == 0 %>
+					</tr><tr height=30>
+				<% end
+			} %>
+		</tr>
+		<tr height=30 style="background: #E5ECF9;color:#1e2078;padding: 0.2em 1em;">
+			<td colspan=20 align="center"><strong style="font-size:125%;">合成词属性</strong></td>
+		</tr>
+		<tr height=30>
+			<% if User.find_by_id(session[:user_id]) %>
+				<td><%= check_box_tag '100_sth_struct', 'true', field_list.include?("100_sth_struct")?true:false, {:style=>"vertical-align:middle;", :onclick=>"set_new_syn_pros_cb_to_false();"} %></td><td><%= initial_property_name('cn')['sth_struct'] %></td>
+				<td><%= check_box_tag '101_sth_tagging_state', 'true', field_list.include?("101_sth_tagging_state")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['sth_tagging_state'] %></td>
+				<td><%= check_box_tag '102_sth_log', 'true', field_list.include?("102_sth_log")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['log'] %></td>
+				<td><%= check_box_tag '103_sth_modified_by', 'true', field_list.include?("103_sth_modified_by")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['modified_by'] %></td>
+				<td><%= check_box_tag '104_sth_updated_at', 'true', field_list.include?("104_sth_updated_at")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['updated_at'] %></td>
+			<% else %>
+				<td><%= check_box_tag '100_sth_struct', 'true', field_list.include?("100_sth_struct")?true:false, {:style=>"vertical-align:middle;", :onclick=>"set_new_syn_pros_cb_to_false();"} %></td><td><%= initial_property_name('cn')['sth_struct'] %></td>
+			<% end %>
+		</tr>
+		<tr height=30>
+			<% CnNewProperty.find(:all, :order=>"id ASC" ,:conditions=>["section=?", 'synthetic']).each_with_index{|property, index|
+				next unless session[:cn_dict_id].include?(property.dictionary_id) %>
+				<td><%= check_box_tag (105+index).to_s+'_'+property.property_string, 'true', field_list.include?((105+index).to_s+'_'+property.property_string)?true:false, :disabled =>field_list.include?("100_sth_struct")?false:true, :style=>"vertical-align:middle;" %></td><td><%= property.human_name %></td>
+				<% if (index+1) % 10 == 0 %>
+					</tr><tr height=30>
+				<% end %>
+			<% } %>
+		</tr>
+	</table>
+<% end %>

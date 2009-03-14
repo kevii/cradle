@@ -1,0 +1,214 @@
+<div style="margin-left:2%;" >
+	<div>
+		<table>
+			<tr>
+				<td>显示个数：</td>
+				<td>
+					<% form_tag :action => 'list',
+											:method => "post",
+											:static_condition => @pass[:static_condition],
+											:dynamic_lexeme_condition => @pass[:dynamic_lexeme_condition],
+											:dynamic_synthetic_condition => @pass[:dynamic_synthetic_condition],
+											:show_conditions => @pass[:show_conditions],
+											:simple_search => @pass[:simple_search],
+											:domain => 'cn' do %>
+						<select id="per_page" name="per_page" style="width: 80px">
+	        		<%= options_for_select(per_page_list, @pass[:per_page].to_s ) %>
+	        	</select>
+	        	<%= submit_tag "Review" %>
+						<% if @list.include?("3_dictionary") %>
+							<span style="padding-left:30px;">
+								<%= button_to_function "辞典<=>显示颜色", :onclick=>"if(Element.visible('field_list')){Effect.SlideUp('field_list');Effect.SlideDown('dictionary_list');}if(Element.visible('dictionary_list')){Effect.SlideUp('dictionary_list');}else{Effect.SlideDown('dictionary_list');}" %>
+							</span>
+						<% end %>
+						<span style="padding-left:30px;">
+							<%= button_to_remote( "显示字段",
+																		:url =>{ :action => :load_section_list },
+																		:with => "'state='+Element.visible('field_list')",
+																		:before=>%Q|if(Element.visible('dictionary_list')){Effect.SlideUp('dictionary_list');}|+%Q|if(Element.visible('field_list')){Effect.SlideUp('field_list');}| ) %>
+						</span>
+					<% end %>
+				</td>
+				<td style="padding-left:30px;">
+					<% if not session[:user_id].blank? and User.find_by_id(session[:user_id]).group_name == "admin" %>
+						<span id='wrapper' style="padding-left:30px;">
+							<span id='period_caller'>
+						  	<% form_remote_tag :url => {:action => :start_dump,
+						  															:static_condition => @pass[:static_condition],
+							                          		:dynamic_lexeme_condition => @pass[:dynamic_lexeme_condition],
+							                          		:dynamic_synthetic_condition => @pass[:dynamic_synthetic_condition],
+																  					:show_conditions => @pass[:show_conditions],
+																  					:simple_search => @pass[:simple_search],
+																  					:domain => 'cn'} do %>
+									<%= submit_tag '输出结果' %>
+									<%= check_box_tag 'dependency' %>include dependency
+						  	<% end %>
+							</span>
+							<span id='indicator' style="display:none;">
+								Dumping:&nbsp;&nbsp;&nbsp;								
+								<%= image_tag("load.gif", :style=>"vertical-align:middle;") %>
+							<span class="progressBar" id="progressBar">1%</span>
+						</span>
+					<% end %>				
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+	<div style="width:100%;">
+		<div id ="field_list" align=center style='display:none;'></div>
+		<% if @list.include?("3_dictionary") %>
+			<div id ="dictionary_list" align=center onclick="Effect.SlideUp('dictionary_list');" style='display:none;'>
+				<table>
+					<tr height=30>
+						<% dicts = CnProperty.find(:all, :order=>"property_cat_id ASC", :conditions=>["property_string='dictionary' and property_cat_id > 0"]) %>
+						<% dicts.each_with_index{|dict, index|
+						   next unless session[:cn_dict_id].include?(dict.property_cat_id) %>
+							<td><span style='<%= "background-color:#{dictionary_color[dict.property_cat_id]};" %>'>&nbsp;&nbsp;</span>&nbsp;<%= dict.tree_string %></td>
+							<% if (index+1) % 5 == 0 %>
+								</tr><tr height=30>
+							<% else %>
+								<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<% end %>
+						<% } %>
+					</tr>
+				</table>
+			</div>
+		<% else %>
+			<div id ="dictionary_list" style='display:none;'></div>
+		<% end %>
+	</div>
+	
+
+	<div style="width:100%;">
+		<div style="padding-top:15px; padding-bottom:15px;">
+			<%= will_paginate @lexemes, :params => {:per_page=>@pass[:per_page], 
+													   										:static_condition=>@pass[:static_condition],
+				                                   	  	:dynamic_lexeme_condition=>@pass[:dynamic_lexeme_condition],
+				                                   	  	:dynamic_synthetic_condition=>@pass[:dynamic_synthetic_condition],
+																								:show_conditions => @pass[:show_conditions],
+													   										:simple_search=>@pass[:simple_search],
+													   										:domain => 'cn' } %>
+		</div>
+		<div class="list">
+			<table>
+				<thead>
+					<tr>
+				  	<th scope="row" align=left width=30px>查找条件：</th>
+		        <td colspan=<%= @list.size %>><%= @pass[:show_conditions] %></td>
+		        <th align="right" ><%= @lexemes.total_entries %>&nbsp;&nbsp;&nbsp;Hits</th>
+			    </tr>
+			  </thead>
+			  <thead>
+			    <tr>
+			      <th></th>
+						<th>ID</th>
+		  	    <% @list.each{|ordered_item|
+							item = ordered_item.gsub(/^\d+_/, "")
+							if not initial_property_name('cn')[item].blank? %>
+								<th><%= item=="sth_tagging_state" ? "构造"+initial_property_name('cn')[item] : initial_property_name('cn')[item] %></th>
+							<% elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item) %>
+								<th><%= initial_property_name('cn')[item.gsub("sth_", "")] %></th>
+							<% else
+								temp = CnNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %>
+								<th <%= temp.scan(/./).size > 5 ? %Q|style="width:70px;"| : %Q|style="white-space: nowrap;"| %>><%= h(temp) %></th>
+							<% end
+            } %>
+	        </tr>
+		    </thead>
+		    <tbody>
+	        <% odd_or_even =0 %>
+					<% for lexeme in @lexemes do
+		    		odd_or_even = 1 - odd_or_even %> 
+		        <tr <%= "class='odd'" if odd_or_even == 0 %> >
+			        <td align="center" >
+				        <%= link_to '查看', :action => 'show', :id => lexeme.id %>
+	            </td>
+	            <td align="left" ><%= h(lexeme.id) %></td>
+							<% @list.each do |ordered_item|
+								item = ordered_item.gsub(/^\d+_/, "")
+								if not initial_property_name('cn')[item].blank?
+									case item
+									when "surface" then %> <td><%= link_to( h(lexeme.surface), "http://www.google.com.cn/search?hl=ja&q=#{lexeme.surface}") %></td>
+									<% when "reading", "log" then %> <td><%= h(lexeme[item]) %></td>
+									<% when "pos", "tagging_state" then %> <td><%= h(eval('lexeme.'+item+'_item.tree_string')) unless lexeme[item].blank? or lexeme[item] == 0 %></td>
+									<% when "created_by", "modified_by" then %> <td><%= h(User.find(lexeme[item].to_i).name) unless lexeme[item].blank? %></td>
+									<% when "updated_at" then %> <td><%= h(lexeme.updated_at.to_formatted_s(:db)) unless lexeme.updated_at.blank? %></td>
+									<% when "dictionary" %>
+										<td style="text-align:center;" >
+											<% temp = []
+											lexeme.dictionary_item.list.each{|dict|
+												next unless session[:cn_dict_id].include?(dict.to_i)
+												temp << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>"
+											} %>
+											<%= temp.join("  ") %>
+										</td>
+									<% when "sth_struct" %>
+										<td style="text-align:center;" >
+											<% unless lexeme.struct.blank? %>
+												<span style='background-color:#047;'>&nbsp;&nbsp;</span>
+											<% end %>
+										</td>
+									<% when "sth_tagging_state" then %> <td><%= h(lexeme.struct.sth_tagging_state_item.tree_string) unless lexeme.struct.blank? %></td>
+									<% end
+								elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item)
+									case item
+									when "sth_log" then %> <td><%= h(lexeme.struct.log) unless lexeme.struct.blank? %></td>
+									<% when "sth_modified_by" then %> <td><%= h(lexeme.struct.annotator.name) unless lexeme.struct.blank? %></td>
+									<% when "sth_updated_at" then %> <td><%= h(lexeme.struct.updated_at.to_formatted_s(:db)) unless lexeme.struct.blank? %></td>
+									<% end
+								else
+									property = CnNewProperty.find(:first, :conditions=>["property_string='#{item}'"]) 
+									if property.section == "lexeme"
+										temp = eval 'lexeme.'+item
+									elsif property.section == "synthetic"
+										if lexeme.struct.blank?
+											temp = ""
+										else
+											temp = eval('lexeme.struct.dup.'+item)
+										end
+									end
+									if temp.blank? %>
+										<td></td>
+									<% else
+										case property.type_field
+										when "category" then %> <td><%= h(CnProperty.find(:first, :conditions=>["property_string='#{item}' and property_cat_id=#{temp}"]).tree_string) %></td>
+										<% when "text" then %> <td><%= h(temp) %></td>
+										<% when "time" then %> <td><%= h(temp.to_formatted_s(:db)) %></td>
+										<% end
+									end
+								end
+							end %>
+		        </tr>
+	        <% end %>
+		    </tbody>
+			  <thead>
+			    <tr>
+			      <th></th>
+						<th>ID</th>
+		  	    <% @list.each{|ordered_item|
+							item = ordered_item.gsub(/^\d+_/, "")
+							if not initial_property_name('cn')[item].blank? %>
+								<th><%= item=="sth_tagging_state" ? "构造"+initial_property_name('cn')[item] : initial_property_name('cn')[item] %></th>
+							<% elsif ["sth_log", "sth_modified_by", "sth_updated_at"].include?(item) %>
+								<th><%= initial_property_name('cn')[item.gsub("sth_", "")] %></th>
+							<% else
+								temp = CnNewProperty.find(:first, :conditions=>["property_string='#{item}'"]).human_name %>
+								<th <%= temp.scan(/./).size > 5 ? %Q|style="width:70px;"| : %Q|style="white-space: nowrap;"| %>><%= h(temp) %></th>
+							<% end
+            } %>
+	        </tr>
+		    </thead>
+			</table>
+		</div>
+		<div style="padding-top:15px; padding-bottom:15px;">
+			<%= will_paginate @lexemes, :params => {:per_page=>@pass[:per_page], 
+													   										:static_condition=>@pass[:static_condition],
+				                                   	  	:dynamic_lexeme_condition=>@pass[:dynamic_lexeme_condition],
+				                                   	  	:dynamic_synthetic_condition=>@pass[:dynamic_synthetic_condition],
+																								:show_conditions => @pass[:show_conditions],
+													   										:simple_search=>@pass[:simple_search],
+													   										:domain => 'cn' } %>
+		</div>
+	</div>
+</div>

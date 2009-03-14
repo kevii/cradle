@@ -10,7 +10,8 @@
 											:dynamic_lexeme_condition => @pass[:dynamic_lexeme_condition],
 											:dynamic_synthetic_condition => @pass[:dynamic_synthetic_condition],
 											:show_conditions => @pass[:show_conditions],
-											:simple_search => @pass[:simple_search] do %>
+											:simple_search => @pass[:simple_search],
+											:domain => "jp" do %>
 						<select id="per_page" name="per_page" style="width: 80px">
 	        		<%= options_for_select(per_page_list, @pass[:per_page].to_s ) %>
 	        	</select>
@@ -86,11 +87,12 @@
 	<div style="width:100%;">
 		<div style="padding-top:15px; padding-bottom:15px;">
 			<%= will_paginate @lexemes, :params => { :per_page=>@pass[:per_page], 
-													   :static_condition=>@pass[:static_condition],
+													   									 :static_condition=>@pass[:static_condition],
 				                                   	   :dynamic_lexeme_condition=>@pass[:dynamic_lexeme_condition],
 				                                   	   :dynamic_synthetic_condition=>@pass[:dynamic_synthetic_condition],
-													   :show_conditions => @pass[:show_conditions],
-													   :simple_search=>@pass[:simple_search] } %>
+													   									 :show_conditions => @pass[:show_conditions],
+													   									 :simple_search=>@pass[:simple_search],
+													   									 :domain => "jp" } %>
 		</div>
 		<div class="list">
 			<table>
@@ -247,11 +249,12 @@
 		</div>
 		<div style="padding-top:15px; padding-bottom:15px;">
 			<%= will_paginate @lexemes, :params => { :per_page=>@pass[:per_page], 
-													   :static_condition=>@pass[:static_condition],
+													   									 :static_condition=>@pass[:static_condition],
 				                                   	   :dynamic_lexeme_condition=>@pass[:dynamic_lexeme_condition],
 				                                   	   :dynamic_synthetic_condition=>@pass[:dynamic_synthetic_condition],
-													   :show_conditions => @pass[:show_conditions],
-													   :simple_search=>@pass[:simple_search] } %>
+													   									 :show_conditions => @pass[:show_conditions],
+													   									 :simple_search=>@pass[:simple_search],
+													   									 :domain => "jp" } %>
 		</div>
 	</div>
 </div>
