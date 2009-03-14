@@ -95,7 +95,7 @@ class CnLexeme < Chinese
             else
               if value == (eval "temp_lexeme."+key) or ( CnNewProperty.find(:first, :conditions=>["property_string='#{key}'"]).type_field == "time" and (eval "not temp_lexeme."+key+".blank?")  and value==(eval "temp_lexeme."+key+".to_formatted_s(:db)") )
                 same << true
-              else 
+              else
                 same << false
               end
           end
