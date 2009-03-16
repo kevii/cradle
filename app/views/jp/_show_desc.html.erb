@@ -21,15 +21,15 @@
 								<td><%= h(show_desc[item]) %></td>
 							<% when "base_id" %>
 								<td>
-									<%= link_to( h(show_desc.base.surface), :action=>"search", :search_type=>"base", :base_id=>show_desc.base_id ) %>
+									<%= link_to( h(show_desc.base.surface), :action=>"search", :search_type=>"base", :base_id=>show_desc.base_id, :domain=>'jp' ) %>
 								</td>
 							<% when "root_id" %>
 								<td style="text-align:center;" >
 									<% unless show_desc.root_id.blank? %>
 										<% if show_desc.root_id =~ /^R/ %>
-											<%= link_to( "<span style='background-color:#047;'>&nbsp;&nbsp;</span>", :action=>"search", :search_type=>"root", :root_id=>show_desc.root_id ) %>
+											<%= link_to( "<span style='background-color:#047;'>&nbsp;&nbsp;</span>", :action=>"search", :search_type=>"root", :root_id=>show_desc.root_id, :domain=>'jp' ) %>
 										<% else %>
-											<%= link_to( h(show_desc.root.surface), :action=>"search", :search_type=>"root", :root_id=>show_desc.root_id )%>
+											<%= link_to( h(show_desc.root.surface), :action=>"search", :search_type=>"root", :root_id=>show_desc.root_id, :domain=>'jp' )%>
 										<% end %>
 									<% end %>
 								</td>
