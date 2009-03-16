@@ -145,7 +145,7 @@
 											<td style="text-align:center;" >
 												<% unless lexeme.root_id.blank? %>
 													<% if lexeme.root_id =~ /^R/ %>
-														<%= link_to( "<span style='background-color:#047;'>&nbsp;&nbsp;</span>", :action=>"search", :search_type=>"root", :root_id=>lexeme.root_id ) %>
+														<%= link_to( "<span style='background-color:#047;'>&nbsp;&nbsp;</span>", :action=>"search", :search_type=>"root", :root_id=>lexeme.root_id, :domain=>'jp' ) %>
 													<% else %>
 														<%= link_to( h(lexeme.root.surface), :action=>"search", :search_type=>"root", :root_id=>lexeme.root_id, :domain=>'jp' )%>
 													<% end %>

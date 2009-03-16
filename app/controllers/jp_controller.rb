@@ -1,11 +1,12 @@
 class JpController < ApplicationController
-  include SearchModule
   before_filter :set_title
   before_filter :authorize, :only => [:input_base, :new, :create, :destroy, :edit, :update, :define_root, :save_roots]
 
+  include SearchModule
+
   def index
+      session[:jp_section_list] = ['1_surface', '2_reading', '3_pronunciation', '4_base_id', '5_root_id', '6_dictionary', '7_pos', '8_ctype', '9_cform', '100_sth_struct'] if session[:jp_section_list].blank?
     if session[:user_id].blank?
-      session[:jp_section_list] = ['1_surface', '2_reading', '3_pronunciation', '4_base_id', '5_root_id', '6_dictionary', '7_pos', '8_ctype', '9_cform', '100_sth_struct']
       session[:jp_dict_id] = JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).select{|item| item.value !~ /\*$/}.map{|dict| dict.property_cat_id}
     else
       session[:jp_dict_id] = JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| dict.property_cat_id}

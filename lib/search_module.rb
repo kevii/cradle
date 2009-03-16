@@ -1,6 +1,4 @@
 module SearchModule
-  include CradleModule
-
   def search
     simple_search = "true"
     if params[:search_type].blank?	# for both jp and cn
@@ -50,7 +48,7 @@ module SearchModule
     end
     
     if session[:user_id].blank? or User.find_by_id(session[:user_id]).blank?
-      temp = session[params[:domain]+"_dict_id"].inject([]){|condition_string, dict_id| condition_string << " ( #{params[:domain]}_lexemes.dictionary like '%-#{dict_id}-%' ) "}
+      temp = session[(params[:domain]+"_dict_id").to_sym].inject([]){|condition_string, dict_id| condition_string << " ( #{params[:domain]}_lexemes.dictionary like '%-#{dict_id}-%' ) "}
       if temp.size == 1
         params[:static_condition] << " and " + temp[0]
       else

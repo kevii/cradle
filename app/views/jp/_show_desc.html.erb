@@ -121,10 +121,13 @@
 						<th>構造</th>
 						<td colspan=5><%= sub_structure.get_display_string %></td>
 					</tr>
+					<%
+						remain_fields = []
+						prepare_for_struct.each{|item| remain_fields << item if session[:jp_dict_id].include?(item.dictionary_id) and current_list.include?(item.property_string)}
+						unless remain_fields.blank?
+					%>
 					<tr>
-						<% prepare_for_struct.each_with_index{|item, index|
-							next unless session[:jp_dict_id].include?(item.dictionary_id)
-							next unless current_list.include?(item.property_string)
+						<% remain_fields.each_with_index{|item, index|
 							if index % 3 == 0 and index != 0
 								odd_or_even = 1 - odd_or_even %>
 								</tr><tr <%= "class='odd'" if odd_or_even == 0 %> >
@@ -143,10 +146,11 @@
 								<% end %>
 							</td>
 						<% }
-						(3-prepare_for_struct.size%3).times{|index| %>
+						(3-remain_fields.size%3).times{|index| %>
 							<th></th><td></td>
 						<% } %>
 					</tr>
+					<% end %>
 				<% } %>
 			<% end %>
 	</table>

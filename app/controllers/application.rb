@@ -4,7 +4,8 @@ require 'date'
 class ApplicationController < ActionController::Base
   layout 'cradle'
   helper :all
-
+  include CradleModule
+  
 	### for maintenance
   include MaintenanceMode
   before_filter :disabled?

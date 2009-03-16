@@ -53,7 +53,7 @@
 						<tr class='odd'>
 							<th><%= initial_property_name('jp')['base_id'] %></th>
 							<td><%= link_to( h(@lexeme.base.surface), :action=> 'show', :id=>@lexeme.base_id )  %></td>
-							<th style="width:25px; text-align:right;"><%= link_to( "系列", :action=> 'search', :base_id => @lexeme.base_id, :search_type => "base" )%></th>
+							<th style="width:25px; text-align:right;"><%= link_to( "系列", :action=> 'search', :base_id => @lexeme.base_id, :search_type => "base", :domain=>'jp' )%></th>
 						</tr>
 						<tr>
 							<th><%= initial_property_name('jp')['root_id'] %></th>
@@ -63,7 +63,7 @@
 								<td>
 									<%= link_to( h(lexeme.root.surface), :action=> 'show', :id=>@lexeme.root_id) if @lexeme.root_id !~ /^R/ %>
 								</td>
-								<th style="width:25px; text-align:right;"><%= link_to( "系列", :action => 'search', :root_id => @lexeme.root_id, :search_type => "root") %></th>
+								<th style="width:25px; text-align:right;"><%= link_to( "系列", :action => 'search', :root_id => @lexeme.root_id, :search_type => "root", :domain=>'jp') %></th>
 							<% end %>
 						</tr>
 						<tr class='odd'>
