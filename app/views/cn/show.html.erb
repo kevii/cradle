@@ -1,0 +1,242 @@
+<div id='synthetic_struct'>
+	<% if @lexeme.struct.blank? %>
+	<div style="margin-left:20px;float:left;width:950px;">
+	<% else %>
+	<div style="margin-left:20px;float:left;width:650px;">
+	<% end %>
+		<% if not flash.now[:notice_special].blank? %>
+		<div id="notice" style="width:400px;"><%= flash.now[:notice_special] %></div>
+		<% end %>
+		<div id='show_desc' style='display:none;'></div>
+			<% if @lexeme.struct.blank? %>
+	  	<div class="User-control" style="float:left; width:400px;">
+			<% else %>
+	    <div class="User-control" style="float:left; width:310px;">
+			<% end %>
+				<fieldset style="padding-left:10px; padding-right:10px;padding-top:20px; background: #f7faff;">
+					<legend style="background: #1e2078;">单词详细内容</legend>
+			    <div class="list" style="width:100%;">
+						<table style="width:100%;">
+							<tr>
+						  	<% if @lexeme.struct.blank? %>
+								<th style="width:100px;"><%= initial_property_name('cn')['id'] %></th>
+								<td colspan=2><%= h(@lexeme.send("id")) %></td>
+								<% else %>
+		            <th style="width:50px;"><%= initial_property_name('cn')['id'] %></th>
+								<td colspan=2><%= h(@lexeme.send("id")) %></td>
+								<% end %>
+							</tr>
+							<tr class='odd'>
+								<th><%= initial_property_name('cn')['surface'] %></th>
+								<td colspan=2><%= h(@lexeme.send("surface")) %></td>
+							</tr>
+							<tr>
+								<th><%= initial_property_name('cn')['reading'] %></th>
+								<td colspan=2><%= h(@lexeme.send("reading")) %></td>
+							</tr>					
+							<tr class='odd'>
+								<th><%= initial_property_name('cn')['pos'] %></th>
+								<td colspan=2><%= h(@lexeme.pos_item.tree_string) unless @lexeme.send("pos").blank?  %></td>
+							</tr>
+							<tr>
+								<th><%= initial_property_name('cn')['dictionary'] %></th>
+								<%
+									temp = []
+									@lexeme.dictionary_item.list.each{|dict| temp << CnProperty.find(:first, :conditions=>["property_string='dictionary' and property_cat_id=#{dict.to_i}"]).tree_string }
+								%>
+								<td  colspan=2><%= h(temp.join(", ")) %></td>
+							</tr>
+							<%
+								odd_or_even = 1
+								CnNewProperty.find(:all, :conditions=>["section='lexeme'"]).each{|item|
+									next unless session[:cn_dict_id].include?(item.dictionary_id)
+									odd_or_even = 1 - odd_or_even
+							%>
+							<tr <%= "class='odd'" if odd_or_even == 0 %>>
+								<th><%= h(item.human_name) %></th>
+								<td colspan=2>
+									<%
+										method_name = "@lexeme."+item.property_string
+										result = eval method_name
+										if result != nil
+											case item.type_field
+											when "category" %>
+												<%= h(CnProperty.find(:first, :conditions=>["property_string='#{item.property_string}' and property_cat_id=#{result}"]).tree_string) %>
+											<% when "text" %>
+												<%= h(result) %>
+											<% when "time" %>
+												<%= h(result.to_formatted_s(:db)) %>
+											<% end
+										end
+									%>
+								</td>
+							</tr>
+							<% } %>
+							<% if User.find_by_id(session[:user_id]) %>
+							<tr <%= "class='odd'" if odd_or_even == 1 %>>
+								<th><%= initial_property_name('cn')['tagging_state'] %></th>
+								<td colspan=2><%= h(@lexeme.tagging_state_item.tree_string) unless @lexeme.tagging_state == 0 %></td>
+							</tr>
+							<tr <%= "class='odd'" if odd_or_even == 0 %>>
+								<th><%= initial_property_name('cn')['log'] %></th>
+								<td colspan=2><%= h(@lexeme.log) %></td>
+							</tr>
+							<tr <%= "class='odd'" if odd_or_even == 1 %>>
+								<th><%= initial_property_name('cn')['created_by'] %></th>
+								<td colspan=2><%= h(@lexeme.creator.name) %></td>
+							</tr>
+							<tr <%= "class='odd'" if odd_or_even == 0 %>>
+								<th><%= initial_property_name('cn')['modified_by'] %></th>
+								<td colspan=2><%= h(@lexeme.annotator.name) unless @lexeme.annotator.blank? %></td>
+							</tr>
+							<tr <%= "class='odd'" if odd_or_even == 1 %>>
+								<th><%= initial_property_name('cn')['updated_at'] %></th>
+								<td colspan=2><%= h(@lexeme.send("updated_at").to_formatted_s(:db)) %></td>
+							</tr>
+							<% end %>
+						</table>
+					</div>
+				</fieldset>
+				<p>
+				<% if User.find_by_id(session[:user_id]) %>
+				<table>
+					<tr>
+						<td><%= button_to '编辑', :action => 'edit', :id => @lexeme.id %></td>
+						<td><%= button_to '删除', { :action => 'destroy', :id => @lexeme.id }, :confirm => 'Are you sure?', :post => true %></td>
+					</tr>
+				</table>
+				<% end %>
+			</div>
+			<%
+				if @lexeme.struct.blank?
+					if User.find_by_id(session[:user_id])
+			%>
+			<div class="User-control" style="margin-left:20px; float:left;width:300px;">
+				<fieldset style="padding-left:10px; padding-right:10px;padding-top:20px; background: #f7faff;text-align:center">
+					<legend style="background: #1e2078;">结构详细内容</legend>
+					<%
+						temp = CnSynthetic.find(:all, :conditions=>["sth_surface=? and sth_meta_id != 0", @lexeme.surface])
+						unless temp.blank?
+					%>
+					<strong style="color:red">此单词在以下的单词中作为“中间部分”被使用</strong>
+					<table>
+						<% temp.each{|parent| %>
+						<tr><td><%= CnLexeme.find(parent.sth_ref_id).surface %></td<td>(<%= parent.sth_ref_id %>)</td></tr>
+						<% } %>
+					</table>
+					<strong style="color:red">指定此单词的内部结构后，会将其自动链接到以上单词的“中间部分”。</strong>
+					<% end %>
+					<%= button_to_remote "指定", :url=>{ :controller => :synthetic,
+																							 :action => :define_internal_structure,
+																							 :split_action => {:type => "define"},
+																							 :info => {:original_id=>@lexeme.id, :from=>"creation", :domain=>"cn"}},
+											    						:before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
+		    </fieldset>
+			</div>
+			<% 	end %>
+		</div>
+			<% else %>
+			<div class="User-control" style="margin-left:20px; float:left; width:310px;">
+				<% if User.find_by_id(session[:user_id]) %>
+				<fieldset style="padding-left:10px; padding-right:10px;padding-top:20px; background: #f7faff;">
+					<legend style="background: #1e2078;">结构详细内容</legend>
+         	<div class="list" style="width:100%;">
+	        	<table style="width:100%;">
+							<tr>
+								<th style="width:50px;"><%= initial_property_name('cn')['sth_tagging_state'] %></th>
+								<td colspan=2><%= h(@lexeme.struct.sth_tagging_state_item.tree_string) %></td>
+							</tr>
+							<tr class='odd'>
+								<th><%= initial_property_name('cn')['log'] %></th>
+								<td colspan=2><%= h(@lexeme.struct.log) %></td>
+							</tr>
+							<tr>
+								<th><%= initial_property_name('cn')['modified_by'] %></th>
+								<td colspan=2><%= @lexeme.struct.annotator.name unless @lexeme.struct.annotator.blank? %></td>
+							</tr>
+							<tr class='odd'>
+								<th><%= initial_property_name('cn')['updated_at'] %></th>
+								<td colspan=2><%= @lexeme.struct.send("updated_at").to_formatted_s(:db) %></td>
+							</tr>
+	        	</table>
+	        </div>
+		    </fieldset>
+		    <p>
+				<table>
+					<tr>
+						<td>
+							<%= button_to_remote "编辑", :url => { :controller => :synthetic,
+																										:action => "modify_structure",
+																										:split_action => {:type => "define"},
+																										:info => {:original_id=>@lexeme.id, :from=>"modification", :domain=>"cn"},
+																										:first_modification => 'true'},
+																					:before=>"if($('notice'))$('notice').remove();if($('notice_err'))$('notice_err').remove();" %>
+						</td>
+						<td>
+							<%= button_to_remote '删除', :url => { :controller => :synthetic,
+																										:action => 'destroy_struct',
+																										:id => @lexeme.id,
+																										:domain => 'cn'},
+																					:confirm=>'Are you sure?',
+																					:post=>true %>
+						</td>
+					</tr>
+				</table>
+				<% end %>
+		    <p>
+				<%
+					for index in 0..(CnSynthetic.find(:all, :conditions=>["sth_ref_id=#{@lexeme.id}"]).size-1)
+						sub_structure = CnSynthetic.find(:first, :conditions=>["sth_ref_id=#{@lexeme.id} and sth_meta_id=#{index}"])
+						index_string = 'meta_'+index.to_s
+				%>
+				<fieldset style="padding-left:10px; padding-right:10px;padding-top:20px; background: #f7faff;">
+					<legend style="background: #1e2078;"><%= sub_structure.sth_surface %></legend>
+					<div class="list" style="width:100%;">
+				  	<table style="width:100%;">
+							<tr>
+								<th style="width:50px;">内部结构</th>
+								<td colspan=2 style="width:190px;"><%= sub_structure.get_display_string %></td>
+							</tr>
+							<%
+								odd_or_even =1
+								CnNewProperty.find(:all, :conditions=>["section='synthetic'"]).each{|property|
+									next unless session[:cn_dict_id].include?(property.dictionary_id)
+									odd_or_even = 1 - odd_or_even
+							%>
+							<tr <%= "class='odd'" if odd_or_even == 0 %> >
+								<th><%= h(property.human_name) %></th>
+								<td colspan=2>
+									<%
+										temp = CnSyntheticNewPropertyItem.find(:first, :conditions=>["property_id='#{property.id}' and ref_id=#{sub_structure.id}"])
+										unless temp.blank?
+											case property.type_field
+											when 'category'
+									%>
+									<%= h(CnProperty.find(:first, :conditions=>["property_string='#{property.property_string}' and property_cat_id=#{temp.category}"]).tree_string) %>
+											<% when 'text' %>
+									<%= h(temp.text) %>
+											<% when 'time' %>
+									<%= h(temp.time.to_formatted_s(:db)) %>
+											<% end
+										end
+									%>
+								</td>
+							</tr>
+							<% } %>
+						</table>
+					</div>
+			  </fieldset>
+			  <p>
+				<% end %>
+			</div>
+		</div>
+		<div style="margin-left:680px;width:450px;">
+			<%= generate_tree_view(:domain=>'cn', :id=>@lexeme.id) %>
+		<div id="myTreeContainer"></div>
+	</div>
+		<% end %>
+</div>
+
+<% unless @lexeme.struct.blank? %>
+	<script>window.onload=CreateTree();</script>
+<% end %>

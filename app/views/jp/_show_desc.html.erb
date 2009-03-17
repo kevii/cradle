@@ -106,9 +106,11 @@
 							end
 					end
 				end
-				(3-real_td%3).times{|index| %>
-					<th></th><td></td>
-				<% } %>
+				if real_td%3 != 0
+					(3-real_td%3).times{|index| %>
+						<th></th><td></td>
+					<% }
+				end %>
 			</tr>
 
 

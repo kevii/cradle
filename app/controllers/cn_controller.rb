@@ -1,11 +1,12 @@
 class CnController < ApplicationController
-  include SearchModule
   before_filter :set_title
   before_filter :authorize, :only => [:input_base, :new, :create, :destroy, :edit, :update, :define_root, :save_roots]
 
+  include SearchModule
+
   def index
+      session[:cn_section_list] = ['1_surface', '2_reading', '3_dictionary', '4_pos', '100_sth_struct'] if session[:cn_section_list].blank?
     if session[:user_id].blank?
-      session[:cn_section_list] = ['1_surface', '2_reading', '3_dictionary', '4_pos', '100_sth_struct']
       session[:cn_dict_id] = CnProperty.find_inside('dictionary', 'property_cat_id > 0').select{|item| item.value !~ /\*$/}.map(&:property_cat_id)
     else
       session[:cn_dict_id] = CnProperty.find_inside('dictionary', 'property_cat_id > 0').map(&:property_cat_id)
@@ -36,60 +37,16 @@ class CnController < ApplicationController
   end
 
   def show
-    @lexeme = JpLexeme.find(params[:id].to_i)
+    @lexeme = CnLexeme.find(params[:id].to_i)
   end
 
   def show_desc
     render :update do |page|
-      page["show_desc"].replace :partial=>"show_desc", :object=>JpLexeme.find(params[:id].to_i)
+      page["show_desc"].replace :partial=>"show_desc", :object=>CnLexeme.find(params[:id].to_i)
       if params[:state] == "false"
         page["show_desc"].visual_effect :slide_down
       else
         page["show_desc"].visual_effect :highlight
-      end
-    end
-  end
-
-  def input_base
-    unless params[:base_type].blank?
-      render :partial => 'input_base', :locals => { :message => "", :base_type => params[:base_type], :original_base=>"" }
-      return
-    end
-    unless params[:base_as_id].blank?
-      begin
-        if (params[:base_as_id] =~ /^\d*$/) != nil
-          message = "ok_id" if not JpLexeme.find(params[:base_as_id].to_i).blank?
-        else
-          message = "fail_id"
-        end
-      rescue ActiveRecord::RecordNotFound
-        message = "fail_id"
-      end
-      render :partial => 'input_base', :locals => { :message => message, :base_id => params[:base_as_id] }
-      return
-    end
-    unless params[:base_as_surface].blank?
-      base_candidates = JpLexeme.find(:all, :conditions => ["surface = ?", params[:base_as_surface]])
-      if base_candidates.size == 1
-        message = "ok_surface"
-        render :partial => 'input_base', :locals => { :message => message, :base_id => base_candidates[0].id }
-        return
-      elsif base_candidates.size == 0
-        message = "fail_surface"
-        render :partial => 'input_base', :locals => { :message => message }
-        return
-      else
-        message = "list_surface"
-        base_list = []
-        base_candidates.each{|base|
-          temp = []
-          temp << "品詞："+base.pos_item.tree_string unless base.pos.blank?
-          temp << "活用型："+base.ctype_item.tree_string unless base.ctype.blank?
-          temp << "活用形："+base.cform_item.tree_string unless base.cform.blank?
-          base_list << [temp.join("， "), base.id]
-        }
-        render :partial => 'input_base', :locals => { :message => message }, :object=>base_list
-        return
       end
     end
   end

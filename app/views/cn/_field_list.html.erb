@@ -14,11 +14,11 @@
 			<td style="width:20px;"><%= check_box_tag '3_dictionary', 'true', field_list.include?("3_dictionary")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['dictionary'] %></td>
 			<td style="width:20px;"><%= check_box_tag '4_pos', 'true', field_list.include?("4_pos")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['pos'] %></td>
 			<% if User.find_by_id(session[:user_id]) %>
-				<td><%= check_box_tag '5_tagging_state', 'true', field_list.include?("5_tagging_state")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['tagging_state'] %></td>
-				<td><%= check_box_tag '6_log', 'true', field_list.include?("6_log")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['log'] %></td>
-				<td><%= check_box_tag '7_created_by', 'true', field_list.include?("7_created_by")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['created_by'] %></td>
-				<td><%= check_box_tag '8_modified_by', 'true', field_list.include?("8_modified_by")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['modified_by'] %></td>
-				<td><%= check_box_tag '9_updated_at', 'true', field_list.include?("9_updated_at")?true:false, :style=>"vertical-align:middle;" %></td><td><%= initial_property_name('cn')['updated_at'] %></td>
+				<td style="width:20px;"><%= check_box_tag '5_tagging_state', 'true', field_list.include?("5_tagging_state")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['tagging_state'] %></td>
+				<td style="width:20px;"><%= check_box_tag '6_log', 'true', field_list.include?("6_log")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['log'] %></td>
+				<td style="width:20px;"><%= check_box_tag '7_created_by', 'true', field_list.include?("7_created_by")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['created_by'] %></td>
+				<td style="width:20px;"><%= check_box_tag '8_modified_by', 'true', field_list.include?("8_modified_by")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['modified_by'] %></td>
+				<td style="width:20px;"><%= check_box_tag '9_updated_at', 'true', field_list.include?("9_updated_at")?true:false, :style=>"vertical-align:middle;" %></td><td style="width:80px;"><%= initial_property_name('cn')['updated_at'] %></td>
 			<% end %>
 		</tr>
 		<tr height=30>
