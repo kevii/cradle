@@ -1,0 +1,75 @@
+<div style="text-align:left;padding-left:15px;padding-top:10px;">
+	<table>
+		<tr>
+			<td width="100"><%= initial_property_name('cn')['surface'] %></td>
+			<td width="365">
+				<% if modification_form.blank? or modification_form.surface.blank? %>
+					<%= text_field_tag :surface, nil, :style=>"width:100%;", :class=>'text-field' %>
+				<% else %>
+					<%= text_field_tag :surface, modification_form.surface, :style=>"width:100%;", :class=>'text-field' %>
+				<% end %>
+			</td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td width="100"><%= initial_property_name('cn')['reading'] %></td>
+			<td width="365">
+				<% if modification_form.blank? or modification_form.reading.blank? %>
+					<%= text_field_tag :reading, nil, :style=>"width:100%;", :class=>'text-field' %>
+				<% else %>
+					<%= text_field_tag :reading, modification_form.reading, :style=>"width:100%;", :class=>'text-field' %>
+				<% end %>
+			</td>
+		</tr>
+		<tr>
+			<td><%= initial_property_name('cn')['pos'] %></td>
+			<td>
+				<% if modification_form.blank? or modification_form.pos.blank? %>
+					<%= display_property_list(:type=>"pos", :domain=>"cn", :state=>"new") %>
+				<% else %>
+					<%= display_property_list(:type=>"pos", :domain=>"cn", :state=>"modify", :id=>modification_form.pos) %>
+				<% end %>
+			</td>
+			<td></td>
+			<td><%= initial_property_name('cn')['tagging_state'] %></td>
+			<td>
+				<% if modification_form.blank? or modification_form.tagging_state.blank? %>
+					<%= display_property_list(:type => "tagging_state",
+																		:domain => "cn",
+																		:state => "modify",
+																		:id => CnProperty.find_item_by_tree_string_or_array("tagging_state", "NEW").property_cat_id) %>
+				<% else %>
+					<%= display_property_list(:type=>"tagging_state", :domain=>"cn", :state=>"modify", :id=>modification_form.tagging_state) %>
+				<% end %>
+			</td>
+		</tr>
+		<tr>
+			<td><%= initial_property_name('cn')['dictionary'] %></td>
+			<td>
+				<select id="dictionary" name="dictionary[]" multiple size=5 style="width:100%;">
+					<% if modification_form.blank? or modification_form.dictionary.blank? %>
+						<%= options_for_select(CnProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| [dict.tree_string, dict.property_cat_id]}, 1) %>
+					<% else %>
+						<% CnProperty.find(:all, :order=>"property_cat_id ASC", :conditions=>["property_string='dictionary' and property_cat_id > 0"]).each{|item| %>
+							<option value=<%= item.property_cat_id %> <%= 'selected' if modification_form.dictionary_item.list.include?(item.property_cat_id.to_s) %>><%= item.tree_string %></option>
+						<% } %>
+					<% end %>
+				</select>
+			</td>
+			<td></td>
+			<td><%= initial_property_name('cn')['log'] %></td>
+			<td>
+				<% if modification_form.blank? or modification_form.log.blank? %>
+					<%= text_area_tag :log, nil, :rows => 4, :style=>"width:100%;", :class=>'text-field' %>
+				<% else %>
+					<%= text_area_tag :log, modification_form.log, :rows => 4, :style=>"width:100%;", :class=>'text-field' %>
+				<% end %>
+			</td>
+		</tr>
+		<% unless CnNewProperty.find(:all, :conditions=>["section='lexeme'"]).blank?%>
+			<% if modification_form.blank? %>
+				<%= customize_field_html(:domain=>"cn", :section=>"lexeme", :state=>"new") %>
+			<% else %>
+				<%= customize_field_html(:domain=>"cn", :section=>"lexeme", :state=>"modify", :id=>modification_form.id) %>
+			<% end %>
+		<% end %>
+	</table>
+</div>

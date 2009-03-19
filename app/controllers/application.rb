@@ -17,6 +17,18 @@ class ApplicationController < ActionController::Base
   before_filter :set_charset
   
   filter_parameter_logging :password
+  
+  def index
+      session[:jp_section_list] = ['1_surface', '2_reading', '3_pronunciation', '4_base_id', '5_root_id', '6_dictionary', '7_pos', '8_ctype', '9_cform', '100_sth_struct'] if session[:jp_section_list].blank?
+      session[:cn_section_list] = ['1_surface', '2_reading', '3_dictionary', '4_pos', '100_sth_struct'] if session[:cn_section_list].blank?
+    if session[:user_id].blank?
+      session[:jp_dict_id] = JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).select{|item| item.value !~ /\*$/}.map{|dict| dict.property_cat_id}
+      session[:cn_dict_id] = CnProperty.find_inside('dictionary', 'property_cat_id > 0').select{|item| item.value !~ /\*$/}.map(&:property_cat_id)
+    else
+      session[:jp_dict_id] = JpProperty.find(:all, :conditions=>["property_string='dictionary' and property_cat_id > 0"]).map{|dict| dict.property_cat_id}
+      session[:cn_dict_id] = CnProperty.find_inside('dictionary', 'property_cat_id > 0').map(&:property_cat_id)
+    end
+  end
 
   def update_property_list
     class_name = verify_domain(params[:domain])['Property']

@@ -1,0 +1,16 @@
+<div class="User-control"  style="margin-left:2%;">
+	<fieldset style="width:90%; background: #f7faff;">
+		<legend style="background: #1e2078;">创建单词</legend>
+		注意：由于书写方式相同，但是拼音、词性等属性不同的单词被视为不同的单词，
+		<span style="color:red"><b>请先检查需要创建的单词是否已经存在于辞典中！</b></span>
+		<% form_remote_tag  :url => {:action => :new}, :update=>"preview", :html => {:id => "main_input"} do %>
+			<%= render :partial => 'modification_form' %>
+			<div style="padding-top:10px;padding-left:15px;padding-bottom:10px;">
+				<%= button_to_function "重置", "Form.reset('main_input')" %>
+				<%= submit_tag "预览" %>
+			</div>
+		<% end %>
+	</fieldset>
+	<p>
+	<div id="preview"></div>
+</div>

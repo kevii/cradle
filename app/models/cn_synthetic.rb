@@ -6,7 +6,7 @@ class CnSynthetic < Chinese
   ##### table refenrence
   ######################################################
   belongs_to :lexeme,  :class_name=>"CnLexeme",  :foreign_key=>"sth_ref_id"
-  has_many :other_properties,  :class_name=>"CnSyntheticNewPropertyItem", :foreign_key=>"ref_id"
+  has_many :other_properties,  :class_name=>"CnSyntheticNewPropertyItem", :foreign_key=>"ref_id", :dependent => :destroy
   
   def sth_tagging_state_item
     CnProperty.find(:first, :conditions=>["property_string='sth_tagging_state' and property_cat_id=?", self.sth_tagging_state])

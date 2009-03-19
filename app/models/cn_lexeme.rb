@@ -6,8 +6,8 @@ class CnLexeme < Chinese
   ##### table refenrence
   ######################################################
   has_one :struct,  :class_name=>"CnSynthetic", :foreign_key=>"sth_ref_id", :conditions=>"sth_meta_id=0"
-  has_many :sub_structs,  :class_name=>"CnSynthetic", :foreign_key=>"sth_ref_id"
-  has_many :dynamic_properties,  :class_name=>"CnLexemeNewPropertyItem", :foreign_key=>"ref_id"
+  has_many :sub_structs,  :class_name=>"CnSynthetic", :foreign_key=>"sth_ref_id", :dependent => :destroy
+  has_many :dynamic_properties,  :class_name=>"CnLexemeNewPropertyItem", :foreign_key=>"ref_id", :dependent => :destroy
   has_many :dynamic_struct_properties, :through=>:sub_structs, :source=>:other_properties
 
   def pos_item
@@ -62,9 +62,13 @@ class CnLexeme < Chinese
   ######################################################
   ##### validation
   ######################################################
-  validates_presence_of :id, :surface, :dictionary, :tagging_state, :created_by
-  validates_uniqueness_of :surface, :scope => [:reading, :pos, :log]
-  
+  validates_presence_of :surface, :message => '单词不能为空！'
+  validates_presence_of :dictionary, :message => '所属辞典不能为空！'
+  validates_presence_of :tagging_state, :message => '状态不能为空！'
+	validates_format_of :reading, :with => /^[a-z]([a-z]|\s)*[a-z]$/, :message => '拼音不能为空，并且必须为小写英文字母！'
+	validates_uniqueness_of :surface, :scope => [:reading, :pos], :message => '该单词已存在于辞典中！'
+	
+	
   ######################################################
   ##### method
   ######################################################
@@ -74,38 +78,6 @@ class CnLexeme < Chinese
     else
       return false
     end
-  end
-  
-  def self.exist_when_new(lexeme={})
-    conditions = []
-    lexeme["surface"].blank? ? conditions << "surface is NULL" : conditions << "surface = '"+lexeme["surface"]+"'"
-    lexeme["reading"].blank? ? conditions << "reading is NULL" : conditions << "reading = '"+lexeme["reading"]+"'"
-    lexeme["pos"].blank? ? conditions << "pos is NULL" : conditions << "pos = "+lexeme["pos"].to_s
-    lexeme["log"].blank? ? conditions << "log is NULL" : conditions << "log = '"+lexeme["log"]+"'"
-    maybe_exists = find(:all, :conditions=>conditions.join(' and '))
-    unless maybe_exists.blank?
-      maybe_exists.each{|temp_lexeme|
-        same = []
-        lexeme.each{|key, value|
-          case key
-            when "surface", "reading", "pos", "log"
-              next
-            when "id", "dictionary", "tagging_state"
-              next
-            else
-              if value == (eval "temp_lexeme."+key) or ( CnNewProperty.find(:first, :conditions=>["property_string='#{key}'"]).type_field == "time" and (eval "not temp_lexeme."+key+".blank?")  and value==(eval "temp_lexeme."+key+".to_formatted_s(:db)") )
-                same << true
-              else
-                same << false
-              end
-          end
-        }
-        if same.size == 0 or (same.size > 0 and same.include?(false) == false and temp_lexeme.id != lexeme["id"])
-          return [true, temp_lexeme.id]
-        end
-      }
-    end
-    return [false, 0]
   end
   
   def self.delete_lexeme(lexeme)

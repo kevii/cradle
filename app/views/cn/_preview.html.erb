@@ -1,0 +1,125 @@
+<% if not flash.now[:notice].blank? %>
+	<div id="notice" ><%= flash.now[:notice] %></div>
+<% elsif not flash.now[:notice_err].blank? %>
+	<div id="notice_err" ><%= flash.now[:notice_err] %></div>
+<% else %>
+	<div style="padding-bottom:15px;">
+		<%= button_to_function "辞典<=>颜色", visual_effect(:toggle_slide, "dictionary_list") %>
+	</div>
+	<div id ="dictionary_list" align=center onclick="Effect.SlideUp('dictionary_list');" style='display:none;'>
+		<table>
+			<tr height=30>
+				<% dicts = CnProperty.find(:all, :order=>"property_cat_id ASC", :conditions=>["property_string='dictionary' and property_cat_id > 0"]) %>
+				<% dicts.each_with_index{|dict, index| %>
+					<td><span style='<%= "background-color:#{dictionary_color[dict.property_cat_id]};" %>'>&nbsp;&nbsp;</span>&nbsp;<%= dict.tree_string %></td>
+					<% if (index+1) % 5 == 0 %>
+						</tr><tr height=30>
+					<% else %>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+					<% end %>
+				<% } %>
+			</tr>
+		</table>
+	</div>
+	<div id="new_lexeme" class="list" >
+		<% form_tag({:action => action_string}, {:id => 'preview', :name => 'preview'}) do %>
+			<table>
+	 			<thead>
+		   		<tr>
+						<%= "<th>#{initial_property_name('cn')['surface']}</th>" unless preview["surface"].blank? %>
+						<%= "<th>#{initial_property_name('cn')['reading']}</th>" unless preview["reading"].blank? %>
+						<%= "<th>#{initial_property_name('cn')['pos']}</th>" unless preview["pos"].blank? %>
+						<%= "<th>#{initial_property_name('cn')['dictionary']}</th>" unless preview["dictionary"].blank? %>
+						<%= "<th>#{initial_property_name('cn')['tagging_state']}</th>" unless preview["tagging_state"].blank? %>
+						<%= "<th>#{initial_property_name('cn')['log']}</th>" unless preview["log"].blank? %>
+						<% properties = CnNewProperty.find(:all, :conditions=>["section='lexeme'"])
+						unless properties.blank?
+							properties.each{|item|
+								temp_string = item.human_name.scan(/./).size > 5 ? "style='width:70px;'" : "style='white-space:nowrap;'" %>
+								<%= %Q|<th #{temp_string}>#{item.human_name}</th>| unless preview[item.property_string].blank? %>
+							<% }
+						end %>
+					</tr>
+  			</thead>
+				<tbody>
+					<tr>
+						<td align="left" >
+							<%= hidden_field_tag "lexeme[surface]", preview["surface"] %>
+							<%= h(preview["surface"]) %>
+						</td>
+						<td align="left" >
+							<%= hidden_field_tag 'lexeme[reading]', preview["reading"] %>
+							<%= h(preview["reading"]) %>
+						</td>
+						<% unless preview["pos"].blank? %>
+							<td align="left" >
+								<%= hidden_field_tag 'lexeme[pos]', preview["pos"] %>
+								<% unless preview["pos"].blank? %>
+									<%= h(CnProperty.find(:first, :conditions=>["property_string='pos' and property_cat_id=#{preview["pos"].to_i}"]).tree_string) %>
+								<% end %>
+							</td>
+						<% end %>
+						<td style="text-align:center" >
+							<% display_dict = []
+							preview["dictionary"].split(",").each{|dict|	display_dict << "<span style='background-color:#{dictionary_color[dict.to_i]};'>&nbsp;&nbsp;</span>" }	%>
+							<%= hidden_field_tag 'lexeme[dictionary]', preview["dictionary"] %>
+							<%= display_dict.join("  ") %>
+						</td>
+						<td align="left" >
+							<%= hidden_field_tag 'lexeme[tagging_state]', preview["tagging_state"] %>
+							<%= h(CnProperty.find(:first, :conditions=>["property_string='tagging_state' and property_cat_id=#{preview["tagging_state"].to_i}"]).tree_string) %>
+						</td>
+						<% unless preview["log"].blank? %>
+							<td align="left" >
+								<%= hidden_field_tag 'lexeme[log]', preview["log"] %>
+								<%= h(preview["log"]) %>
+							</td>
+						<% end %>
+						<% properties = CnNewProperty.find(:all, :conditions=>["section='lexeme'"])
+						unless properties.blank?
+							properties.each{|item| 
+								unless preview[item.property_string].blank? %>
+									<td align="left" >
+										<%= hidden_field_tag 'other_property['+item.property_string+']', preview[item.property_string] %>
+										<% case item.type_field
+										when "category" %>
+											<%= CnProperty.find(:first, :conditions=>["property_string='#{item.property_string}' and property_cat_id=#{preview[item.property_string].to_i}"]).tree_string %>
+										<% when "text", "time" %>
+											<%= h(preview[item.property_string]) %>
+										<% end %>
+									</td>
+								<% end
+							}
+						end %>
+					</tr>
+				</tbody>
+	 			<thead>
+		   		<tr>
+						<%= "<th>#{initial_property_name('cn')['surface']}</th>" unless preview["surface"].blank? %>
+						<%= "<th>#{initial_property_name('cn')['reading']}</th>" unless preview["reading"].blank? %>
+						<%= "<th>#{initial_property_name('cn')['pos']}</th>" unless preview["pos"].blank? %>
+						<%= "<th>#{initial_property_name('cn')['dictionary']}</th>" unless preview["dictionary"].blank? %>
+						<%= "<th>#{initial_property_name('cn')['tagging_state']}</th>" unless preview["tagging_state"].blank? %>
+						<%= "<th>#{initial_property_name('cn')['log']}</th>" unless preview["log"].blank? %>
+						<% properties = CnNewProperty.find(:all, :conditions=>["section='lexeme'"])
+						unless properties.blank?
+							properties.each{|item|
+								temp_string = item.human_name.scan(/./).size > 5 ? "style='width:70px;'" : "style='white-space:nowrap;'" %>
+								<%= %Q|<th #{temp_string}>#{item.human_name}</th>| unless preview[item.property_string].blank? %>
+							<% }
+						end %>
+					</tr>
+  			</thead>
+			</table>
+			<p>
+			<div>
+				<% if action_string == 'update' %>
+					<%= hidden_field_tag 'id', id %>
+					<%= submit_tag "更新" %>
+				<% else %>
+					<%= submit_tag "创建" %>
+				<% end %>
+			</div>
+		<% end %>
+	</div>
+<% end %>
