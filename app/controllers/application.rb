@@ -52,12 +52,9 @@ class ApplicationController < ActionController::Base
 
   def start_dump
     case params[:domain]
-      when 'jp'
-        section_list = session[:jp_section_list]
-      when 'cn'
-        section_list = session[:cn_section_list]
-      when 'en'
-        section_list = session[:en_section_list]
+    when 'jp' then section_list = session[:jp_section_list]
+    when 'cn' then section_list = session[:cn_section_list]
+    when 'en' then section_list = session[:en_section_list]
     end
     @uid = DumpDataWorker.asynch_dump_data(:static_condition => params[:static_condition],
                                            :dynamic_lexeme_condition => params[:dynamic_lexeme_condition],
