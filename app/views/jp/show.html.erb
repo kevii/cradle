@@ -123,7 +123,7 @@
 			<% if User.find_by_id(session[:user_id]) %>
 				<table>
 					<tr>
-						<td><%= button_to '編集', :action => 'edit', :id => @lexeme.id %></td>
+						<td><%= button_to '編集', {:action => 'edit', :id => @lexeme.id}, :method => :get %></td>
 						<td><%= button_to '削除', { :action => 'destroy', :id => @lexeme.id }, :confirm => 'Are you sure?', :post => true %></td>
 					</tr>
 				</table>

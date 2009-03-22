@@ -45,14 +45,18 @@ class CnController < ApplicationController
 
   def new
     if request.post?
-			lexeme = get_params_from_form(params)
- 			@lexeme = lexeme.dup
-      temp = CnLexeme.new(lexeme.delete_if{|k,v| not CnLexeme.column_names.include?(k)})
-			unless temp.valid?
-        flash.now[:notice_err] = "<ul>" + temp.errors.map{|k,v| '<li>'+v+'</li>'}.join('') + "</ul>"
-        render :partial=>"preview"
+			lexeme, flash.now[:notice_err] = get_params_from_form(params)
+			unless flash.now[:notice_err].blank?
+				render :partial=>"preview"
 			else
-	      render :partial=>"preview", :object=>@lexeme, :locals=>{:action_string=>'create'}
+	 			@lexeme = lexeme.dup
+	      temp = CnLexeme.new(lexeme.delete_if{|k,v| not CnLexeme.column_names.include?(k)})
+				unless temp.valid?
+	        flash.now[:notice_err] = "<ul>" + temp.errors.map{|k,v| '<li>'+v+'</li>'}.join('') + "</ul>"
+	        render :partial=>"preview"
+				else
+		      render :partial=>"preview", :object=>@lexeme, :locals=>{:action_string=>'create'}
+				end
 			end
     end
   end
@@ -82,34 +86,43 @@ class CnController < ApplicationController
   end
 
 	def destroy
-		begin
-			CnLexeme.transaction do CnLexeme.find(params[:id]).destroy end
-	  rescue Exception => e
-      flash[:notice_err] = "<ul><li>程序出现问题，不能删除单词！</li><li>#{e.message}</li></ul>"
+    if CnSynthetic.exists?(["sth_struct like ?", "%-#{params[:id]}-%"])
+      flash[:notice_err] = "<ul><li>此单词被使用在其它单词的内部结构中，不能被删除！</li></ul>"
       redirect_to :action => 'show', :id => params[:id]
     else
-			flash[:notice] = "<ul><li>成功删除单词！</li></ul>"
-      redirect_to :action => 'index'
-    end
+			begin
+				CnLexeme.transaction do CnLexeme.find(params[:id]).destroy end
+		  rescue Exception => e
+	      flash[:notice_err] = "<ul><li>程序出现问题，不能删除单词！</li><li>#{e.message}</li></ul>"
+	      redirect_to :action => 'show', :id => params[:id]
+	    else
+				flash[:notice] = "<ul><li>成功删除单词！</li></ul>"
+	      redirect_to :action => 'index'
+	    end
+		end
 	end
 
   def edit
     if request.post?
-			lexeme = get_params_from_form(params)
- 			@lexeme = lexeme.dup
- 			temp = CnLexeme.find(params[:id])
-      lexeme.delete_if{|k,v| not CnLexeme.column_names.include?(k)}.each{|key, value| temp[key] = value}
-			unless temp.valid?
-        flash.now[:notice_err] = "<ul>" + temp.errors.map{|k,v| '<li>'+v+'</li>'}.join('') + "</ul>"
-        render :partial=>"preview"
+			lexeme, flash.now[:notice_err] = get_params_from_form(params)
+			unless flash.now[:notice_err].blank?
+				render :partial=>"preview"
 			else
-	      render :partial=>"preview", :object=>@lexeme, :locals=>{:action_string=>'update', :id=>params[:id]}
+	 			@lexeme = lexeme.dup
+	 			temp = CnLexeme.find(params[:id])
+	      lexeme.delete_if{|k,v| not CnLexeme.column_names.include?(k)}.each{|key, value| temp[key] = value}
+				unless temp.valid?
+	        flash.now[:notice_err] = "<ul>" + temp.errors.map{|k,v| '<li>'+v+'</li>'}.join('') + "</ul>"
+	        render :partial=>"preview"
+				else
+		      render :partial=>"preview", :object=>@lexeme, :locals=>{:action_string=>'update', :id=>params[:id]}
+				end
 			end
     end
 	end
 
 	def update
-    params[:lexeme].update({:dictionary => params[:lexeme][:dictionary].split(',').map{|item| item.to_i}.sort.map{|item| '-'+item.to_s+'-'}.join(','), :updated_at => session[:user_id]})
+    params[:lexeme].update({:dictionary => params[:lexeme][:dictionary].split(',').map{|item| item.to_i}.sort.map{|item| '-'+item.to_s+'-'}.join(','), :modified_by => session[:user_id]})
    	lexeme = CnLexeme.find(params[:id])
     begin
       CnLexeme.transaction do
@@ -167,15 +180,13 @@ class CnController < ApplicationController
               time_error, time_string = verify_time_property(:value=>value, :domain=>'cn')
               if time_error.blank? then lexeme[key] = time_string
               else
-                flash.now[:notice_err] = time_error
-                render :partial=>"preview"
-                return
+              	return nil, time_error
               end
             end
           end
         end
       end
     }
-    return lexeme
+    return lexeme, nil
   end
 end

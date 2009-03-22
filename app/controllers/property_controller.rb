@@ -297,7 +297,7 @@ class PropertyController < ApplicationController
       if special_array.include?(temp.property_string)
         exist = true if verify_domain(params[:domain])['Lexeme'].constantize.exists?( temp.property_string => temp.property_cat_id )
       elsif temp.property_string == "dictionary"
-        exist = true if verify_domain(params[:domain])['Lexeme'].constantize.verify_dictionary(temp.property_cat_id.to_s)
+        exist = true if verify_domain(params[:domain])['Lexeme'].constantize.exists?([%Q|dictionary like "%-#{temp.property_cat_id.to_s}-%"|])
       else
         exist = true if verify_domain(params[:domain])['LexemeNewPropertyItem'].constantize.exists?(["property_id = ? and category = ?", temp.definition.id, temp.property_cat_id])
       end

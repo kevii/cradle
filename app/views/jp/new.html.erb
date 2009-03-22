@@ -1,17 +1,15 @@
 <div class="User-control"  style="margin-left:2%;">
-    <fieldset style="width:90%; background: #f7faff;">
-        <legend style="background: #1e2078;">新規単語</legend>
+  <fieldset style="width:90%; background: #f7faff;">
+	  <legend style="background: #1e2078;">新規単語</legend>
 		■書き方一緒で属性の異なる単語は、異なる単語と見なしますので、<span style="color:red"><b>辞書に新規したい単語の有無をまずチェックしてください！</b></span>
-        <% form_remote_tag  :url => {:action => :new},
-							:update=>"preview_news",
-							:html => {:id => "main_input"} do %>
-            <%= render :partial => 'modification_form' %>
+    <% form_remote_tag  :url => {:action => :new}, :update=>"preview_news", :html => {:id => "main_input"} do %>
+	    <%= render :partial => 'modification_form' %>
 			<div style="padding-top:10px;padding-left:15px;padding-bottom:10px;">
 				<%= button_to_function "リセット", "Form.reset('main_input')" %>
 				<%= submit_tag "プレビュー" %>
 			</div>
-        <% end %>
-    </fieldset>
+    <% end %>
+  </fieldset>
 	<p>
 	<div id="preview_news"></div>
 </div>
