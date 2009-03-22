@@ -62,7 +62,7 @@ class DumpDataWorker < Workling::Base
 
 	private
 	def find_all_ids(options)
-		final_id_arrays = get_search_collection(options).map(&:id)
+		final_id_arrays = get_search_collection(options, 'all').map(&:id)
     if options[:dependency].blank?
     	return final_id_arrays.uniq.sort
     else

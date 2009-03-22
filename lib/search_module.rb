@@ -331,21 +331,29 @@ module SearchModule
     end
   end
 
-  def get_search_collection(option={})
+  def get_search_collection(option={}, state = 'page')
     if option[:simple_search] == "true"
       temp_conditions = [option[:static_condition], option[:dynamic_lexeme_condition], option[:dynamic_synthetic_condition]].compact
       temp_conditions.delete('')
       temp_conditions = temp_conditions.join(' and ')
       if option[:dynamic_lexeme_condition].blank? and option[:dynamic_synthetic_condition].blank?
-	      lexemes = verify_domain(option[:domain])['Lexeme'].constantize.paginate(:conditions=>temp_conditions,
-	      															 																					:include=>[:sub_structs],
-	      															 																					:per_page=>option[:per_page],
-																																								:page=>option[:page])
+      	if state == 'page'
+		      lexemes = verify_domain(option[:domain])['Lexeme'].constantize.paginate(:conditions=>temp_conditions,
+		      															 																					:include=>[:sub_structs],
+		      															 																					:per_page=>option[:per_page],
+																																									:page=>option[:page])
+				elsif state == 'all'
+		      lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :conditions=>temp_conditions, :include=>[:sub_structs])
+				end
 			else
-				lexemes = verify_domain(option[:domain])['Lexeme'].constantize.paginate(:conditions=>temp_conditions,
-	       															 																					:include=>[:dynamic_properties, {:sub_structs=>[:other_properties]}],
-	       															 																					:per_page=>option[:per_page],
-	 																																							:page=>option[:page])
+				if state == 'page'
+					lexemes = verify_domain(option[:domain])['Lexeme'].constantize.paginate(:conditions=>temp_conditions,
+		       															 																					:include=>[:dynamic_properties, {:sub_structs=>[:other_properties]}],
+		       															 																					:per_page=>option[:per_page],
+		 																																							:page=>option[:page])
+		 		elsif state == 'all'
+					lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :conditions=>temp_conditions, :include=>[:dynamic_properties, {:sub_structs=>[:other_properties]}])
+		 		end
 			end
     else
       dynamic_lexeme_ids = []
@@ -376,7 +384,11 @@ module SearchModule
       	end
       	static_ids = verify_domain(option[:domain])['Lexeme'].constantize.find_by_sql(sql_st).map(&:id)
         static_ids.size >= dynamic_ids.size ? final_ids = dynamic_ids & static_ids : final_ids = static_ids & dynamic_ids
-        lexemes = verify_domain(option[:domain])['Lexeme'].constantize.paginate(:all, :conditions=>["id in (#{final_ids.join(',')})"], :page=>option[:page], :per_page=>option[:per_page])
+        if state == 'page'
+	        lexemes = verify_domain(option[:domain])['Lexeme'].constantize.paginate(:conditions=>["id in (#{final_ids.join(',')})"], :page=>option[:page], :per_page=>option[:per_page])
+				elsif state == 'all'
+	        lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :conditions=>["id in (#{final_ids.join(',')})"])
+				end
       end
     end
   end
