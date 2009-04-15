@@ -195,6 +195,11 @@ namespace :cradle do
         ) ENGINE=INNODB
       ENB
       
+      ### schema_migrations table for later migration
+      ActiveRecord::Base.connection.execute <<-"ENB"
+				create table schema_migrations (version varchar(255) primary key)
+      ENB
+      
       puts "STEP 2: loading initial lexeme properties into database"
       puts "    loading pos into table jp_properties"
       ActiveRecord::Base.connection.execute <<-"ENB"
@@ -431,6 +436,11 @@ namespace :cradle do
           index		index_text			 (text(255)),
           index   index_time       (time)
         ) ENGINE=INNODB
+      ENB
+
+      ### schema_migrations table for later migration
+      ActiveRecord::Base.connection.execute <<-"ENB"
+				create table schema_migrations (version varchar(255) primary key)
       ENB
       
       puts "STEP 2: loading initial lexeme properties into database"

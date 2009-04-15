@@ -5,18 +5,21 @@
 		save_string = "保存"
 		msg_string = "区切り符号指定してから、多段入力できます。"
 		add_field_string = "フィールド追加"
+		note_string = '注:'
 	when "cn"
 		create_string = "创建"
 		modify_string = "编辑"
 		save_string = "保存"
 		msg_string = "在指定了分隔符号之后，就能创建多层的属性"
 		add_field_string = "增加层次"
+		note_string = '注:'
 	when "en"
 		create_string = "Create"
 		modify_string = "Modify"
 		save_string = "Save"
 		msg_string = "You can create multiple level property after specifying a seperator."
 		add_field_string = "Add Field"
+		note_string = "Note:"
 end %>
 
 <% form_remote_tag :url => { :action => :save_category_item, :domain=>params[:domain] } do %>
@@ -58,6 +61,14 @@ end %>
 									After modified、there are <span style="color:red;"><%= temp %>items</span> under this item will all be updated.
 							<% end %>
 						<% end %>
+					<% end %>
+				</td>
+				<td>
+					<%= note_string %>
+					<% if @property_id == 0 %>
+						<%= text_field_tag 'explanation', nil, :class => 'text-field' %>
+					<% else %>
+						<%= text_field_tag 'explanation', @explanation, :class => 'text-field' %>
 					<% end %>
 				</td>
 			</tr>

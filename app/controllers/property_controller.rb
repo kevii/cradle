@@ -213,6 +213,7 @@ class PropertyController < ApplicationController
       @property_id = params[:id].to_i
       temp = verify_domain(params[:domain])['Property'].constantize.find(@property_id)
       @property_item = temp.tree_string.split(temp.seperator)
+      @explanation = temp.explanation
     end
     temp = verify_domain(params[:domain])['Property'].constantize.find(:first, :conditions=>["property_string=?",params[:string]])
     temp.blank? ? @seperator=nil : @seperator=temp.seperator
@@ -259,8 +260,9 @@ class PropertyController < ApplicationController
       begin
         if change_to_valid_property.blank?
           item = verify_domain(params[:domain])['Property'].constantize.save_property_tree(params[:string], property_item, params[:seperator])
+          item.update_attributes!(:explanation => params[:explanation])
         else
-          item = change_to_valid_property.update_attributes!(:property_cat_id=>verify_domain(params[:domain])['Property'].constantize.maximum("property_cat_id", :conditions=>["property_string=?", params[:string]])+1)
+          item = change_to_valid_property.update_attributes!(:property_cat_id=>verify_domain(params[:domain])['Property'].constantize.maximum("property_cat_id", :conditions=>["property_string=?", params[:string]])+1, :explanation => params[:explanation])
         end
       rescue
         flash.now[:notice_err] = get_validation_error(item, "save", params[:domain])
@@ -271,7 +273,7 @@ class PropertyController < ApplicationController
     else
       begin
         item = verify_domain(params[:domain])['Property'].constantize.find(params[:id].to_i)
-        item.update_attributes!(:value=>params[params[:string]].values[0])
+        item.update_attributes!(:value=>params[params[:string]].values[0], :explanation => params[:explanation])
       rescue
         flash.now[:notice_err] = get_validation_error(item, "save", params[:domain])
         render(:update){|page| page[:modify_category_item].replace_html :inline=>"<div id='notice_err' ><%= flash.now[:notice_err] %></div>"}
