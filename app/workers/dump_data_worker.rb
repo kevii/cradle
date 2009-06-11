@@ -268,7 +268,7 @@ class DumpDataWorker < Workling::Base
               when "time"
                 temp_line << eval('lexeme.'+item[1]).to_formatted_s(:number)
               when "user"
-                temp_line << User.find(eval('lexeme.'+item[1])).name
+             		temp_line << eval('lexeme.'+item[1]).blank? ? '' : User.find(eval('lexeme.'+item[1])).name
               else  ##nil      base_id, base.surface, root_id, root.surface, id, dictionary
                 case item[1]
                   when 'base_id', 'base.surface' , 'id', 'root_id'
