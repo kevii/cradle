@@ -72,7 +72,7 @@ class JpLexeme < ActiveRecord::Base
   ##### validation
   ######################################################
   validates_presence_of :surface, :message=>'単語を入力してください！'
-	validates_uniqueness_of :surface, :scope=>[:reading, :pronunciation, :pos, :ctype, :cform], :message=>'新規する単語は既に辞書に保存されている！'
+	validates_uniqueness_of :surface, :scope=>[:reading, :pos, :ctype, :cform, :dictionary], :message=>'新規する単語は既に辞書に保存されている！'
   
   ######################################################
   ##### method
