@@ -3,14 +3,14 @@
 #You might want to change this
 ENV["RAILS_ENV"] ||= "production"
 
-require File.dirname(__FILE__) + "/../../config/environment.rb"
+require RAILS_ROOT + "/config/environment.rb"
 
 $running = true;
 Signal.trap("TERM") do 
   $running = false
 end
 
-dump_path_prefix = File.dirname(__FILE__) + "/../../dumped_data/"
+dump_path_prefix = RAILS_ROOT + "/dumped_data/"
 backup_interval = 86400  ## in second
 backup_time = 3        ## 3 am
 backup_copies = 10     ## the number of copies
@@ -19,8 +19,8 @@ time_suffix_type = 'day'  ## time suffix type:  second or day
 last_time = 0
 
 
-log_path = File.dirname(__FILE__) + "/../../log/"
-user_dump_path = File.dirname(__FILE__) + "/../../public/user_dump_file/"
+log_path = RAILS_ROOT + "/log/"
+user_dump_path = RAILS_ROOT + "/public/user_dump_file/"
 
 
 while($running) do
