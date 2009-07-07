@@ -20,5 +20,5 @@
 # Learn more: http://github.com/javan/whenever
 
 every 1.day, :at => '4:00 am' do
-	rake "rake cradle:maintenance"
+	rake "cradle:maintenance"
 end
