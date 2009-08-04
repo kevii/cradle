@@ -248,6 +248,7 @@ class SyntheticController < ApplicationController
           end
       end
     }
+		
 
     if params[:first_modification].blank?
       top_word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part| all_lexemes << part.to_i if part=~/^\d+$/}}
@@ -263,16 +264,32 @@ class SyntheticController < ApplicationController
           lexeme_class_name.constantize.transaction do
             dummy_lexemes.each{|index, properties|
               max_id = lexeme_class_name.constantize.maximum('id')
-              temp = lexeme_class_name.constantize.new(:surface=>properties["surface"], :reading=>properties["reading"], :pronunciation=>properties["pronunciation"],
-                                                       :pos=>properties["pos"], :base_id=>max_id+1, :dictionary=>root_dictionary.to_s,
-                                                       :tagging_state=>dummy_tag, :created_by=>session[:user_id])
+              if params[:info][:domain] == 'jp'
+	              temp = lexeme_class_name.constantize.new(:surface=>properties["surface"],
+																			              			:reading=>properties["reading"],
+																			              			:pronunciation=>properties["pronunciation"],
+																			              			:pos=>properties["pos"],
+																			              			:base_id=>max_id+1,
+																			              			:dictionary=>root_dictionary.to_s,
+																		                      :tagging_state=>dummy_tag,
+																		                      :created_by=>session[:user_id])
+							else
+	              temp = lexeme_class_name.constantize.new(:surface=>properties["surface"],
+																			              			:reading=>properties["reading"],
+																			              			:pos=>properties["pos"],
+																			              			:dictionary=>root_dictionary.to_s,
+																		                      :tagging_state=>dummy_tag,
+																		                      :created_by=>session[:user_id])
+							
+							end
               temp.id = max_id+1
               if temp.save!
                 dummy_words.store(properties["surface"], temp.id.to_s)
               end
             }
           end
-
+					
+					
           #####################################
           #####   update dummy words' id in meta structure and all lexemes
           top_word.each{|id, meta| meta[:sth_struct].split(',').map{|item| item.delete('-')}.each{|part|
@@ -293,6 +310,8 @@ class SyntheticController < ApplicationController
           dummy_words.each{|key, value| all_lexemes << value.to_i}
           all_lexemes = all_lexemes.uniq
 
+
+
           ######################################
           ####      save the update words
           old_struct_ids = []
@@ -305,9 +324,11 @@ class SyntheticController < ApplicationController
           }
           update_words.each{|word| save_word_structure(:word=>word, :class_name=>class_name, :user_id=>session[:user_id], :item_class_name=>item_class_name, :category_names=>category_names, :text_names=>text_names, :time_names=>time_names)}
 
+
           ######################################
           ####      save the new words
           new_words.each{|word| save_word_structure(:word=>word, :class_name=>class_name, :user_id=>session[:user_id], :item_class_name=>item_class_name, :category_names=>category_names, :text_names=>text_names, :time_names=>time_names)}
+
 
           #####################################
           ####   delete old structure if from modification
@@ -320,9 +341,11 @@ class SyntheticController < ApplicationController
             }
           end
 
+
           ######################################
           ####      save root word
           save_word_structure(:word=>top_word, :class_name=>class_name, :user_id=>session[:user_id], :item_class_name=>item_class_name, :category_names=>category_names, :text_names=>text_names, :time_names=>time_names)
+
 
           ######################################
           ####     update existing meta part whose sth_surface matches with the root word
@@ -338,7 +361,8 @@ class SyntheticController < ApplicationController
           else
             final_update_dictioary_list = root_dictionary.list
           end
-          
+
+
           ######################################
           ####      update all words' dictionary
           lexeme_class_name.constantize.transaction do
@@ -611,11 +635,9 @@ class SyntheticController < ApplicationController
     all_super_root = option[:all_intermedia].map{|item| item.sth_ref_id}.uniq.sort
     option[:class_name].constantize.transaction do
       option[:all_intermedia].each{|inter_part|
-        debugger
         option[:class_name].constantize.find(:all, :conditions=>["sth_ref_id=? and sth_struct like ?", inter_part.sth_ref_id, '%-meta\_'+inter_part.sth_meta_id.to_s+'-%']).each{|to_update|
           to_update.update_attributes!(:sth_struct=>to_update.sth_struct.gsub("-meta_#{inter_part.sth_meta_id.to_s}-", "-#{option[:id].to_s}-"))
         }
-        debugger
         find_below_meta_structure(:class_name=>option[:class_name], :inter_part=>inter_part).each{|below_meta_structure|
           option[:item_class_name].constantize.transaction do
             option[:item_class_name].constantize.find(:all, :conditions=>["ref_id=?", below_meta_structure.id]).each{|temp| temp.destroy}

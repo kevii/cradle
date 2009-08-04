@@ -268,9 +268,11 @@ end %>
 									<td width="390"><%= text_field_tag "dummy"+index.to_s+'_reading', nil, :style=>"width:100%;", :class=>'text-field' %></td>
 								</tr>
 								<tr>
-									<td width="60"><%= initial_property_name(info[:domain])['pronunciation'] %></td>
-									<td width="390"><%= text_field_tag "dummy"+index.to_s+'_pronunciation', nil, :style=>"width:100%;", :class=>'text-field' %></td>
-									<td width="60"></td>
+									<% if info[:domain] == 'jp' %>
+										<td width="60"><%= initial_property_name(info[:domain])['pronunciation'] %></td>
+										<td width="390"><%= text_field_tag "dummy"+index.to_s+'_pronunciation', nil, :style=>"width:100%;", :class=>'text-field' %></td>
+										<td width="60"></td>
+									<% end %>
 									<td width="60"><%= initial_property_name(info[:domain])['pos'] %></td>
 									<td width="390"><%= display_property_list(:type=>"pos", :domain=>info[:domain], :state=>"new", :prefix=>"dummy"+index.to_s) %></td>
 								</tr>
