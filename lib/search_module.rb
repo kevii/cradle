@@ -83,6 +83,7 @@ module SearchModule
     case params[:domain]
     when "jp"
     	error_msg_1 = "IDは数字だけで指定して下さい！"
+    	error_msg_1_1 = "ID範囲を指定するには、,(comma)もしくは-(hyphen)を利用してください！(例；xx, xx-yy, xx-xx, xx)"
     	error_msg_2 = "検索条件入力エラーもしくは単語が見つかりません!"
     	structure_trans = "構造"
     	inner_surface_trans = "内部表記"
@@ -90,6 +91,7 @@ module SearchModule
     	inner_pos_trans = "内部品詞"
     when "cn"
     	error_msg_1 = "ID必须为数字！"
+    	error_msg_1_1 = "在指定ID的范围时，只能使用comma(,)或者hyphen(-)！(例；xx, xx-yy, xx-xx, xx)"
     	error_msg_2 = "查找条件输入错误，或无此单词！"
     	structure_trans = "结构"
     	inner_surface_trans = "内部成分"
@@ -97,8 +99,14 @@ module SearchModule
     	inner_pos_trans = "内部词性"
     end
     
+    unless params[:id][:value].blank?
+    	if params[:id][:operator] != '='
+    		return "", "", "<ul><li>"+error_msg_1+"</li></ul>" if (%r[^\d+$].match(params[:id][:value]) == nil)
+    	else
+    		return "", "", "<ul><li>"+error_msg_1_1+"</li></ul>" unless (params[:id][:value] =~ /^(\d+(-\d+)?)(,\s*(\d+(-\d+)?))*$/)
+    	end
+    end
     
-    return "", "", "<ul><li>"+error_msg_1+"</li></ul>" if not params[:id][:value].blank? and %r[^\d+$].match(params[:id][:value]) == nil
     params.each{|key, value|
       case key
       when "commit", "authenticity_token", "controller", "action", "search_type", "domain" then next
@@ -144,8 +152,24 @@ module SearchModule
             end
           when "id"
             unless params[key][:value].blank?
-              result << initial_property_name(params[:domain])[key] + operator0[params[key][:operator]] + params[key][:value]
-              condition[0]<<" #{params[:domain]}_lexemes.#{key} #{params[key][:operator]} #{params[key][:value].to_i} "
+            	if (params[key][:operator] == '=')
+            		id_result_string = []
+            		id_condition_string = []
+            		params[key][:value].split(/,\s*/).map{|item| item.split('-')}.each{|item|
+            			if item.size == 1
+            				id_result_string << item[0]
+            				id_condition_string << " #{params[:domain]}_lexemes.#{key} = #{item[0].to_i} "
+            			else
+            				id_result_string << item.join('-')
+            				id_condition_string << " (#{params[:domain]}_lexemes.#{key} >= #{item[0].to_i} and #{params[:domain]}_lexemes.#{key} <= #{item[1].to_i}) "
+            			end
+            		}
+            		result << initial_property_name(params[:domain])[key] + operator0[params[key][:operator]] + id_result_string.join(', ')
+            		condition[0] << '(' + id_condition_string.join(' or ') + ')'
+            	else
+	              result << initial_property_name(params[:domain])[key] + operator0[params[key][:operator]] + params[key][:value]
+  	            condition[0]<<" #{params[:domain]}_lexemes.#{key} #{params[key][:operator]} #{params[key][:value].to_i} "
+            	end
             end
           when "surface", "reading", "pronunciation"
             unless params[key][:value].blank?
