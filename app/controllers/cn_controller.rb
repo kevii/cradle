@@ -129,7 +129,7 @@ class CnController < ApplicationController
       	lexeme.update_attributes!(params[:lexeme])
       	lexeme_dynamic_property_ids = lexeme.dynamic_properties.map(&:property_id)
       	CnNewProperty.find_all_by_section('lexeme').each{|property|
-      		if params[:other_property].key?(property.property_string)
+      		if not params[:other_property].blank? and params[:other_property].key?(property.property_string)
       			if lexeme_dynamic_property_ids.include?(property.id)
       				lexeme.dynamic_properties.select{|t| t.property_id == property.id}[0].update_attributes!(property.type_field.to_sym=>params[:other_property][property.property_string.to_sym])
       			else

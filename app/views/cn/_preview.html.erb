@@ -47,10 +47,12 @@
 							<%= hidden_field_tag "lexeme[surface]", preview["surface"] %>
 							<%= h(preview["surface"]) %>
 						</td>
-						<td align="left" >
-							<%= hidden_field_tag 'lexeme[reading]', preview["reading"] %>
-							<%= h(preview["reading"]) %>
-						</td>
+						<% unless preview["reading"].blank? %>
+							<td align="left" >
+								<%= hidden_field_tag 'lexeme[reading]', preview["reading"] %>
+								<%= h(preview["reading"]) %>
+							</td>
+						<% end %>
 						<% unless preview["pos"].blank? %>
 							<td align="left" >
 								<%= hidden_field_tag 'lexeme[pos]', preview["pos"] %>
