@@ -310,7 +310,7 @@ class JpController < ApplicationController
             if params[:new_root]=="NEW"
               max = JpLexeme.maximum('id')
               new_root_id = "R"+max.to_s
-              while(JpLexeme.exists?(:root_id=>temp_string))
+              while(JpLexeme.exists?(:root_id=>new_root_id))
                 new_root_id = "R"+(rand(max)+1).to_s
               end
             else
@@ -325,7 +325,7 @@ class JpController < ApplicationController
           return
         else
           flash[:notice] = "<ul><li>Root系列を指定しました！</li></ul>"
-          redirect_to :action => "search", :search_type=>"root", :root_id=>new_root_id
+          redirect_to :action => "search", :search_type=>"root", :root_id=>new_root_id, :domain => 'jp'
           return
         end
       when "destroy"
@@ -352,7 +352,7 @@ class JpController < ApplicationController
           if params[:base_list].blank?
             redirect_to :action => "index"  
           else
-            redirect_to :action => "search", :search_type=>"root", :root_id=>params[:new_root]
+            redirect_to :action => "search", :search_type=>"root", :root_id=>params[:new_root], :domain => 'jp'
           end
           return
         end
