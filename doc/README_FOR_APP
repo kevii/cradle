@@ -30,11 +30,6 @@
   
   Used by properties tables in Cradle.
 
-* daemon gem and daemon_generator plugin
-
-  "daemon" is a ruby gem that cound run back office programme.
-  "daemon_generator" is a rails plugin that can manage multiple daemons used for rails.
-
 * starling gem and workling plugin
 
   "starling" is a ruby gem that can manage queue function in background.
