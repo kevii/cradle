@@ -27,6 +27,7 @@ Rails::Initializer.run do |config|
   # config.gem "aws-s3", :lib => "aws/s3"
   config.gem 'will_paginate', :version => '~> 2.3.11', :source => 'http://gemcutter.org'
   config.gem 'whenever', :lib => false, :source => 'http://gemcutter.org/'
+  config.gem 'system_timer' # required by starling
   config.gem 'starling-starling', :lib => 'starling', :source => 'http://gems.github.com/'
 
   # Only load the plugins named here, in the order given. By default, all plugins 

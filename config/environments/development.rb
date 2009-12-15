@@ -16,5 +16,5 @@ config.action_controller.perform_caching             = false
 # Don't care if the mailer can't send
 config.action_mailer.raise_delivery_errors = false
 
-Workling::Remote.dispatcher = Workling::Remote::Runners::StarlingRunner.new
-Workling::Return::Store.instance = Workling::Return::Store::StarlingReturnStore.new
+#Workling::Remote.dispatcher = Workling::Remote::Runners::StarlingRunner.new
+#Workling::Return::Store.instance = Workling::Return::Store::StarlingReturnStore.new

@@ -10,3 +10,4 @@ dumped_data/**/*
 initial_lexeme_property/*
 db/schema.rb
 test/**/*
+*~
