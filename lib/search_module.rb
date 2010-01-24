@@ -367,7 +367,18 @@ module SearchModule
 		      															 																					:per_page=>option[:per_page],
 																																									:page=>option[:page])
 				elsif state == 'all'
-		      lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :conditions=>temp_conditions, :include=>[:sub_structs])
+					sql_st = <<-SQL
+				  	SELECT DISTINCT #{option[:domain]}_lexemes.id
+				  	FROM #{option[:domain]}_lexemes
+				  		LEFT OUTER JOIN #{option[:domain]}_synthetics
+				  			ON #{option[:domain]}_synthetics.sth_ref_id = #{option[:domain]}_lexemes.id
+				  	WHERE ( #{temp_conditions} )
+				  	ORDER BY #{option[:domain]}_lexemes.id ASC
+				  SQL
+				  
+					lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find_by_sql(sql_st)
+				
+#		      lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :select=> 'id', :conditions=>temp_conditions, :include=>[:sub_structs])
 				end
 			else
 				if state == 'page'
@@ -376,7 +387,22 @@ module SearchModule
 		       															 																					:per_page=>option[:per_page],
 		 																																							:page=>option[:page])
 		 		elsif state == 'all'
-					lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :conditions=>temp_conditions, :include=>[:dynamic_properties, {:sub_structs=>[:other_properties]}])
+					sql_st = <<-SQL
+				  	SELECT DISTINCT #{option[:domain]}_lexemes.id
+				  	FROM #{option[:domain]}_lexemes
+				  		LEFT OUTER JOIN #{option[:domain]}_lexeme_new_property_items
+				  			ON #{option[:domain]}_lexeme_new_property_items.ref_id = #{option[:domain]}_lexemes.id
+				  		LEFT OUTER JOIN #{option[:domain]}_synthetics
+				  			ON #{option[:domain]}_synthetics.sth_ref_id = #{option[:domain]}_lexemes.id
+				  		LEFT OUTER JOIN #{option[:domain]}_synthetic_new_property_items
+				  			ON #{option[:domain]}_synthetic_new_property_items.ref_id = #{option[:domain]}_synthetics.id
+				  	WHERE ( #{temp_conditions} )
+			  		ORDER BY #{option[:domain]}_lexemes.id ASC
+				  SQL
+				  
+		 			lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find_by_sql(sql_st)
+		 		
+#					lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :select=> 'id', :conditions=>temp_conditions, :include=>[:dynamic_properties, {:sub_structs=>[:other_properties]}])
 		 		end
 			end
     else
@@ -401,20 +427,25 @@ module SearchModule
         collection = install_by_dividing(:ids=>dynamic_ids, :domain=>option[:domain])
         lexemes = collection.paginate(:page=>option[:page], :per_page=>option[:per_page])
       else
-      	if option[:domain] = 'jp'
-      		sql_st = "SELECT DISTINCT jp_lexemes.id FROM jp_lexemes LEFT OUTER JOIN jp_synthetics ON jp_synthetics.sth_ref_id = jp_lexemes.id WHERE ( #{option[:static_condition]} ) ORDER BY jp_lexemes.id ASC"
-      	elsif option[:domain] = 'cn'
-      		sql_st = "SELECT DISTINCT cn_lexemes.id FROM cn_lexemes LEFT OUTER JOIN cn_synthetics ON cn_synthetics.sth_ref_id = cn_lexemes.id WHERE ( #{option[:static_condition]} ) ORDER BY cn_lexemes.id ASC"
-      	end
+      	sql_st = <<-SQL
+					SELECT DISTINCT #{option[:domain]}_lexemes.id
+					FROM #{option[:domain]}_lexemes
+					LEFT OUTER JOIN #{option[:domain]}_synthetics
+						ON #{option[:domain]}_synthetics.sth_ref_id = #{option[:domain]}_lexemes.id
+					WHERE ( #{option[:static_condition]} )
+					ORDER BY #{option[:domain]}_lexemes.id ASC
+				SQL
+
       	static_ids = verify_domain(option[:domain])['Lexeme'].constantize.find_by_sql(sql_st).map(&:id)
         static_ids.size >= dynamic_ids.size ? final_ids = dynamic_ids & static_ids : final_ids = static_ids & dynamic_ids
         if state == 'page'
 	        lexemes = verify_domain(option[:domain])['Lexeme'].constantize.paginate(:conditions=>["id in (#{final_ids.join(',')})"], :page=>option[:page], :per_page=>option[:per_page])
 				elsif state == 'all'
-	        lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :conditions=>["id in (#{final_ids.join(',')})"])
+	        lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :select=> 'id', :conditions=>["id in (#{final_ids.join(',')})"])
 				end
       end
     end
+    return lexemes
   end
   
   ### :conditions, :domain, :section
@@ -466,7 +497,7 @@ module SearchModule
       else
         id_string = ids[start..(ids.size-1)].join(',')
       end
-      collection.concat(class_name.constantize.find(:all, :conditions=>["id in (#{id_string})"]))
+   		collection.concat(class_name.constantize.find(:all, :conditions=>["id in (#{id_string})"]))
       start = start + step + 1
     end
     return collection

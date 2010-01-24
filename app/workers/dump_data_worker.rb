@@ -63,29 +63,48 @@ class DumpDataWorker < Workling::Base
 	private
 	def find_all_ids(options)
 		final_id_arrays = get_search_collection(options, 'all').map(&:id)
-    if options[:dependency].blank?
-    	return final_id_arrays.uniq.sort
+    if options[:dependency].blank? then final_id_arrays.sort
     else
-    	temp_id_arrays = final_id_arrays.dup
-    	return final_id_arrays.inject(temp_id_arrays){|id_arrays, index_id|
-    		id_arrays.concat(find_ids_with_dependency(index_id, id_arrays, options[:domain])).uniq.sort
-    	}
+    	dependency_ids = install_dependency_ids(final_id_arrays, options[:domain])
+    	return final_id_arrays.concat(dependency_ids).uniq.sort
     end
   end
   
-  def find_ids_with_dependency(id, original_ids_array, domain)
-		if verify_domain(domain)['Lexeme'].constantize.find(id).struct.blank?
-			return []
-		else
-    	dependency_ids = verify_domain(domain)['Synthetic'].constantize.find(:all, :conditions=>["sth_ref_id=?", id]).map(&:sth_struct).inject([]){|id_array, item| item.split(',').map{|temp| temp[1..-2]}.each{|temp_string| id_array << temp_string.to_i if temp_string =~ /^\d+$/}; id_array}
-  		dependency_ids.dup.each{|item|
-		 		if original_ids_array.include?(item)
-	  			next
-	  		else
-	  			dependency_ids.concat(find_ids_with_dependency(item, original_ids_array, domain))
-	  		end
-	  	}
-			return dependency_ids.uniq.sort
+  def install_dependency_ids(initial_ids, domain)
+  	initial_size = initial_ids.size
+  	step = 1000
+  	begin_index = 0
+  	dependency_ids = []
+  	while(begin_index < initial_size) do
+  		end_index = begin_index+step
+  		end_index = initial_size if end_index >= initial_size
+  		dependency_ids.concat(find_ids_with_dependency(initial_ids[(begin_index)..(end_index)].join(','), domain))
+  		begin_index = end_index + 1
+  	end
+  	return dependency_ids
+  end
+  
+  def find_ids_with_dependency(ids_or_pair, domain, state='ids')
+  	case state
+  	when 'ids'
+  		temp_dependency_structs = verify_domain(domain)['Synthetic'].constantize.find(:all, :select=>'sth_ref_id, sth_struct', :conditions=>["sth_ref_id in (#{ids_or_pair})"])
+  	when 'pair'
+  		temp_dependency_structs = verify_domain(domain)['Synthetic'].constantize.find(:all, :select=>'sth_ref_id, sth_struct', :conditions=>["sth_ref_id = ? and sth_meta_id = ?", ids_or_pair[0], ids_or_pair[1]])
+   	end
+  	if temp_dependency_structs.blank? then return []
+  	else
+    	dependency_ids = temp_dependency_structs.map{|item| [item.sth_ref_id, item.sth_struct]}.inject([]){|id_array, item|
+    										 item[1].split(',').map{|temp| temp[1..-2]}.each{|candidate|
+    										 	 if candidate =~ /^\d+$/ then id_array << candidate.to_i
+    										 	 else
+    										 	 	 id_array.concat(find_ids_with_dependency([item[0], candidate.split('').last], domain, 'pair'))
+    										 	 end
+    										 }
+    										 id_array
+    									 }
+    	dependency_ids.uniq!
+    	dependency_ids.concat(install_dependency_ids(dependency_ids, domain)).uniq!
+			return dependency_ids
 		end
   end
   

@@ -66,10 +66,10 @@ class ApplicationController < ActionController::Base
                                            :domain => params[:domain],
                                            :prefix => root_url,
                                            :dependency => params[:dependency].blank? ? nil : 1)
-    render(:update){|page|
-      page[:period_caller].replace_html :inline=>"<%= periodically_call_remote(:url=>{:action=>'update_indicator', :uid=>@uid}, :frequency=>'2', :variable=>'progress_indicator') %>"
-      page[:indicator].show
-    }
+     render(:update){|page|
+       page[:period_caller].replace_html :inline=>"<%= periodically_call_remote(:url=>{:action=>'update_indicator', :uid=>@uid}, :frequency=>'2', :variable=>'progress_indicator') %>"
+       page[:indicator].show
+     }
   end
 
   def update_indicator
