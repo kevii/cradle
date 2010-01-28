@@ -31,7 +31,7 @@ class DumpDataWorker < Workling::Base
       lexeme_class = 'EnLexeme'
     end
     whole_number = id_array.size
-    step = (whole_number.to_f/100.0).round
+    step = (whole_number.to_f/100.0).round + 1
     start_index = 0
     each_part = 100
     count = 0
