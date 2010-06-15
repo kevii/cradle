@@ -1,5 +1,5 @@
 require 'date'
-require 'YAML'
+require 'yaml'
 
 namespace :cradle do
   desc "backup database and clean up temporary file"
