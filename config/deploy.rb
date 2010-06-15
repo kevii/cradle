@@ -37,7 +37,6 @@ end
 
 after "deploy:update_code" do
 	run "cp -f #{shared_path}/system/database.yml #{release_path}/config/database.yml"
-	run "ln -s #{shared_path}/initial_lexeme_property #{release_path}/initial_lexeme_property"
 	run "ln -s #{shared_path}/dumped_data #{release_path}/dumped_data"
  	run "ln -s #{shared_path}/user_dump_file #{release_path}/public/user_dump_file"
  	run "cp -f #{release_path}/public/javascripts/jsProgressBarHandler.js.example #{release_path}/public/javascripts/jsProgressBarHandler.js"
