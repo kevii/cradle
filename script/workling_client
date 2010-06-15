@@ -1,11 +1,17 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'daemons'
+require 'yaml'
 
 workling = File.join(File.dirname(__FILE__), '..', 'vendor', 'plugins', 'workling', 'script', 'listen.rb')
+configuration = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'config', 'database.yml'))
+app_name = case (configuration['development'] or configuration['production'])['database']
+	when /seinan/ then 'seinan-workling'
+	else 'cradle-workling'
+end
 
 options = {
-  :app_name   => (File.expand_path(__FILE__).split('/')[-3] + "-workling"),
+  :app_name   => app_name,
   :ARGV       => ARGV,
   :dir_mode   => :normal,
   :dir        => File.join(File.dirname(__FILE__), '..', 'log'),
