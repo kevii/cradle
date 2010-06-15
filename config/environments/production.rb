@@ -23,4 +23,7 @@ config.action_controller.perform_caching             = true
 
 
 ### added because of rails 2.2.2 changed the way relative_url_root being processed and set
-config.action_controller.relative_url_root = "/cradle"
+case RAILS_ROOT
+when /cradle/ then config.action_controller.relative_url_root = "/cradle"
+when /seinan/ then config.action_controller.relative_url_root = "/seinan"
+end 

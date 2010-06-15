@@ -1,6 +1,6 @@
 STDOUT.sync = true
 
-namespace :cradle do
+namespace :seinan do
 #   desc "remove dictionaries except naist-jdic"
 #   task :remove_dics => :environment
 #   task :remove_dics, :filename do |task, args|
@@ -12,8 +12,9 @@ namespace :cradle do
 # 		end
 # 	end
 	
-  desc "import nansei data"
-  task :import_nansei_data => :environment do |task, args|
+  desc "import seinan data"
+  task :import_seinan_data => :environment do |task, args|
+  	temp = 2
 		debugger
 		temp = 1
 	end
