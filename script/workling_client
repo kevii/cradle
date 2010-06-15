@@ -3,8 +3,9 @@ require 'rubygems'
 require 'daemons'
 
 workling = File.join(File.dirname(__FILE__), '..', 'vendor', 'plugins', 'workling', 'script', 'listen.rb')
+
 options = {
-  :app_name   => "workling",
+  :app_name   => (File.expand_path(__FILE__).split('/')[-3] + "-workling"),
   :ARGV       => ARGV,
   :dir_mode   => :normal,
   :dir        => File.join(File.dirname(__FILE__), '..', 'log'),
