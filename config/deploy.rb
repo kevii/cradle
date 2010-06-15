@@ -1,4 +1,14 @@
-set :application, "cradle"	# set application name
+task :cradle do
+	set :application, "cradle"
+  set :branch, "master"
+	set :deploy_to, "/home/jia-l/rails/#{application}"
+end
+
+task :seinan do
+	set :application, "seinan"
+  set :branch, "seinan"
+	set :deploy_to, "/home/jia-l/rails/#{application}"
+end
 
 server "dahlia.naist.jp", :app, :web, :db, :primary => true	# set the server's role, equal to following
 
@@ -6,23 +16,12 @@ set :repository,  "/home/jia-l/git-repo/cradle.git"	# set repo URL
 set :local_repository, "ssh://jia-l@dahlia.naist.jp/home/jia-l/git-repo/cradle.git"
 set :scm, :git											# set source control management method
 set :deploy_via, :remote_cache			# speed up the deploy process
+set :base_path, "/home/jia-l/rails" # set base deploy path on the server
 
 set :user, "jia-l"		# set ssh user
 set :use_sudo, false  # do not use sudo
 set :keep_releases, 5	#	set the number of old copies on server
 
-
-task :cradle do
-  set :base_path, "/home/jia-l/rails" # set base deploy path on the server
-  set :deploy_to, "/home/jia-l/rails/#{application}"    # set the detailed deploy path of this app
-  set :branch, "master"
-end
-
-task :seinan do
-  set :base_path, "/home/jia-l/rails/" # set base deploy path on the server
-  set :deploy_to, "/home/jia-l/rails/seinan"    # set the detailed deploy path of this app
-  set :branch, "seinan"
-end
 
 namespace :deploy do
   # Overrides for Phusion Passenger

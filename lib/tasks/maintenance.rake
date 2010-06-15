@@ -1,4 +1,5 @@
 require 'date'
+require 'YAML'
 
 namespace :cradle do
   desc "backup database and clean up temporary file"
@@ -8,13 +9,16 @@ namespace :cradle do
 
 	desc "backup database"
 	task :backup_database do
+		db_names = YAML.load_file("#{RAILS_ROOT}/config/database.yml").values.map{|item| item['database']}
 		date_suffix = Date.today.to_s.delete("-")
-		["cor-jp", "cor-cn"].each{|db_name|
+		db_names.each{|db_name|
 			case db_name
-			when "cor-jp"
+			when /-jp/
 				dump_file_path = "#{RAILS_ROOT}/dumped_data/japanese/"
-			when "cor-cn"
+			when /-cn/
 				dump_file_path = "#{RAILS_ROOT}/dumped_data/chinese/"
+			when /-en/
+				dump_file_path = "#{RAILS_ROOT}/dumped_data/english/"
 			end
 			all_db_file = []
 			Dir.foreach(dump_file_path){|file| all_db_file << [dump_file_path + file, $1] if file=~/^#{db_name}-(\d+)\.sql$/}
