@@ -1,32 +1,28 @@
-set :application, "Cradle"	# set application name
+set :application, "cradle"	# set application name
 
 server "dahlia.naist.jp", :app, :web, :db, :primary => true	# set the server's role, equal to following
 
-set :repository,  "/home/jia-l/git-repo/Cradle.git"	# set repo URL
-set :local_repository, "ssh://jia-l@dahlia.naist.jp/home/jia-l/git-repo/Cradle.git"
-set :scm, "git"											# set source control management method
+set :repository,  "/home/jia-l/git-repo/cradle.git"	# set repo URL
+set :local_repository, "ssh://jia-l@dahlia.naist.jp/home/jia-l/git-repo/cradle.git"
+set :scm, :git											# set source control management method
 set :deploy_via, :remote_cache			# speed up the deploy process
 
+set :user, "jia-l"		# set ssh user
+set :use_sudo, false  # do not use sudo
+set :keep_releases, 5	#	set the number of old copies on server
 
 
 task :cradle do
-  set :base_path, "/home/roka/rails" # set base deploy path on the server
-  set :deploy_to, "/home/roka/rails/#{application}"    # set the detailed deploy path of this app
+  set :base_path, "/home/jia-l/rails" # set base deploy path on the server
+  set :deploy_to, "/home/jia-l/rails/#{application}"    # set the detailed deploy path of this app
   set :branch, "master"
 end
 
-task :nansei do
-  set :base_path, "/home/roka/rails/" # set base deploy path on the server
-  set :deploy_to, "/home/roka/rails/nansei"    # set the detailed deploy path of this app
-  set :branch, "master"
+task :seinan do
+  set :base_path, "/home/jia-l/rails/" # set base deploy path on the server
+  set :deploy_to, "/home/jia-l/rails/seinan"    # set the detailed deploy path of this app
+  set :branch, "seinan"
 end
-
-set :user, "jia-l"		# set ssh user
-set :runner, "jia-l"	#
-#set :use_sudo, false	# do not use sudo
-default_run_options[:pty] = true
-set :keep_releases, 5	#	set the number of old copies on server
-
 
 namespace :deploy do
   # Overrides for Phusion Passenger
@@ -40,7 +36,7 @@ namespace :deploy do
 end
 
 after "deploy:update_code" do
-	run "cp -f #{release_path}/config/database.yml #{release_path}/config/database.yml"
+	run "cp -f #{shared_path}/system/database.yml #{release_path}/config/database.yml"
 	run "ln -s #{shared_path}/initial_lexeme_property #{release_path}/initial_lexeme_property"
 	run "ln -s #{shared_path}/dumped_data #{release_path}/dumped_data"
  	run "ln -s #{shared_path}/user_dump_file #{release_path}/public/user_dump_file"

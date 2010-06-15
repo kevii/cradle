@@ -36,5 +36,7 @@
   "workling" is rails plugin that is written for running backgroud tasks in rails.
   Using starling and worling pair can manager user specific long run tasks in rails.
   
+  starling -d -p 22122 -P tmp/pids/starling.pid -L log/starling.log -q tmp/
+  
 * deploy using passenger(modrails)
   Reference: http://www.modrails.com/documentation/Users%20guide.html
