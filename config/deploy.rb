@@ -47,8 +47,8 @@ after "deploy", "deploy:cleanup"
 
 desc "restart workling"
 task :restart_workling do
-  sudo "RAILS_ENV=production #{release_path}/script/workling_client stop"
-  sudo "RAILS_ENV=production #{release_path}/script/workling_client start"
+  run "RAILS_ENV=production #{release_path}/script/workling_client stop"
+  run "RAILS_ENV=production #{release_path}/script/workling_client start"
 end
 
 desc "Update the crontab file"
