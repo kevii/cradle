@@ -64,8 +64,10 @@ class ApplicationController < ActionController::Base
                                            :simple_search => params[:simple_search],
                                            :section_list => section_list,
                                            :domain => params[:domain],
-                                           :prefix => root_url,
-                                           :dependency => params[:dependency].blank? ? nil : 1)
+                                           :dependency => params[:dependency].blank? ? nil : 1,
+                                           :root_url => root_url,
+                                           :rails_root => RAILS_ROOT,
+                                           :file_name => ('user_dump_file/' + Time.now.to_s(:db).gsub(/[^\d]/, '-')))
      render(:update){|page|
        page[:period_caller].replace_html :inline=>"<%= periodically_call_remote(:url=>{:action=>'update_indicator', :uid=>@uid}, :frequency=>'2', :variable=>'progress_indicator') %>"
        page[:indicator].show

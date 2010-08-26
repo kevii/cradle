@@ -35,8 +35,7 @@ class DumpDataWorker < Workling::Base
     start_index = 0
     each_part = 100
     count = 0
-    file_path = 'user_dump_file/' + Time.now.to_s(:db).gsub(/[^\d]/, '-')
-    output_file = File.open(RAILS_ROOT+'/public/'+file_path, "w")
+    output_file = File.open((options[:rails_root] + '/public/' + options[:file_name]), "w")
     output_file.puts first_line
     output_file.puts field_list
     while(count < 100) do
@@ -57,7 +56,7 @@ class DumpDataWorker < Workling::Base
       Workling::Return::Store.set(options[:uid], count.to_s)
     end
     output_file.close
-    Workling::Return::Store.set(options[:uid], options[:prefix]+file_path)
+    Workling::Return::Store.set(options[:uid], options[:root_url] + options[:file_name])
   end
 
 	private
