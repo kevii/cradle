@@ -12,34 +12,38 @@ SCRIPTNAME=workling_init_script_for_cradle
 
 NAME=workling_client
 
-DAEMON_1="/home/jia-l/rails/cradle/current/script/$NAME"
-PIDFILE_1=/home/jia-l/rails/cradle/current/log/cradle-workling.pid
-
-DAEMON_2="/home/jia-l/rails/seinan/current/script/$NAME"
-PIDFILE_2=/home/jia-l/rails/seinan/current/log/seinan-workling.pid
+DAEMON="/home/jia-l/rails/cradle/current/script/$NAME"
+PIDFILE_1=/home/jia-l/rails/cradle/current/log/workling-client-1.pid
+PIDFILE_2=/home/jia-l/rails/cradle/current/log/workling-client-2.pid
+PIDFILE_3=/home/jia-l/rails/cradle/current/log/workling-client-3.pid
 
 # Exit if the package is not installed
-[ -x "$DAEMON_1" ] || exit 0
-[ -x "$DAEMON_2" ] || exit 0
+[ -x "$DAEMON" ] || exit 0
 
 
 do_start()
 {
 	if [ ! -e "$PIDFILE_1" ]
 	then
-		sudo -u jia-l RAILS_ENV=production $DAEMON_1 start
+		sudo -u jia-l RAILS_ENV=production $DAEMON --number 1 start
 	fi
 
 	if [ ! -e "$PIDFILE_2" ]
 	then
-		sudo -u jia-l RAILS_ENV=production $DAEMON_2 start
+		sudo -u jia-l RAILS_ENV=production $DAEMON --number 2 start
+	fi
+
+	if [ ! -e "$PIDFILE_3" ]
+	then
+		sudo -u jia-l RAILS_ENV=production $DAEMON --number 3 start
 	fi
 }
 
 do_stop()
 {
-	sudo -u jia-l RAILS_ENV=production $DAEMON_1 stop
-	sudo -u jia-l RAILS_ENV=production $DAEMON_2 stop
+	sudo -u jia-l RAILS_ENV=production $DAEMON --number 1 stop
+	sudo -u jia-l RAILS_ENV=production $DAEMON --number 2 stop
+	sudo -u jia-l RAILS_ENV=production $DAEMON --number 3 stop
 }
 
 case "$1" in
