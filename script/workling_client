@@ -3,18 +3,18 @@ require 'rubygems'
 require 'daemons'
 require 'yaml'
 
-number = 0 
-for i in 0..ARGV.length 
-  if ARGV[i] == '--number' 
-    number = ARGV[i + 1] 
+name = 'cradle'
+for i in 0..ARGV.length
+  if ARGV[i] == '--name'
+    name = ARGV[i + 1] 
     2.times {ARGV.delete_at(i)} 
   end 
 end
 
-puts "Workling Number: #{number}"
+puts "Workling Name: #{name} #{ARGV}"
 
 options = {
-  :app_name   => "workling-client-#{number}",
+  :app_name   => "workling-client-#{name}",
   :ARGV       => ARGV,
   :dir_mode   => :normal,
   :dir        => File.join(File.dirname(__FILE__), '..', 'log'),
