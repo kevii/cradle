@@ -419,17 +419,8 @@ class SyntheticController < ApplicationController
         alert_string = "<ul><li>Problem occurred, cannot delete internal structure</li></ul>"
         success_string = "<ul><li>Internal structure deleted!</li></ul>"
     end
-    class_name = verify_domain(params[:domain])['Synthetic']
-    item_class_name = verify_domain(params[:domain])['SyntheticNewPropertyItem']
     begin
-      class_name.constantize.transaction do
-        class_name.constantize.find(:all, :conditions=>["sth_ref_id=?", params[:id].to_i]).each{|sub_structure|
-          item_class_name.constantize.transaction do
-            item_class_name.constantize.find(:all, :conditions=>["ref_id=?", sub_structure.id]).each{|temp| temp.destroy}
-          end
-          sub_structure.destroy
-        }
-      end
+    	verify_domain(params[:domain])['Synthetic'].constantize.destroy_struct(params[:id].to_i)
     rescue
       flash[:notice_err]=alert_string
     else

@@ -1,3 +1,5 @@
+require "simple-json-parser-builder"
+
 class DumpDataWorker < Workling::Base
   include CradleModule
 	include SearchModule
@@ -273,7 +275,7 @@ class DumpDataWorker < Workling::Base
                 when "sth_tagging_state"
                   temp_line << lexeme.struct.sth_tagging_state_item.tree_string
                 when "sth_struct"
-                  temp_line << lexeme.struct.get_dump_string(options[:syn_list])
+                  temp_line << JsonBuilder.new.build(lexeme.struct.get_dump_string(options[:syn_list]))
               end
             end
           elsif item[2] == 'lexeme'
@@ -323,7 +325,7 @@ class DumpDataWorker < Workling::Base
               when "sth_tagging_state"
                 temp_line << lexeme.struct.sth_tagging_state_item.tree_string
               when "sth_struct"
-                temp_line << lexeme.struct.get_dump_string(options[:syn_list])
+                temp_line << JsonBuilder.new.build(lexeme.struct.get_dump_string(options[:syn_list]))
               end
             end
           elsif item[2] == 'lexeme'

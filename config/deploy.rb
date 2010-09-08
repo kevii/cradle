@@ -47,8 +47,7 @@ after "deploy", "deploy:cleanup"
 
 desc "restart workling"
 task :restart_workling do
-  run "RAILS_ENV=production #{release_path}/script/workling_client --name #{application} stop"
-	run "RAILS_ENV=production #{release_path}/script/workling_client --name #{application} start"
+  run "RAILS_ENV=production #{release_path}/script/workling_client --name #{application} restart"
 end
 
 desc "Update the crontab file"
