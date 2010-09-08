@@ -43,6 +43,21 @@ namespace :cradle do
 		  return new_ary
 		end
 		
+		def add_surface(struct)
+		  temp_surface = ''
+		  struct[1..-1].each do |item|
+		    case item
+		    when Array
+		      new_struct = add_surface(item)
+		      temp_surface << new_struct[0]['sth_surface']
+		    when Hash
+		      temp_surface << item.values[0]
+		    end
+		  end
+		  struct[0]['sth_surface'] = temp_surface
+		  return struct
+		end
+		
 		def compute_struct(temp_str)
 		  temp_chars = ''
 		  level = 1
@@ -63,7 +78,7 @@ namespace :cradle do
 		      temp_chars << char
 		    end
 		  end
-		  convert_to_hash(convert_to_ary(temp_chars, max_level))
+		  add_surface(convert_to_hash(convert_to_ary(temp_chars, max_level)))
 		end
 		
 		current_line = nil

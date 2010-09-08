@@ -36,6 +36,7 @@ end
 
 after "deploy:update_code" do
 	run "cp -f #{shared_path}/system/database.yml #{release_path}/config/database.yml"
+	run "cp -f #{shared_path}/system/workling.yml #{release_path}/config/workling.yml"
 	run "ln -s #{shared_path}/dumped_data #{release_path}/dumped_data"
  	run "ln -s #{shared_path}/user_dump_file #{release_path}/public/user_dump_file"
  	run "cp -f #{release_path}/public/javascripts/jsProgressBarHandler.js.example #{release_path}/public/javascripts/jsProgressBarHandler.js"
@@ -47,7 +48,8 @@ after "deploy", "deploy:cleanup"
 
 desc "restart workling"
 task :restart_workling do
-  run "RAILS_ENV=production #{release_path}/script/workling_client --name #{application} restart"
+	run "RAILS_ENV=production #{release_path}/script/workling_client --name #{application} stop"
+  run "RAILS_ENV=production #{release_path}/script/workling_client --name #{application} start"
 end
 
 desc "Update the crontab file"

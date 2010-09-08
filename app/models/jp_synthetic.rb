@@ -12,6 +12,7 @@ class JpSynthetic < ActiveRecord::Base
 		temp_sth_struct_ary = []
 		properties_ary = []
 		sub_json_struct = {}
+		current_sth_surface = ''
 		options[:json_struct].each do |item|
 			case item
 			when Array
@@ -24,13 +25,17 @@ class JpSynthetic < ActiveRecord::Base
 				else
 					properties_ary = item.inject([]) do |temp_ary, inner|
 						unless inner[1].blank?
-							property = JpNewProperty.find_by_section_and_property_string('synthetic', inner[0])
-							temp_value = case property.type_field
-								when 'category' then JpProperty.find_item_by_tree_string_or_array(inner[0], inner[1]).property_cat_id
-								when 'text'			then inner[1]
-								when 'time'			then inner[1].to_formatted_s(:db)
+							case inner[0]
+							when 'sth_surface' then current_sth_surface = inner[1]
+							else
+								property = JpNewProperty.find_by_section_and_property_string('synthetic', inner[0])
+								temp_value = case property.type_field
+									when 'category' then JpProperty.find_item_by_tree_string_or_array(inner[0], inner[1]).property_cat_id
+									when 'text'			then inner[1]
+									when 'time'			then inner[1].to_formatted_s(:db)
+								end
+								temp_ary << {:property_id => property.id, :type => property.type_field, :value => temp_value}
 							end
-							temp_ary << {:property_id => property.id, :type => property.type_field, :value => temp_value}
 						end
 						temp_ary
 					end
@@ -41,7 +46,7 @@ class JpSynthetic < ActiveRecord::Base
 			:sth_ref_id 				=> options[:lexeme].id,
 			:sth_meta_id				=> current_level,
 			:sth_struct					=> temp_sth_struct_ary.map{|x| "-#{x}-"}.join(','),
-			:sth_surface				=> options[:lexeme].surface,
+			:sth_surface				=> current_sth_surface,
 			:sth_tagging_state	=> options[:tagging_state],
 			:log								=> options[:log],
 			:modified_by				=> options[:modified_by]
@@ -127,23 +132,24 @@ class JpSynthetic < ActiveRecord::Base
   
   def get_dump_string(property_list)
     dump_string_array = []
-    if property_list.blank?
-    	dump_string_array << {}
-    else
-      property_hash = property_list.inject({}) do |temp_hash, property|
-        valid_pro = send(property[0])
-        temp_hash[property[0]] = if valid_pro.blank? then ''
-        else
-          case property[2]
-          when 'category' then JpProperty.find(:first, :conditions=>["property_string=? and property_cat_id=?", property[0], valid_pro]).tree_string.toutf8
-          when 'text'			then valid_pro
-          when 'time'			then valid_pro.to_formatted_s(:number)
-          end
-        end
-        temp_hash
-      end
-      dump_string_array << property_hash unless property_hash.blank?
+    property_list << ['sth_surface', nil, nil]
+    property_hash = property_list.inject({}) do |temp_hash, property|
+    	case property[0]
+    	when 'sth_surface' then temp_hash['sth_surface'] = sth_surface
+    	else
+    		valid_pro = send(property[0])
+	      temp_hash[property[0]] = if valid_pro.blank? then ''
+	      else
+	        case property[2]
+	        when 'category' then JpProperty.find(:first, :conditions=>["property_string=? and property_cat_id=?", property[0], valid_pro]).tree_string.toutf8
+	        when 'text'			then valid_pro
+	        when 'time'			then valid_pro.to_formatted_s(:number)
+	        end
+	      end
+	    end
+      temp_hash
     end
+    dump_string_array << property_hash unless property_hash.blank?
     sth_struct.split(',').map{|item| item.delete('-')}.each{|part|
       if part =~ /^\d+$/
         dump_string_array << {part => JpLexeme.find(part.to_i).surface}

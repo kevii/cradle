@@ -1,0 +1,10 @@
+production:
+  listens_on: localhost:15151
+  memcache_options:
+    namespace: workling-client-cradle
+
+development:
+  listens_on: localhost:22122
+  
+test:
+  listens_on: localhost:12345

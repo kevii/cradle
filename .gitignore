@@ -4,6 +4,7 @@ tmp/**/*
 .DS_Store
 Capfile
 config/database.yml
+config/workling.yml
 public/javascripts/jsProgressBarHandler.js
 public/user_dump_file/*
 dumped_data/**/*

@@ -7,11 +7,6 @@ class ApplicationController < ActionController::Base
   helper :all
   include CradleModule
   
-	### for maintenance
-  include MaintenanceMode
-  before_filter :disabled?
-
-  
   ### Pick a unique cookie name to distinguish our session data from others
   session :session_key => '_cradle_session_id'
   ### set charset
