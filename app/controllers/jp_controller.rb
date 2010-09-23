@@ -4,6 +4,31 @@ class JpController < ApplicationController
 
   include SearchModule
 
+  def direct_list
+  	if params[:condition] =~ /^surface=LIKE=(.*)$/
+	    redirect_to :action												=> "list",
+	    						:static_condition							=> " jp_lexemes.surface like '%#{$1}%' ",
+	    						:simple_search								=> 'true',
+	    						:dynamic_lexeme_condition			=> '',
+	    						:dynamic_synthetic_condition	=> '',
+	    						:show_conditions							=> "単語=~#{$1}",
+	                :domain												=> 'jp'
+			return
+  	elsif params[:condition] =~ /^surface=EQUAL=(.*)$/
+	    redirect_to :action												=> "list",
+	    						:static_condition							=> " jp_lexemes.surface = '#{$1}' ",
+	    						:simple_search								=> 'true',
+	    						:dynamic_lexeme_condition			=> '',
+	    						:dynamic_synthetic_condition	=> '',
+	    						:show_conditions							=> "単語=#{$1}",
+	                :domain												=> 'jp'
+	    return
+  	else
+  		redirect_to '/'
+  		return
+  	end
+  end
+
   def load_section_list
     if params[:state] == "false"
       render(:update){|page|
