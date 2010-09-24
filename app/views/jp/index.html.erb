@@ -26,10 +26,17 @@
 				            <td width="55"><%= initial_property_name('jp')['surface'] %></td>
 				            <td width="80">
 				        		<select id="operator_surface" name="surface[operator]" style="width:100%;">
-				                    <%= options_for_select(operator1, "=") %>
+				        			<% temp_operator = if params[:surface_operator].blank? then '='
+				        			elsif params[:surface_operator] == 'EQUAL' then '='
+				        			elsif params[:surface_value] == 'LIKE' then '=~'
+				        			end %>
+				                    <%= options_for_select(operator1, temp_operator) %>
 				            	</select>
 							</td>
-				            <td width="365"><%= text_field :surface, :value , {:style=>"width:100%;", :class=>'text-field'} %></td>
+				            <td width="365">
+				        			<% temp_value = (params[:surface_value].blank? ? nil : params[:surface_value]) %>
+				            	<%= text_field_tag "surface[value]", temp_value , {:style=>"width:100%;", :class=>'text-field'} %>
+				            </td>
 						</tr>
 						<tr>
 			    	        <td><%= initial_property_name('jp')['reading'] %></td>
@@ -251,3 +258,8 @@
 		</table>
 	<% end %>
 </div>
+
+<ul style='margin-top:50px;'>
+	<li>LSD辞書は，ライフサイエンス辞書プロジェクト（代表：京都大学金子周司教授）から使用許諾をいただきました．</li>
+	<li>標準病名マスターは， （財）医療情報システム開発センターより使用許諾をいただきました．</li>
+</ul>

@@ -5,7 +5,8 @@ class JpController < ApplicationController
   include SearchModule
 
   def direct_list
-  	if params[:condition] =~ /^surface=LIKE=(.*)$/
+  	case params[:condition]
+  	when /^surface=LIKE=(.*)$/
 	    redirect_to :action												=> "list",
 	    						:static_condition							=> " jp_lexemes.surface like '%#{$1}%' ",
 	    						:simple_search								=> 'true',
@@ -14,7 +15,7 @@ class JpController < ApplicationController
 	    						:show_conditions							=> "単語=~#{$1}",
 	                :domain												=> 'jp'
 			return
-  	elsif params[:condition] =~ /^surface=EQUAL=(.*)$/
+  	when /^surface=EQUAL=(.*)$/
 	    redirect_to :action												=> "list",
 	    						:static_condition							=> " jp_lexemes.surface = '#{$1}' ",
 	    						:simple_search								=> 'true',
@@ -23,6 +24,12 @@ class JpController < ApplicationController
 	    						:show_conditions							=> "単語=#{$1}",
 	                :domain												=> 'jp'
 	    return
+	  when /^index_surface=LIKE=(.*)$/
+	  	redirect_to :action => :index, :surface_value => $1, :surface_operator => 'LIKE'
+	  	return
+	  when /^index_surface=EQUAL=(.*)$/
+	  	redirect_to :action => :index, :surface_value => $1, :surface_operator => 'EQUAL'
+	  	return
   	else
   		redirect_to '/'
   		return
