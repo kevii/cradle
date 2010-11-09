@@ -127,23 +127,24 @@ class CnSynthetic < Chinese
   
   def get_dump_string(property_list)
     dump_string_array = []
-    if property_list.blank?
-    	dump_string_array << {}
-    else
-      property_hash = property_list.inject({}) do |temp_hash, property|
-        valid_pro = send(property[0])
-        temp_hash[property[0]] = if valid_pro.blank? then ''
-        else
+    property_list << ['sth_surface', nil, nil]
+    property_hash = property_list.inject({}) do |temp_hash, property|
+      case property[0]
+    	when 'sth_surface' then temp_hash['sth_surface'] = sth_surface
+    	else
+    		valid_pro = send(property[0])
+	      temp_hash[property[0]] = if valid_pro.blank? then ''
+	      else
           case property[2]
           when 'category' then CnProperty.find(:first, :conditions=>["property_string=? and property_cat_id=?", property[0], valid_pro]).tree_string 
           when 'text'			then valid_pro
           when 'time'			then valid_pro.to_formatted_s(:number)
           end
-        end
-        temp_hash
-      end
-      dump_string_array << property_hash unless property_hash.blank?
+	      end
+	    end
+      temp_hash
     end
+    dump_string_array << property_hash unless property_hash.blank?
     sth_struct.split(',').map{|item| item.delete('-')}.each{|part|
       if part =~ /^\d+$/
         dump_string_array << {part => CnLexeme.find(part.to_i).surface}
