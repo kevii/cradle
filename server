@@ -1,0 +1,587 @@
+Script started on Thu 04 Aug 2011 02:23:47 AM JST
+]0;kevin@KEVIN-T410: ~/Applications/rails_projects/cradle-oldkevin@KEVIN-T410:~/Applications/rails_projects/cradle-old$ lscd frames/ls[K[Kscript/server
+=> Booting WEBrick
+=> Rails 2.3.5 application starting on http://0.0.0.0:3000
+./script/../config/../vendor/rails/railties/lib/rails/gem_dependency.rb:119:Warning: Gem::Dependency#version_requirements is deprecated and will be removed on or after August 2010.  Use #requirement
+=> Call with -d to detach
+=> Ctrl-C to shutdown server
+[2011-08-04 02:24:04] INFO  WEBrick 1.3.1
+[2011-08-04 02:24:04] INFO  ruby 1.8.7 (2011-02-18) [x86_64-linux]
+[2011-08-04 02:24:10] INFO  WEBrick::HTTPServer#start: pid=17349 port=3000
+  [4;36;1mSQL (24.2ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.2ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing JpController#index (for 127.0.0.1 at 2011-08-04 02:24:19) [GET]
+  Parameters: {"action"=>"index", "controller"=>"jp"}
+  [4;36;1mJpProperty Load (103.3ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;35;1mJpProperty Columns (0.8ms)[0m   [0mSHOW FIELDS FROM `jp_properties`[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mCnProperty Load (0.8ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;35;1mCnProperty Columns (0.7ms)[0m   [0mSHOW FIELDS FROM `cn_properties`[0m
+Rendering template within layouts/cradle
+Rendering jp/index
+  [4;36;1mJpProperty Load (12.7ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string = 'pos' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mJpProperty Load (5.4ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string = 'ctype' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mJpProperty Load (0.6ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string = 'cform' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;36;1mJpProperty Load (0.3ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (`jp_properties`.`id` = 218) [0m
+  [4;35;1mJpProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (`jp_properties`.`id` = 220) [0m
+  [4;36;1mJpProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (`jp_properties`.`id` = 230) [0m
+  [4;35;1mUser Columns (0.5ms)[0m   [0mSHOW FIELDS FROM `users`[0m
+  [4;36;1mUser Load (0.2ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` IS NULL) LIMIT 1[0m
+  [4;35;1mJpLexeme Columns (0.7ms)[0m   [0mSHOW FIELDS FROM `jp_lexemes`[0m
+  [4;36;1mJpSynthetic Columns (0.7ms)[0m   [0;1mSHOW FIELDS FROM `jp_synthetics`[0m
+  [4;35;1mJpNewProperty Load (0.4ms)[0m   [0mSELECT * FROM `jp_new_properties` WHERE (section='lexeme') [0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `jp_new_properties` WHERE (section='lexeme') [0m
+  [4;35;1mJpNewProperty Columns (0.6ms)[0m   [0mSHOW FIELDS FROM `jp_new_properties`[0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string = 'pos' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`id` IS NULL) LIMIT 1[0m
+  [4;36;1mJpNewProperty Load (0.4ms)[0m   [0;1mSELECT * FROM `jp_new_properties` WHERE (section='synthetic') [0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `jp_new_properties` WHERE (section='synthetic') [0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` IS NULL) LIMIT 1[0m
+Completed in 630ms (View: 344, DB: 151) | 200 OK [http://localhost/]
+  [4;35;1mSQL (0.1ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing JpController#index (for 127.0.0.1 at 2011-08-04 02:24:19) [GET]
+  Parameters: {"action"=>"index", "controller"=>"jp"}
+  [4;35;1mJpProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;36;1mJpProperty Columns (0.5ms)[0m   [0;1mSHOW FIELDS FROM `jp_properties`[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+  [4;35;1mCnProperty Load (0.1ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;36;1mCnProperty Columns (0.7ms)[0m   [0;1mSHOW FIELDS FROM `cn_properties`[0m
+Rendering template within layouts/cradle
+Rendering jp/index
+  [4;35;1mJpProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string = 'pos' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mJpProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string = 'ctype' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mJpProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string = 'cform' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;35;1mJpProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (`jp_properties`.`id` = 218) [0m
+  [4;36;1mJpProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (`jp_properties`.`id` = 220) [0m
+  [4;35;1mJpProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (`jp_properties`.`id` = 230) [0m
+  [4;36;1mUser Columns (0.8ms)[0m   [0;1mSHOW FIELDS FROM `users`[0m
+  [4;35;1mUser Load (0.1ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`id` IS NULL) LIMIT 1[0m
+  [4;36;1mJpLexeme Columns (1.0ms)[0m   [0;1mSHOW FIELDS FROM `jp_lexemes`[0m
+  [4;35;1mJpSynthetic Columns (0.8ms)[0m   [0mSHOW FIELDS FROM `jp_synthetics`[0m
+  [4;36;1mJpNewProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `jp_new_properties` WHERE (section='lexeme') [0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `jp_new_properties` WHERE (section='lexeme') [0m
+  [4;36;1mJpNewProperty Columns (0.4ms)[0m   [0;1mSHOW FIELDS FROM `jp_new_properties`[0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string = 'pos' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` IS NULL) LIMIT 1[0m
+  [4;35;1mJpNewProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_new_properties` WHERE (section='synthetic') [0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `jp_new_properties` WHERE (section='synthetic') [0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`id` IS NULL) LIMIT 1[0m
+Completed in 116ms (View: 95, DB: 5) | 200 OK [http://localhost/]
+  [4;36;1mSQL (0.2ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing ApplicationController#index (for 127.0.0.1 at 2011-08-04 02:24:20) [GET]
+
+ActionController::RoutingError (No route matches "/javascripts/jsProgressBarHandler.js" with {:method=>:get}):
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:104:in `service'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:65:in `run'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:173:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:95:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `each'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:23:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:82:in `start'
+
+Rendering rescues/layout (not_found)
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing UsersController#login (for 127.0.0.1 at 2011-08-04 02:24:22) [GET]
+  Parameters: {"action"=>"login", "controller"=>"users"}
+Rendering template within layouts/cradle
+Rendering users/login
+  [4;36;1mUser Columns (0.7ms)[0m   [0;1mSHOW FIELDS FROM `users`[0m
+  [4;35;1mUser Load (0.1ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`id` IS NULL) LIMIT 1[0m
+Completed in 88ms (View: 86, DB: 1) | 200 OK [http://localhost/users/login]
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing ApplicationController#index (for 127.0.0.1 at 2011-08-04 02:24:23) [GET]
+
+ActionController::RoutingError (No route matches "/javascripts/jsProgressBarHandler.js" with {:method=>:get}):
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:104:in `service'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:65:in `run'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:173:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:95:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `each'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:23:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:82:in `start'
+
+Rendering rescues/layout (not_found)
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing UsersController#login (for 127.0.0.1 at 2011-08-04 02:24:30) [POST]
+  Parameters: {"name"=>"cradle", "commit"=>"Login", "method"=>"post", "action"=>"login", "controller"=>"users", "password"=>"[FILTERED]"}
+  [4;36;1mUser Columns (0.8ms)[0m   [0;1mSHOW FIELDS FROM `users`[0m
+  [4;35;1mUser Load (0.4ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`name` = 'cradle') LIMIT 1[0m
+Redirected to http://localhost:3000/
+Completed in 10ms (DB: 1) | 302 Found [http://localhost/users/login?method=post]
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing JpController#index (for 127.0.0.1 at 2011-08-04 02:24:30) [GET]
+  Parameters: {"action"=>"index", "controller"=>"jp"}
+  [4;36;1mJpProperty Load (0.2ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;35;1mJpProperty Columns (0.7ms)[0m   [0mSHOW FIELDS FROM `jp_properties`[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;35;1mCnProperty Columns (3.0ms)[0m   [0mSHOW FIELDS FROM `cn_properties`[0m
+Rendering template within layouts/cradle
+Rendering jp/index
+  [4;36;1mJpProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string = 'pos' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mJpProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string = 'ctype' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mJpProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string = 'cform' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;36;1mJpProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (`jp_properties`.`id` = 218) [0m
+  [4;35;1mJpProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (`jp_properties`.`id` = 220) [0m
+  [4;36;1mJpProperty Load (0.0ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (`jp_properties`.`id` = 230) [0m
+  [4;35;1mUser Columns (0.5ms)[0m   [0mSHOW FIELDS FROM `users`[0m
+  [4;36;1mUser Load (0.2ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;35;1mJpProperty Load (0.2ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string = 'tagging_state' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mUser Load (0.2ms)[0m   [0;1mSELECT * FROM `users` [0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `users` [0m
+  [4;36;1mJpLexeme Columns (1.0ms)[0m   [0;1mSHOW FIELDS FROM `jp_lexemes`[0m
+  [4;35;1mJpSynthetic Columns (0.5ms)[0m   [0mSHOW FIELDS FROM `jp_synthetics`[0m
+  [4;36;1mJpNewProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `jp_new_properties` WHERE (section='lexeme') [0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `jp_new_properties` WHERE (section='lexeme') [0m
+  [4;36;1mJpNewProperty Columns (0.3ms)[0m   [0;1mSHOW FIELDS FROM `jp_new_properties`[0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string = 'pos' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;35;1mJpProperty Load (0.4ms)[0m   [0mSELECT * FROM `jp_properties` WHERE (property_string = 'sth_tagging_state' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` [0m
+  [4;35;1mJpNewProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_new_properties` WHERE (section='synthetic') [0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `jp_new_properties` WHERE (section='synthetic') [0m
+  [4;35;1mJpProperty Load (0.3ms)[0m   [0mSELECT `jp_properties`.id FROM `jp_properties` WHERE (`jp_properties`.`property_string` = 'lsd_tag1') LIMIT 1[0m
+  [4;36;1mJpProperty Load (0.2ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string = 'lsd_tag1' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mJpProperty Load (0.1ms)[0m   [0mSELECT `jp_properties`.id FROM `jp_properties` WHERE (`jp_properties`.`property_string` = 'lsd_tag2') LIMIT 1[0m
+  [4;36;1mJpProperty Load (0.2ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string = 'lsd_tag2' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mJpProperty Load (0.1ms)[0m   [0mSELECT `jp_properties`.id FROM `jp_properties` WHERE (`jp_properties`.`property_string` = 'tag_omit_ICD') LIMIT 1[0m
+  [4;36;1mJpProperty Load (0.4ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string = 'tag_omit_ICD' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+Completed in 145ms (View: 71, DB: 7) | 200 OK [http://localhost/]
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing ApplicationController#index (for 127.0.0.1 at 2011-08-04 02:24:30) [GET]
+
+ActionController::RoutingError (No route matches "/javascripts/jsProgressBarHandler.js" with {:method=>:get}):
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:104:in `service'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:65:in `run'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:173:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:95:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `each'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:23:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:82:in `start'
+
+Rendering rescues/layout (not_found)
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing CnController#index (for 127.0.0.1 at 2011-08-04 02:24:36) [GET]
+  Parameters: {"action"=>"index", "controller"=>"cn"}
+  [4;36;1mJpProperty Load (0.3ms)[0m   [0;1mSELECT * FROM `jp_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;35;1mJpProperty Columns (0.8ms)[0m   [0mSHOW FIELDS FROM `jp_properties`[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;35;1mCnProperty Columns (0.7ms)[0m   [0mSHOW FIELDS FROM `cn_properties`[0m
+Rendering template within layouts/cradle
+Rendering cn/index
+  [4;36;1mCnProperty Load (0.8ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string = 'pos' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mCnProperty Load (0.1ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (property_string='dictionary' and property_cat_id > 0) [0m
+  [4;36;1mCnProperty Load (0.3ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (`cn_properties`.`id` = 60) [0m
+  [4;35;1mUser Columns (0.8ms)[0m   [0mSHOW FIELDS FROM `users`[0m
+  [4;36;1mUser Load (0.1ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;35;1mCnProperty Load (0.5ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (property_string = 'tagging_state' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mUser Load (0.1ms)[0m   [0;1mSELECT * FROM `users` [0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `users` [0m
+  [4;36;1mJpLexeme Columns (1.0ms)[0m   [0;1mSHOW FIELDS FROM `jp_lexemes`[0m
+  [4;35;1mJpSynthetic Columns (0.9ms)[0m   [0mSHOW FIELDS FROM `jp_synthetics`[0m
+  [4;36;1mJpNewProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `jp_new_properties` WHERE (section='lexeme') [0m
+  [4;35;1mCnLexeme Columns (1.0ms)[0m   [0mSHOW FIELDS FROM `cn_lexemes`[0m
+  [4;36;1mCnSynthetic Columns (1.1ms)[0m   [0;1mSHOW FIELDS FROM `cn_synthetics`[0m
+  [4;35;1mCnNewProperty Load (0.6ms)[0m   [0mSELECT * FROM `cn_new_properties` WHERE (section='lexeme') [0m
+  [4;36;1mCnNewProperty Columns (0.9ms)[0m   [0;1mSHOW FIELDS FROM `cn_new_properties`[0m
+  [4;35;1mCnProperty Load (0.4ms)[0m   [0mSELECT `cn_properties`.id FROM `cn_properties` WHERE (`cn_properties`.`property_string` = 'word_category') LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string = 'word_category' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mCnProperty Load (0.1ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (property_string = 'pos' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;35;1mCnProperty Load (0.4ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (property_string = 'sth_tagging_state' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` [0m
+  [4;35;1mJpNewProperty Load (0.1ms)[0m   [0mSELECT * FROM `jp_new_properties` WHERE (section='synthetic') [0m
+  [4;36;1mCnNewProperty Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_new_properties` WHERE (section='synthetic') [0m
+  [4;35;1mCnProperty Load (0.3ms)[0m   [0mSELECT `cn_properties`.id FROM `cn_properties` WHERE (`cn_properties`.`property_string` = 'relation') LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string = 'relation' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+Completed in 240ms (View: 210, DB: 4) | 200 OK [http://localhost/cn]
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing ApplicationController#index (for 127.0.0.1 at 2011-08-04 02:24:37) [GET]
+
+ActionController::RoutingError (No route matches "/javascripts/jsProgressBarHandler.js" with {:method=>:get}):
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:104:in `service'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:65:in `run'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:173:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:95:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `each'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:23:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:82:in `start'
+
+Rendering rescues/layout (not_found)
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing CnController#update_property_list (for 127.0.0.1 at 2011-08-04 02:25:44) [POST]
+  Parameters: {"option"=>"", "prefix"=>"", "action"=>"update_property_list", "domain"=>"cn", "level"=>"1", "id"=>"0", "type"=>"pos", "level1"=>"NN", "controller"=>"cn", "_"=>"", "state"=>"search"}
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string = 'pos' and parent_id is null) ORDER BY property_cat_id ASC[0m
+  [4;35;1mCnProperty Columns (0.5ms)[0m   [0mSHOW FIELDS FROM `cn_properties`[0m
+  [4;36;1mCnProperty Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (`cn_properties`.`id` = 23) [0m
+  [4;35;1mCnProperty Load (13.2ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (`cn_properties`.parent_id = 23) ORDER BY property_cat_id[0m
+Completed in 55ms (View: 41, DB: 0) | 200 OK [http://localhost/cn/update_property_list/0?domain=cn&level=1&option=&prefix=&state=search&type=pos]
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing CnController#search (for 127.0.0.1 at 2011-08-04 02:25:44) [POST]
+  Parameters: {"commit"=>"查找", "reading"=>{"value"=>"", "operator"=>"="}, "sth_modified_by"=>{"value"=>"", "operator"=>"="}, "dictionary"=>{"value"=>["1"], "operator"=>"or"}, "sth_reading"=>{"value"=>"", "operator"=>"like"}, "updated_at"=>{"section(1i)"=>"", "section(2i)"=>"", "operator"=>"<=", "section(3i)"=>"", "section(4i)"=>"", "section(5i)"=>""}, "action"=>"search", "domain"=>"cn", "surface"=>{"value"=>"", "operator"=>"="}, "sth_struct"=>{"value"=>"", "operator"=>"like"}, "sth_tagging_state"=>{"level1"=>"", "operator"=>"="}, "relation"=>{"level1"=>"", "operator"=>"="}, "id"=>{"value"=>"", "operator"=>"="}, "created_by"=>{"value"=>"", "operator"=>"="}, "search_type"=>"", "tagging_state"=>{"level1"=>"", "operator"=>"="}, "controller"=>"cn", "modified_by"=>{"value"=>"", "operator"=>"="}, "word_category"=>{"level1"=>"", "operator"=>"="}, "sth_pos"=>{"level1"=>"", "operator"=>"="}, "sth_updated_at"=>{"section(1i)"=>"", "section(2i)"=>"", "operator"=>"<=", "section(3i)"=>"", "section(4i)"=>"", "section(5i)"=>""}, "pos"=>{"level1"=>"NN", "operator"=>"="}, "character_number"=>{"value"=>"6", "operator"=>"="}}
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET NAMES 'utf8'[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET SQL_AUTO_IS_NULL=0[0m
+  [4;36;1mCnProperty Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='dictionary' and property_cat_id=1) LIMIT 1[0m
+  [4;35;1mCnProperty Columns (0.5ms)[0m   [0mSHOW FIELDS FROM `cn_properties`[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (`cn_properties`.`id` = 60) [0m
+  [4;35;1mCnLexeme Columns (0.9ms)[0m   [0mSHOW FIELDS FROM `cn_lexemes`[0m
+  [4;36;1mCnSynthetic Columns (0.7ms)[0m   [0;1mSHOW FIELDS FROM `cn_synthetics`[0m
+  [4;35;1mCnNewProperty Load (0.4ms)[0m   [0mSELECT * FROM `cn_new_properties` WHERE (property_string='relation') LIMIT 1[0m
+  [4;36;1mCnNewProperty Columns (0.4ms)[0m   [0;1mSHOW FIELDS FROM `cn_new_properties`[0m
+  [4;35;1mCnNewProperty Load (0.3ms)[0m   [0mSELECT * FROM `cn_new_properties` WHERE (property_string='word_category') LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and value='NN' and parent_id is null) LIMIT 1[0m
+Redirected to http://localhost:3000/cn/list?domain=cn&dynamic_lexeme_condition=&dynamic_synthetic_condition=&show_conditions=%E8%BE%9E%E5%85%B8%3A%28NAIST-cndic-2008%29%2C%26nbsp%3B%26nbsp%3B%26nbsp%3B%E5%AD%97%E6%95%B0%3D6%2C%26nbsp%3B%26nbsp%3B%26nbsp%3B%E8%AF%8D%E6%80%A7%3DNN&simple_search=true&static_condition=+%28+cn_lexemes.dictionary+like+%27%25-1-%25%27+%29++and++char_length%28cn_lexemes.surface%29+%3D+6++and++cn_lexemes.pos+%3D+22+
+Completed in 77ms (DB: 0) | 302 Found [http://localhost/cn/search?domain=cn&search_type=]
+  [4;35;1mSQL (0.1ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing CnController#list (for 127.0.0.1 at 2011-08-04 02:25:44) [GET]
+  Parameters: {"static_condition"=>" ( cn_lexemes.dictionary like '%-1-%' )  and  char_length(cn_lexemes.surface) = 6  and  cn_lexemes.pos = 22 ", "dynamic_synthetic_condition"=>"", "action"=>"list", "domain"=>"cn", "dynamic_lexeme_condition"=>"", "show_conditions"=>"辞典:(NAIST-cndic-2008),&nbsp;&nbsp;&nbsp;字数=6,&nbsp;&nbsp;&nbsp;词性=NN", "controller"=>"cn", "simple_search"=>"true"}
+  [4;35;1mUser Columns (0.8ms)[0m   [0mSHOW FIELDS FROM `users`[0m
+  [4;36;1mUser Load (0.1ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+  [4;35;1mCnLexeme Load (830.9ms)[0m   [0mSELECT * FROM `cn_lexemes` WHERE ( ( cn_lexemes.dictionary like '%-1-%' ) and char_length(cn_lexemes.surface) = 6 and cn_lexemes.pos = 22 ) LIMIT 0, 30[0m
+  [4;36;1mCnLexeme Columns (0.8ms)[0m   [0;1mSHOW FIELDS FROM `cn_lexemes`[0m
+  [4;35;1mCnSynthetic Load (64.7ms)[0m   [0mSELECT `cn_synthetics`.* FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id IN (1605,7305,17386,24054,33543,33773,38458,39406,40637,41037,44723,44724,44725,46655,48930,49634,51203,54563,55345,56198,112542,134912,134913,134914,134915,134916,134917,134918,134919,134920)) [0m
+  [4;36;1mCnSynthetic Columns (0.8ms)[0m   [0;1mSHOW FIELDS FROM `cn_synthetics`[0m
+  [4;35;1mSQL (274.9ms)[0m   [0mSELECT count(*) AS count_all FROM `cn_lexemes` WHERE ( ( cn_lexemes.dictionary like '%-1-%' ) and char_length(cn_lexemes.surface) = 6 and cn_lexemes.pos = 22 ) [0m
+Rendering template within layouts/cradle
+Rendering cn/list
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;35;1mCnProperty Load (1.5ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (property_string='dictionary' and property_cat_id > 0) ORDER BY property_cat_id ASC[0m
+  [4;36;1mCnProperty Columns (0.4ms)[0m   [0;1mSHOW FIELDS FROM `cn_properties`[0m
+  [4;35;1mCnProperty Load (0.1ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (`cn_properties`.`id` = 60) [0m
+  [4;36;1mCnProperty Load (0.5ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (2.7ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 1605 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (1.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 7305 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.0ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (1.8ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 17386 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.7ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 24054 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 33543 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 33773 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (10.0ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 38458 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 39406 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.6ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 40637 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 41037 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.8ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 44723 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 44724 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.0ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 44725 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.0ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 46655 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.6ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 48930 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.8ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 49634 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 51203 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.5ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 54563 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 55345 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 56198 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.5ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 112542 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (1.0ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 134912 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 134913 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 134914 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.6ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 134915 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 134916 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 134917 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 134918 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 134919 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 134920 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+Completed in 1422ms (View: 207, DB: 1) | 200 OK [http://localhost/cn/list?domain=cn&dynamic_lexeme_condition=&dynamic_synthetic_condition=&show_conditions=%E8%BE%9E%E5%85%B8%3A%28NAIST-cndic-2008%29%2C%26nbsp%3B%26nbsp%3B%26nbsp%3B%E5%AD%97%E6%95%B0%3D6%2C%26nbsp%3B%26nbsp%3B%26nbsp%3B%E8%AF%8D%E6%80%A7%3DNN&simple_search=true&static_condition=+%28+cn_lexemes.dictionary+like+%27%25-1-%25%27+%29++and++char_length%28cn_lexemes.surface%29+%3D+6++and++cn_lexemes.pos+%3D+22+]
+  [4;35;1mSQL (0.1ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing ApplicationController#index (for 127.0.0.1 at 2011-08-04 02:25:46) [GET]
+
+ActionController::RoutingError (No route matches "/javascripts/jsProgressBarHandler.js" with {:method=>:get}):
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:104:in `service'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:65:in `run'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:173:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:95:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `each'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:23:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:82:in `start'
+
+Rendering rescues/layout (not_found)
+  [4;35;1mSQL (0.1ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing CnController#list (for 127.0.0.1 at 2011-08-04 02:25:49) [GET]
+  Parameters: {"static_condition"=>" ( cn_lexemes.dictionary like '%-1-%' )  and  char_length(cn_lexemes.surface) = 6  and  cn_lexemes.pos = 22 ", "dynamic_synthetic_condition"=>"", "action"=>"list", "domain"=>"cn", "dynamic_lexeme_condition"=>"", "page"=>"6", "show_conditions"=>"辞典:(NAIST-cndic-2008),&nbsp;&nbsp;&nbsp;字数=6,&nbsp;&nbsp;&nbsp;词性=NN", "controller"=>"cn", "per_page"=>"30", "simple_search"=>"true"}
+  [4;35;1mUser Columns (0.8ms)[0m   [0mSHOW FIELDS FROM `users`[0m
+  [4;36;1mUser Load (0.1ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+  [4;35;1mCnLexeme Load (296.4ms)[0m   [0mSELECT * FROM `cn_lexemes` WHERE ( ( cn_lexemes.dictionary like '%-1-%' ) and char_length(cn_lexemes.surface) = 6 and cn_lexemes.pos = 22 ) LIMIT 150, 30[0m
+  [4;36;1mCnLexeme Columns (54.0ms)[0m   [0;1mSHOW FIELDS FROM `cn_lexemes`[0m
+  [4;35;1mCnSynthetic Load (4.0ms)[0m   [0mSELECT `cn_synthetics`.* FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id IN (135041,135042,135043,135044,135045,135046,135047,135048,135049,135050,135051,135052,135053,135054,135055,135056,135057,135058,135059,135060,135061,135062,135063,135064,135065,135066,135067,135068,135069,135070)) [0m
+  [4;36;1mCnSynthetic Columns (0.8ms)[0m   [0;1mSHOW FIELDS FROM `cn_synthetics`[0m
+  [4;35;1mSQL (0.1ms)[0m   [0mSELECT count(*) AS count_all FROM `cn_lexemes` WHERE ( ( cn_lexemes.dictionary like '%-1-%' ) and char_length(cn_lexemes.surface) = 6 and cn_lexemes.pos = 22 ) [0m
+Rendering template within layouts/cradle
+Rendering cn/list
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;35;1mCnProperty Load (0.3ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (property_string='dictionary' and property_cat_id > 0) ORDER BY property_cat_id ASC[0m
+  [4;36;1mCnProperty Columns (0.7ms)[0m   [0;1mSHOW FIELDS FROM `cn_properties`[0m
+  [4;35;1mCnProperty Load (0.1ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (`cn_properties`.`id` = 60) [0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (1.5ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135041 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135042 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135043 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135044 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135045 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135046 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135047 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135048 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135049 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135050 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.5ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135051 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135052 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135053 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135054 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135055 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135056 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135057 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135058 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135059 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135060 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.2ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.7ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135061 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.5ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135062 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.2ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135063 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135064 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135065 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135066 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135067 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135068 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.3ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135069 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnSynthetic Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135070 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+Completed in 524ms (View: 136, DB: 1) | 200 OK [http://localhost/cn/list?domain=cn&dynamic_lexeme_condition=&dynamic_synthetic_condition=&page=6&per_page=30&show_conditions=%E8%BE%9E%E5%85%B8%3A%28NAIST-cndic-2008%29%2C%26nbsp%3B%26nbsp%3B%26nbsp%3B%E5%AD%97%E6%95%B0%3D6%2C%26nbsp%3B%26nbsp%3B%26nbsp%3B%E8%AF%8D%E6%80%A7%3DNN&simple_search=true&static_condition=+%28+cn_lexemes.dictionary+like+%27%25-1-%25%27+%29++and++char_length%28cn_lexemes.surface%29+%3D+6++and++cn_lexemes.pos+%3D+22+]
+  [4;35;1mSQL (0.1ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing ApplicationController#index (for 127.0.0.1 at 2011-08-04 02:25:50) [GET]
+
+ActionController::RoutingError (No route matches "/javascripts/jsProgressBarHandler.js" with {:method=>:get}):
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:104:in `service'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/httpserver.rb:65:in `run'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:173:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:162:in `start_thread'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:95:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `each'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:92:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:23:in `start'
+  /home/kevin/.rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/webrick/server.rb:82:in `start'
+
+Rendering rescues/layout (not_found)
+  [4;35;1mSQL (0.1ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+DEPRECATION WARNING: Disabling sessions for a single controller has been deprecated. Sessions are now lazy loaded. So if you don't access them, consider them off. You can still modify the session cookie options with request.session_options.. (called from /home/kevin/Applications/rails_projects/cradle-old/app/controllers/application_controller.rb:11)
+
+
+Processing CnController#show (for 127.0.0.1 at 2011-08-04 02:25:56) [GET]
+  Parameters: {"action"=>"show", "id"=>"135043", "controller"=>"cn"}
+  [4;35;1mSQL (0.1ms)[0m   [0mSET NAMES 'utf8'[0m
+  [4;36;1mSQL (0.1ms)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+  [4;35;1mCnLexeme Columns (0.5ms)[0m   [0mSHOW FIELDS FROM `cn_lexemes`[0m
+  [4;36;1mCnLexeme Load (0.3ms)[0m   [0;1mSELECT * FROM `cn_lexemes` WHERE (`cn_lexemes`.`id` = 135043) [0m
+Rendering template within layouts/cradle
+Rendering cn/show
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135043 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnSynthetic Columns (0.8ms)[0m   [0;1mSHOW FIELDS FROM `cn_synthetics`[0m
+  [4;35;1mCnNewProperty Load (0.5ms)[0m   [0mSELECT `cn_new_properties`.id FROM `cn_new_properties` WHERE (`cn_new_properties`.`property_string` = 'surface' AND `cn_new_properties`.`section` = 'lexeme') LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='pos' and property_cat_id=22) LIMIT 1[0m
+  [4;35;1mCnProperty Columns (0.7ms)[0m   [0mSHOW FIELDS FROM `cn_properties`[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='dictionary' and property_cat_id=1) LIMIT 1[0m
+  [4;35;1mCnProperty Load (0.1ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (`cn_properties`.`id` = 60) [0m
+  [4;36;1mCnNewProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_new_properties` WHERE (section='lexeme') [0m
+  [4;35;1mCnNewProperty Columns (0.7ms)[0m   [0mSHOW FIELDS FROM `cn_new_properties`[0m
+  [4;36;1mCnNewProperty Load (0.8ms)[0m   [0;1mSELECT `cn_new_properties`.id FROM `cn_new_properties` WHERE (`cn_new_properties`.`property_string` = 'word_category' AND `cn_new_properties`.`section` = 'lexeme') LIMIT 1[0m
+  [4;35;1mCnNewProperty Load (0.3ms)[0m   [0mSELECT * FROM `cn_new_properties` WHERE (property_string='word_category' and section='lexeme') LIMIT 1[0m
+  [4;36;1mCnLexemeNewPropertyItem Load (184.3ms)[0m   [0;1mSELECT * FROM `cn_lexeme_new_property_items` WHERE (property_id=3 and ref_id=135043) LIMIT 1[0m
+  [4;35;1mCnLexemeNewPropertyItem Columns (0.5ms)[0m   [0mSHOW FIELDS FROM `cn_lexeme_new_property_items`[0m
+  [4;36;1mCnProperty Load (1.3ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='word_category' and property_cat_id=11) LIMIT 1[0m
+  [4;35;1mCnProperty Load (0.4ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (`cn_properties`.`id` = 93) [0m
+  [4;36;1mCnProperty Load (0.2ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (`cn_properties`.`id` = 92) [0m
+  [4;35;1mUser Columns (0.8ms)[0m   [0mSHOW FIELDS FROM `users`[0m
+  [4;36;1mUser Load (0.1ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;35;1mCnProperty Load (0.4ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (property_string='tagging_state' and property_cat_id=1) LIMIT 1[0m
+  [4;36;1mUser Load (0.6ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) [0m
+  [4;35;1mUser Load (0.4ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`id` = 23) [0m
+  [4;36;1mCACHE (0.0ms)[0m   [0;1mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='sth_tagging_state' and property_cat_id=2) LIMIT 1[0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`id` = 23) [0m
+  [4;36;1mCnSynthetic Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_synthetics` WHERE (sth_ref_id=135043) [0m
+  [4;35;1mCnSynthetic Load (0.2ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (sth_ref_id=135043 and sth_meta_id=0) LIMIT 1[0m
+  [4;36;1mCnSynthetic Load (0.7ms)[0m   [0;1mSELECT * FROM `cn_synthetics` WHERE (sth_ref_id=135043 and sth_meta_id=1) LIMIT 1[0m
+  [4;35;1mCnLexeme Load (0.8ms)[0m   [0mSELECT * FROM `cn_lexemes` WHERE (`cn_lexemes`.`id` = 8790) [0m
+  [4;36;1mCnNewProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_new_properties` WHERE (section='synthetic') [0m
+  [4;35;1mCnSyntheticNewPropertyItem Load (95.9ms)[0m   [0mSELECT * FROM `cn_synthetic_new_property_items` WHERE (property_id='2' and ref_id=31425) LIMIT 1[0m
+  [4;36;1mCnSyntheticNewPropertyItem Columns (0.7ms)[0m   [0;1mSHOW FIELDS FROM `cn_synthetic_new_property_items`[0m
+  [4;35;1mCnProperty Load (0.6ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (property_string='relation' and property_cat_id=11) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (`cn_properties`.`id` = 77) [0m
+  [4;35;1mCnSynthetic Load (0.1ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (sth_ref_id=135043 and sth_meta_id=1) LIMIT 1[0m
+  [4;36;1mCnLexeme Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_lexemes` WHERE (`cn_lexemes`.`id` = 135683) [0m
+  [4;35;1mCnLexeme Load (0.7ms)[0m   [0mSELECT * FROM `cn_lexemes` WHERE (`cn_lexemes`.`id` = 8984) [0m
+  [4;36;1mCnNewProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_new_properties` WHERE (section='synthetic') [0m
+  [4;35;1mCnSyntheticNewPropertyItem Load (0.4ms)[0m   [0mSELECT * FROM `cn_synthetic_new_property_items` WHERE (property_id='2' and ref_id=31426) LIMIT 1[0m
+  [4;36;1mCnProperty Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_properties` WHERE (property_string='relation' and property_cat_id=11) LIMIT 1[0m
+  [4;35;1mCnProperty Load (0.1ms)[0m   [0mSELECT * FROM `cn_properties` WHERE (`cn_properties`.`id` = 77) [0m
+  [4;36;1mCnLexeme Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_lexemes` WHERE (`cn_lexemes`.`id` = 135043) [0m
+  [4;35;1mCnSynthetic Load (0.1ms)[0m   [0mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135043 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;36;1mCnSynthetic Load (0.1ms)[0m   [0;1mSELECT * FROM `cn_synthetics` WHERE (sth_ref_id=135043 and sth_meta_id=1) LIMIT 1[0m
+  [4;35;1mCnLexeme Load (0.1ms)[0m   [0mSELECT * FROM `cn_lexemes` WHERE (`cn_lexemes`.`id` = 135683) [0m
+  [4;36;1mCnSynthetic Load (0.5ms)[0m   [0;1mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 135683 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;35;1mCnLexeme Load (0.1ms)[0m   [0mSELECT * FROM `cn_lexemes` WHERE (`cn_lexemes`.`id` = 8984) [0m
+  [4;36;1mCnSynthetic Load (0.7ms)[0m   [0;1mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 8984 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;35;1mCnLexeme Load (0.1ms)[0m   [0mSELECT * FROM `cn_lexemes` WHERE (`cn_lexemes`.`id` = 8790) [0m
+  [4;36;1mCnSynthetic Load (0.4ms)[0m   [0;1mSELECT * FROM `cn_synthetics` WHERE (`cn_synthetics`.sth_ref_id = 8790 AND (sth_meta_id=0)) LIMIT 1[0m
+  [4;35;1mCACHE (0.0ms)[0m   [0mSELECT * FROM `users` WHERE (`users`.`id` = 1) LIMIT 1[0m
+Completed in 698ms (View: 685, DB: 2) | 200 OK [http://localhost/cn/show/135043]
+l ^C[2011-08-04 02:39:48] INFO  going to shutdown ...
+[2011-08-04 02:39:48] INFO  WEBrick::HTTPServer#start done.
+Exiting
+]0;kevin@KEVIN-T410: ~/Applications/rails_projects/cradle-oldkevin@KEVIN-T410:~/Applications/rails_projects/cradle-old$ ls
+[0m[01;34mapp[0m  [01;35mc1.png[0m  [01;34mconfig[0m  [01;34mdb[0m  [01;34mdoc[0m  [01;34mlib[0m  [01;34mlog[0m  [01;35mm.png[0m  [01;34mpublic[0m  Rakefile  README  [01;34mscript[0m  server  [01;34mtest[0m  [01;34mtmp[0m  [01;34mvendor[0m
+[m]0;kevin@KEVIN-T410: ~/Applications/rails_projects/cradle-oldkevin@KEVIN-T410:~/Applications/rails_projects/cradle-old$ exit
+exit
+
+Script done on Thu 04 Aug 2011 02:39:54 AM JST

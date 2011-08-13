@@ -13,3 +13,5 @@ db/schema.rb
 test/**/*
 *~
 *.bak
+db/cor-cn-20110531.sql
+db/cor-jp-20110531.sql
