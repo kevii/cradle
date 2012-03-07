@@ -33,7 +33,7 @@
 						<tr>
 							<th><%= initial_property_name('jp')['reading'] %></th>
 							<td colspan=2><%= h(@lexeme.send("reading")) %></td>
-						</tr>					
+						</tr>
 						<tr class='odd'>
 							<th><%= initial_property_name('jp')['pronunciation'] %></th>
 							<td colspan=2><%= h(@lexeme.send("pronunciation")) %></td>
@@ -72,6 +72,15 @@
 							   @lexeme.dictionary_item.list.each{|dict| temp << JpProperty.find(:first, :conditions=>["property_string='dictionary' and property_cat_id=#{dict.to_i}"]).tree_string }	%>
 							<td  colspan=2><%= h(temp.join(", ")) %></td>
 						</tr>
+
+            <tr>
+              <th>翻訳情報</th>
+              <td colspan=2>
+                <% unless @lexeme.senses.empty? %>
+                  <%= link_to("中国語", :action => 'show_trans', :id => @lexeme.id) %>
+                <% end %>
+              </td>
+            <td>
 						<%	odd_or_even = 0
 						JpNewProperty.find(:all, :conditions=>["section='lexeme'"]).each{|item|
 							next unless session[:jp_dict_id].include?(item.dictionary_id)
@@ -241,3 +250,4 @@
 <% unless @lexeme.struct.blank? %>
 	<script>window.onload=CreateTree();</script>
 <% end %>
+

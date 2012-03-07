@@ -1,13 +1,13 @@
 class CnNewProperty < Chinese
   # mysql table used
-  self.table_name = "cn_new_properties"
-  
+  self.table_name = "cradle_cn.cn_new_properties"
+
   ######################################################
   ##### table refenrence
   ######################################################
   has_many :lexeme_items, :class_name => "CnLexemeNewPropertyItem", :foreign_key =>"property_id"
   has_many :synthetic_items, :class_name => "CnSyntheticNewPropertyItem", :foreign_key =>"property_id"
-  
+
   ######################################################
   ##### validation
   ######################################################
@@ -20,7 +20,7 @@ class CnNewProperty < Chinese
                          :in => CnLexeme.column_names.dup.concat(CnSynthetic.column_names).uniq,
                          :message => "不能使用该“ID”！"
   validates_presence_of :section, :type_field
-  
+
   ######################################################
   ##### callback
   ######################################################
@@ -30,7 +30,7 @@ class CnNewProperty < Chinese
       CnProperty.update_all("property_string = '#{self.property_string}'", "property_string = '#{original.property_string}'")
     end
   end
-  
+
   def before_destroy
     case self.type_field
       when "category"
@@ -43,9 +43,9 @@ class CnNewProperty < Chinese
           errors.add_to_base("<ul><li>仍有使用该属性的单词存在，不能删除“#{self.human_name}”！</li></ul>")
           return false
         end
-    end 
+    end
   end
-  
+
   ######################################################
   ##### method
   ######################################################
@@ -53,3 +53,4 @@ class CnNewProperty < Chinese
     self.find(:all, :conditions =>["section = ? and type_field = ?", section, type], :order=>"id ASC")
   end
 end
+

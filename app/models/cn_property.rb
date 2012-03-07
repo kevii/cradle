@@ -1,12 +1,12 @@
 class CnProperty < Chinese
   # mysql table used
-  self.table_name = "cn_properties"
-  
+  self.table_name = "cradle_cn.cn_properties"
+
   ######################################################
   ##### table refenrence
   ######################################################
   acts_as_tree :order=>"property_cat_id"
-  
+
   def definition
     if ["pos", "tagging_state", "dictionary", "sth_tagging_state"].include?(self.property_string)
       return nil
@@ -108,8 +108,9 @@ class CnProperty < Chinese
     end
     return tree_node_array
   end
-  
+
   def self.find_inside(type, conditions)
   	find(:all, :conditions=>["property_string=? and "+conditions, type])
   end
 end
+

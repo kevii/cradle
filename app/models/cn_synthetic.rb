@@ -1,7 +1,7 @@
 class CnSynthetic < Chinese
   # mysql table used
-  self.table_name = "cn_synthetics"
-  
+  self.table_name = "cradle_cn.cn_synthetics"
+
   ######################################################
   ##### table refenrence
   ######################################################
@@ -64,13 +64,13 @@ class CnSynthetic < Chinese
 			find(:all, :conditions=>["sth_ref_id=?", lexeme_id]).each{|sub_structure| sub_structure.destroy}
   	end
 	end
-  
+
   def sth_tagging_state_item
     CnProperty.find(:first, :conditions=>["property_string='sth_tagging_state' and property_cat_id=?", self.sth_tagging_state])
   end
-  
+
   belongs_to :annotator, :class_name => "User", :foreign_key => "modified_by"
-  
+
   def method_missing(selector, *args)
     string = selector.to_s
     if (string =~ /=$/) != nil
@@ -104,12 +104,12 @@ class CnSynthetic < Chinese
       super
     end
   end
-  
+
   ######################################################
   ##### validation
   ######################################################
   validates_uniqueness_of :sth_ref_id, :scope => [:sth_meta_id]
-  
+
   ######################################################
   ##### method
   ######################################################
@@ -124,7 +124,7 @@ class CnSynthetic < Chinese
     }
     return string_array.join(',&nbsp;&nbsp;&nbsp;')
   end
-  
+
   def get_dump_string(property_list)
     dump_string_array = []
     property_list << ['sth_surface', nil, nil]
@@ -136,7 +136,7 @@ class CnSynthetic < Chinese
 	      temp_hash[property[0]] = if valid_pro.blank? then ''
 	      else
           case property[2]
-          when 'category' then CnProperty.find(:first, :conditions=>["property_string=? and property_cat_id=?", property[0], valid_pro]).tree_string 
+          when 'category' then CnProperty.find(:first, :conditions=>["property_string=? and property_cat_id=?", property[0], valid_pro]).tree_string
           when 'text'			then valid_pro
           when 'time'			then valid_pro.to_formatted_s(:number)
           end
@@ -155,3 +155,4 @@ class CnSynthetic < Chinese
     return dump_string_array
   end
 end
+

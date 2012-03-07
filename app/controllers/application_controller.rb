@@ -6,14 +6,14 @@ class ApplicationController < ActionController::Base
   layout 'cradle'
   helper :all
   include CradleModule
-  
+
   ### Pick a unique cookie name to distinguish our session data from others
   session :session_key => '_cradle_session_id'
   ### set charset
   before_filter :set_charset
-  
+
   filter_parameter_logging :password
-  
+
   def index
       session[:jp_section_list] = ['1_surface', '2_reading', '3_pronunciation', '4_base_id', '5_root_id', '6_dictionary', '7_pos', '8_ctype', '9_cform', '100_sth_struct'] if session[:jp_section_list].blank?
       session[:cn_section_list] = ['1_surface', '2_reading', '3_dictionary', '4_pos', '100_sth_struct'] if session[:cn_section_list].blank?
@@ -39,7 +39,7 @@ class ApplicationController < ActionController::Base
       end
       children.each{|child| id = child.id if child.value == value}
     end
-    params[:prefix].blank? ? prefix = "" : prefix = params[:prefix]+'_' 
+    params[:prefix].blank? ? prefix = "" : prefix = params[:prefix]+'_'
     render :update do |page|
       page.replace prefix+"#{params[:type]}_level#{params[:level].to_i+1}_list",
                    :inline=>"<%= display_property_list(:type=>'#{params[:type]}', :domain=>'#{params[:domain]}', :prefix=>'#{params[:prefix]}', :state=>'#{params[:state]}', :option=>'#{params[:option]}', :id=>#{id}, :level=>#{params[:level].to_i+1}) %>"
@@ -87,7 +87,7 @@ class ApplicationController < ActionController::Base
       end
     }
   end
-  
+
   private
   def authorize
     unless User.find_by_id(session[:user_id])
@@ -96,7 +96,7 @@ class ApplicationController < ActionController::Base
       return
     end
   end
-  
+
   def authorize_admin
     unless User.find_by_id(session[:user_id]).group_name == "admin"
       flash[:notice_err] = "<ul><li>You are not administrator!</li></ul>"
@@ -104,7 +104,7 @@ class ApplicationController < ActionController::Base
       return
     end
   end
-  
+
   ### set charset
   def set_charset
     headers["Content-Type"] = "text/html; charset = UTF-8"
@@ -134,7 +134,7 @@ class ApplicationController < ActionController::Base
       return []
     end
   end
-  
+
   def get_time_string_from_hash(option)
     if option.has_key?("section(1i)")
       return DateTime.civil(option["section(1i)"].to_i, option["section(2i)"].to_i, option["section(3i)"].to_i, option["section(4i)"].to_i, option["section(5i)"].to_i).to_formatted_s(:db)
@@ -142,7 +142,7 @@ class ApplicationController < ActionController::Base
       return DateTime.civil(option["year"].to_i, option["month"].to_i, option["day"].to_i, option["hour"].to_i, option["minute"].to_i).to_formatted_s(:db)
     end
   end
-  
+
   def verify_time_property(option)
     message = ""
     time_string = ""
@@ -174,3 +174,4 @@ class ApplicationController < ActionController::Base
     end
   end
 end
+

@@ -1,0 +1,13 @@
+<table>
+  <tr>
+    <th>中国語翻訳</th>
+    <td>
+      <% unless @lexeme.senses.empty? %>
+        <ul class="senses">
+          <%= render @senses %>
+        </ul>
+      <% end %>
+    </td>
+  </tr>
+</table>
+

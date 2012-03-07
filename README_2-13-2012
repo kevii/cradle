@@ -1,0 +1,22 @@
+1. Software version: ruby 1.8.7 (2011-12-28 patchlevel 357)
+                     gem version 1.3.5
+                     mysql version 5.1.41
+
+2. Import gems: 'cradle.gems' is a gems list file exported by RVM(Ruby Version Manager).
+                use command: $ rvm gemset import cradle.gems
+
+                When importing cradle.gems, it will must appear some errors on 'fiveruns-memcache-client' and 'starling-starling'.
+                use command: $ sudo install fiveruns-memcache-client starling-starling --source http://gems.github.com
+
+              * In windows, there is no RVM which can be used. We have to import all gems manually.
+
+3. Import database: Create two database named 'cradle_jp' and 'cradle_cn' in msyql.
+                    In '<cradle directory>/db', there are two files 'cor-jp-20110531.sql' and 'cor-cn-20110531.sql'.
+                    Import into the corresponding database.
+                    Database configuration is 'database.yml' in '<cradle directory>/config'.
+
+4. Start server: use commands: $ starling -d -p 22122 -P tmp/pids/starling.pid -L log/starling.log -q tmp/
+                               $ script/server
+
+5. Use firefox to browse 'http://localhost:3000'.
+

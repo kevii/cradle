@@ -76,3 +76,23 @@ end
 ### workling and starling for user-triggered background job
 Workling::Remote.dispatcher = Workling::Remote::Runners::StarlingRunner.new
 Workling::Return::Store.instance = Workling::Return::Store::StarlingReturnStore.new
+
+class ActiveRecord::ConnectionAdapters::MysqlAdapter
+  def native_database_types #:nodoc:
+    {
+      :primary_key    => "bigint unsigned auto_increment PRIMARY KEY",
+      :ubigint       => { :name => "bigint unsigned" },
+      :string      => { :name => "varchar", :limit => 255 },
+      :text        => { :name => "text" },
+      :integer     => { :name => "int", :limit => 11 },
+      :float       => { :name => "float" },
+      :decimal     => { :name => "decimal" },
+      :datetime    => { :name => "datetime" },
+      :timestamp   => { :name => "datetime" },
+      :time        => { :name => "time" },
+      :date        => { :name => "date" },
+      :binary      => { :name => "blob" },
+      :boolean     => { :name => "tinyint", :limit => 1 },
+    }
+  end
+end

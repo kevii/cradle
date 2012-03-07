@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  cn_lexeme_ref_id: 
+  text: MyText
+  category: 1
+  lock_version: 1
+
+two:
+  cn_lexeme_ref_id: 
+  text: MyText
+  category: 1
+  lock_version: 1

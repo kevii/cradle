@@ -3,24 +3,24 @@ require 'digest/sha1'
 class User < ActiveRecord::Base
   # mysql table used
   self.table_name = "users"
-  
+
   ######################################################
   ##### table refenrence
   ######################################################
   has_many :created_jp_lexemes, :class_name => "JpLexeme", :foreign_key => "created_by"
   has_many :modified_jp_lexemes, :class_name => "JpLexeme", :foreign_key => "modified_by"
   has_many :modified_jp_synthetics, :class_name => "JpSynthetic", :foreign_key => "modified_by"
-  
-  
+
+
   ######################################################
   ##### validation
   ######################################################
   validates_presence_of :name, :password
   validates_uniqueness_of :name
-  
+
   attr_accessor :password_confirmation
   validates_confirmation_of :password
-  
+
   ######################################################
   ##### callback
   ######################################################
@@ -43,7 +43,7 @@ class User < ActiveRecord::Base
   def password
     @password
   end
-  
+
   def password=(pwd)
     @password = pwd
     create_new_salt
@@ -51,7 +51,7 @@ class User < ActiveRecord::Base
   end
 
   private
-  
+
   def self.encrypted_password(password, salt)
     string_to_hash = password + "cradle" + salt # 'cradle' makes it harder to guess
     Digest::SHA1.hexdigest(string_to_hash)
@@ -60,7 +60,7 @@ class User < ActiveRecord::Base
   def create_new_salt
     self.salt = self.object_id.to_s + rand.to_s
   end
-  
+
   def validate_delete
     if Thread.current["user_id"] == id
       errors.add_to_base("You cannot delete yourself!")
@@ -74,3 +74,4 @@ class User < ActiveRecord::Base
     end
   end
 end
+

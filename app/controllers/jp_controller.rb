@@ -63,6 +63,11 @@ class JpController < ApplicationController
     @lexeme = JpLexeme.find(params[:id].to_i)
   end
 
+  def show_trans
+    @lexeme = JpLexeme.find(params[:id].to_i)
+    @senses = @lexeme.senses
+  end
+
   def show_desc
     render :update do |page|
       page["show_desc"].replace :partial=>"show_desc", :object=>JpLexeme.find(params[:id].to_i)
@@ -136,14 +141,14 @@ class JpController < ApplicationController
 		      #							false means the base word is not specified
 		      # base_type: 1 means base_lexeme_ref is the order in new word series;
 		      #						 2 means base_lexeme_ref is the real base_lexeme_ref field in the database
-		      # error_message will pass to 
+		      # error_message will pass to
 		      lexemes, point_base, base_type, flash.now[:notice_err] = JpLexeme.verify_words_in_base(params, new_lexeme)
 	      	render :partial=>"preview_news", :object=>lexemes, :locals=> {:point_base => point_base, :base_type => base_type, :structure => nil }
 	      end
 	    end
     end
   end
-  
+
   def create
 		lexemes = []
 		other_properties = []
@@ -207,7 +212,7 @@ class JpController < ApplicationController
        		lexeme["root_id"] = temp.root_id
 				end
 	 			passing_lexeme = lexeme.dup
-	      lexeme.delete_if{|k,v| not JpLexeme.column_names.include?(k)}.each{|key, value| temp[key] = value}	 			
+	      lexeme.delete_if{|k,v| not JpLexeme.column_names.include?(k)}.each{|key, value| temp[key] = value}
 				unless temp.valid?
 	        flash.now[:notice_err] = "<ul>" + temp.errors.map{|k,v| '<li>'+v+'</li>'}.join('') + "</ul>"
 	        render :partial=>"preview_edit"
@@ -250,7 +255,7 @@ class JpController < ApplicationController
       		end
       	}
         if params['series_change'] == "true"
-          updating_lexeme.same_base_lexemes.each{|item| 
+          updating_lexeme.same_base_lexemes.each{|item|
             next if item.id == updating_lexeme.id
             item.update_attributes!({:base_id=>updating_lexeme.base_id, :root_id=>updating_lexeme.root_id, :modified_by => session[:user_id]})
           }
@@ -382,13 +387,13 @@ class JpController < ApplicationController
         else
           flash[:notice] = "<ul><li>Root系列から外しました！</li></ul>"
           if params[:base_list].blank?
-            redirect_to :action => "index"  
+            redirect_to :action => "index"
           else
             redirect_to :action => "search", :search_type=>"root", :root_id=>params[:new_root], :domain => 'jp'
           end
           return
         end
-    end  
+    end
   end
 
   private
@@ -475,3 +480,4 @@ class JpController < ApplicationController
     return lexeme, nil
   end
 end
+

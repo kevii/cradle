@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  cn_sense_ref_id: 
+  jp_sense_ref_id: 
+  lock_version: 1
+
+two:
+  cn_sense_ref_id: 
+  jp_sense_ref_id: 
+  lock_version: 1

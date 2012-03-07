@@ -6,11 +6,20 @@ class JpLexeme < ActiveRecord::Base
   ##### table refenrence
   ######################################################
   has_one	:struct, :class_name=>"JpSynthetic", :foreign_key=>"sth_ref_id", :conditions=>"sth_meta_id=0"
-  
+
   has_many :same_base_lexemes,	:class_name=>"JpLexeme",								:foreign_key=>"base_id"
   has_many :sub_structs,				:class_name=>"JpSynthetic",							:foreign_key=>"sth_ref_id",	:dependent=>:destroy
   has_many :dynamic_properties, :class_name=>"JpLexemeNewPropertyItem",	:foreign_key=>"ref_id",			:dependent=>:destroy
   has_many :dynamic_struct_properties, :through=>:sub_structs, :source=>:other_properties
+
+  # tanslations between different languages
+  # has_many :jp_to_cns, :foreign_key=>"jp_id", :dependent=>:destroy
+  # has_many :to_cn, :through=>:jp_to_cns, :source=>:cn
+
+  has_many :senses, :class_name=>"JpLexemeSense", :foreign_key=>"jp_lexeme_ref_id", :dependent=>:destroy
+
+  # has_many :cn_to_jps, :class_name => "CnToJp", :foreign_key => :jp_id, :dependent => :destroy
+
 
   belongs_to :base,				:class_name=>"JpLexeme",	:foreign_key=>"base_id"
   belongs_to :creator,		:class_name=>"User",			:foreign_key=>"created_by"
@@ -20,13 +29,35 @@ class JpLexeme < ActiveRecord::Base
     if self.root_id =~ /^R/ then return nil
     else return JpLexeme.find(self.root_id.to_i) end
   end
-  
+
+  def create_sense!(text)
+    senses.create!(:text => text)
+  end
+
+  def destroy_sense!(jpsense)
+    senses.find_by_jp_lexeme_ref_id(jpsense).destroy
+  end
+
+
+
+#  def if_trans_to_cn?(cnlexeme)
+#    jp_to_cns.find_by_cn_id(cnlexeme)
+#  end
+
+#  def create_trans_to_cn!(cnlexeme)
+#    jp_to_cns.create!(:cn_id => cnlexeme.id)
+#  end
+
+#  def destroy_trans_to_cn!(cnlexeme)
+#    jp_to_cns.find_by_cn_id(cnlexeme).destroy
+#  end
+
   def same_root_lexemes
     if self.root_id.blank? then return nil
     else return JpLexeme.find(:all, :conditions=>["root_id=?", self.root_id], :order=>"id ASC") end
   end
 
-  def pos_item 
+  def pos_item
     JpProperty.find(:first, :conditions=>["property_string='pos' and property_cat_id=?", self.pos])
   end
 
@@ -41,7 +72,7 @@ class JpLexeme < ActiveRecord::Base
   def tagging_state_item
     JpProperty.find(:first, :conditions=>["property_string='tagging_state' and property_cat_id=?", self.tagging_state])
   end
-  
+
   composed_of :dictionary_item, :class_name => "DictionaryItem", :mapping => %w(dictionary dictionary_item)
 
   def method_missing(selector, *args)
@@ -67,17 +98,17 @@ class JpLexeme < ActiveRecord::Base
       end
     else super end
   end
-  
+
   ######################################################
   ##### validation
   ######################################################
   validates_presence_of :surface, :message=>'単語を入力してください！'
 	validates_uniqueness_of :surface, :scope=>[:reading, :pos, :ctype, :cform, :dictionary], :message=>'新規する単語は既に辞書に保存されている！'
-  
+
   ######################################################
   ##### method
   ######################################################
-  
+
   def self.verify_words_in_base(params, lexeme)
     same_base_lexemes = []
 		point_base = nil
@@ -96,8 +127,8 @@ class JpLexeme < ActiveRecord::Base
       # type -3 means that it can not find a match in the list against input's pronunciation
       # type -2 means that it can not find a match in the list against input's reading
       # type -1 means that can not find a match in the list against input's surface
-      # type 1 means that there is only one lexeme in the returned array and it's base is itself 
-      # type 2 means that there are several lexemes in the returned array and their base is the word whose cform_id is 1           
+      # type 1 means that there is only one lexeme in the returned array and it's base is itself
+      # type 2 means that there are several lexemes in the returned array and their base is the word whose cform_id is 1
       case type
       when -1 then err_msg = "<ul><li>単語の入力は間違っている<br/>もしくは活用型、活用形の選択が間違っている</li></ul>"
       when -2 then err_msg = "<ul><li>読みの入力は間違っている<br/>もしくは活用型、活用形の選択が間違っている</li></ul>"
@@ -124,7 +155,7 @@ class JpLexeme < ActiveRecord::Base
       end
     end
 		return same_base_lexemes, point_base, base_type, err_msg
-	end  
+	end
 
 	def self.create_new_word_or_series(params, lexemes, other_properties, user_id)
     new_word = nil
@@ -195,7 +226,7 @@ class JpLexeme < ActiveRecord::Base
     end
     return new_word, new_series
 	end
-	
+
 	def self.delete_lexeme(params)
 		notice_msg = nil
 		err_msg = nil
@@ -228,18 +259,18 @@ class JpLexeme < ActiveRecord::Base
     end
 		return notice_msg, err_msg
 	end
-  
+
   private
   def self.findWordsInSeries( lexeme = {} )
     newLexemes = Array.new
     newLexemes << lexeme
- 
+
     # save single word which does not have cform or ctype
     if lexeme["cform"] == nil or lexeme["ctype"] == nil
     # return type 1 means base is itself
-      return newLexemes, 1 
+      return newLexemes, 1
     end
-    
+
     # save word which has cform and ctype
     seeds = JpCtypeCformSeed.find(:all, :conditions => [" ctype=? and cform=? ", lexeme["ctype"], lexeme["cform"]] )
     if seeds.size == 0
@@ -263,13 +294,13 @@ class JpLexeme < ActiveRecord::Base
         # return type -2 means that can not find a match in the list against input's reading
         if (lexeme["reading"] =~ /#{seed_found.reading_end}$/) == nil
           return newLexemes, -2
-        end 
+        end
         reading_head = $`
         # return type -3 means that can not find a match in the list against input's pronunciation
         if (lexeme["pronunciation"] =~ /#{seed_found.pronunciation_end}$/) == nil
           return newLexemes, -3
         end
-        pronunciation_head = $` 
+        pronunciation_head = $`
       end
 
       series = JpCtypeCformSeed.find(:all, :conditions => " ctype = '#{seed_found.ctype}' and id != '#{seed_found.id}' ")
@@ -298,7 +329,7 @@ class JpLexeme < ActiveRecord::Base
       # return type 2 means base is the word which in newLexemes
       return newLexemes, 2
     end
-  end  
+  end
 
   def self.find_seed(array = [], string ="")
     return array[0] if array.size == 1 and (string =~ /#{array[0].surface_end}$/) != nil
@@ -312,7 +343,7 @@ class JpLexeme < ActiveRecord::Base
       if (string =~ /#{seed.surface_end}$/) != nil
         result = seed
         break
-      end       
+      end
     }
     # nil means that can not find a match in the list against input's surface
     # asterid_seed means that can find a match in the list which does not have a suffix in surface
@@ -327,7 +358,7 @@ class JpLexeme < ActiveRecord::Base
       return result
     end
   end
-  
+
 	def self.save_aux_properties(lexeme, aux_properties, state)
 		if state == 'new'
 			unless aux_properties.blank?
@@ -354,3 +385,4 @@ class JpLexeme < ActiveRecord::Base
 		end
 	end
 end
+

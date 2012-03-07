@@ -6,14 +6,14 @@
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<%= stylesheet_link_tag "cradle", :media => "all" %>
 	<%= javascript_include_tag :defaults %>
-	
+
 	<!-- For main menu... -->
 	<%= stylesheet_link_tag "top_menu", :media => "all" %>
 
     <!-- For tree view -->
 	<%= javascript_include_tag "ECOTree.js" %>
 	<%= stylesheet_link_tag "ECOTree", :media => "all" %>
-	
+
 	<!-- For dumping progress bar -->
 	<%= javascript_include_tag "jsProgressBarHandler.js" %>
 </head>
@@ -21,7 +21,7 @@
 <body id="ChaSen">
 	<div>
 		<div style="float:left; padding-top:10px;"><%= image_tag("matsu-logo.gif") %></div>
-		
+
 		<div id="banner" align="right">
 			<div>
 				<table style="width:95%;">
@@ -37,7 +37,7 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<div id="navigation">
 		<% @user=User.find_by_id(session[:user_id])%>
 	    <% if not @user.blank? %>
@@ -55,7 +55,7 @@
 										<li><%= link_to '複合語属性', :controller => :property, :action => :synthetic_property_index, :domain => 'jp' %></li>
 									</ul>
 								</li>
-							<% end %>	
+							<% end %>
 						</ul>
 					</li>
 					<li class="first_level"><%= link_to '中文辞典', :controller => :cn, :action => :index %>
@@ -78,7 +78,7 @@
 				<%= @user.name %></td>
 				 &nbsp | &nbsp
 				<%= link_to 'Preferrence', :controller=>'/users', :action=>'chg_pwd' %>
-				 &nbsp | &nbsp 
+				 &nbsp | &nbsp
 				<% if @user.group_name=="admin" %>
 					<%= link_to 'User list', :controller=>'/users', :action=>'list_users' %>
 					 &nbsp | &nbsp
@@ -89,6 +89,7 @@
 			<div class="top_menu">
 				<ul>
 					<li class="first_level_first"><%= link_to '日本語辞書', :controller => :jp, :action => :index %></li>
+          <li class="first_level"><%= link_to '中文辞典', :controller => :cn, :action => :index %></li>
 				</ul>
 			</div>
 			<div id="navigation-login">
@@ -110,3 +111,4 @@
 	</div>
 </body>
 </html>
+

@@ -1,0 +1,9 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  jp_sense_ref_id: 
+  cn_lexeme_ref_id: 1
+
+two:
+  jp_sense_ref_id: 
+  cn_lexeme_ref_id: 1

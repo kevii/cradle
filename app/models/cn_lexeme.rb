@@ -1,6 +1,10 @@
 class CnLexeme < Chinese
   # mysql table used
-  self.table_name = "cn_lexemes"
+  # establish_connection :chinese
+  # def self.table_name()
+  #   "cradle_cn.cn_lexemes"
+  # end
+  self.table_name = "cradle_cn.cn_lexemes"
 
   ######################################################
   ##### table refenrence
@@ -11,9 +15,38 @@ class CnLexeme < Chinese
   has_many :dynamic_properties,	:class_name=>"CnLexemeNewPropertyItem",	:foreign_key=>"ref_id",			:dependent=>:destroy
   has_many :dynamic_struct_properties, :through=>:sub_structs, :source=>:other_properties
 
+  # tanslations between different languages
+  # has_many :jp_to_cns, :class_name=>"JpToCn", :foreign_key=>"cn_id", :dependent=>:destroy
+
+  # has_many :cn_to_jps, :foreign_key => :cn_id, :dependent => :destroy
+  # has_many :to_jp, :through => :cn_to_jps, :source => :jp
+
+  has_many :senses, :class_name=>"CnLexemeSense", :foreign_key=>"cn_lexeme_ref_id", :dependent=>:destroy
+
+
   belongs_to :creator,		:class_name=>"User",	:foreign_key=>"created_by"
   belongs_to :annotator,	:class_name=>"User",	:foreign_key=>"modified_by"
-  
+
+  def create_sense!(text)
+    senses.create!(:text => text)
+  end
+
+  def destroy_sense!(cnsense)
+    senses.find_by_cn_lexeme_ref_id(cnsense).destroy
+  end
+
+#  def if_trans_to_jp?(jplexeme)
+#    cn_to_jps.find_by_jp_id(jplexeme)
+#  end
+
+#  def create_trans_to_jp!(jplexeme)
+#    cn_to_jps.create!(:jp_id => jplexeme.id)
+#  end
+
+#  def destroy_trans_to_jp!(jplexeme)
+#    cn_to_jps.find_by_jp_id(jplexeme).destroy
+#  end
+
   def pos_item
     CnProperty.find(:first, :conditions=>["property_string='pos' and property_cat_id=?", self.pos])
   end
@@ -47,10 +80,11 @@ class CnLexeme < Chinese
       end
     else super end
   end
-  
+
   ######################################################
   ##### validation
   ######################################################
   validates_presence_of :surface, :message => '单词不能为空！'
 	validates_uniqueness_of :surface, :scope => [:reading, :pos], :message => '该单词已存在于辞典中！'
 end
+
