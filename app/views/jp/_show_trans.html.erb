@@ -1,0 +1,6 @@
+<li>
+  <%= link_to h(show_trans.cn_lexeme.surface), :controller=>'cn', :action=>'show', :id=>show_trans.cn_lexeme.id %>
+  <%= h show_trans.cn_lexeme.pos_item.tree_string %>
+  <%= show_trans.cn_lexeme.dictionary_item %>
+</li>
+

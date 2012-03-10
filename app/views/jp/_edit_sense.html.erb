@@ -1,0 +1,19 @@
+<tr>
+  <% form_for edit_sense,:index => edit_sense.id, :url => {:controller => 'jp', :action => 'update_sense' } do |f|%>
+  <%= f.error_messages %>
+  <th><%= f.label :意味 %></th>
+  <td><%= f.text_field :text %></td>
+  <td><%= f.submit "Update" %></td>
+  <% end %>
+</tr>
+<tr>
+    <th></th>
+    <td>
+    <% unless edit_sense.translation_to_cn.empty? %>
+    <table class="tanslations">
+      <%= render :partial => 'edit_trans', :collection => edit_sense.get_translation_to_cn %>
+    </table>
+    <% end %>
+    </td>
+</tr>
+

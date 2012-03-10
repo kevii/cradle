@@ -1,0 +1,29 @@
+<table>
+  <tr>
+    <th>         </th>
+    <td>中国語翻訳</td>
+  <tr>
+    <th>         </th>
+    <td>
+      <% unless @lexeme.senses.empty? %>
+        <table class="senses">
+          <%= render :partial => 'edit_sense', :collection => @lexeme.senses  %>
+        </table>
+      <% end %>
+    </td>
+  </tr>
+<table>
+---------------------------
+<table>
+  <tr>
+    <th>         </th>
+    <td>
+      <% form_for @sense, :index => @lexeme.id, :url => {:controller => 'jp', :action => 'create_sense'} do |f|%>
+      <%= f.label :新しい意味 %><br />
+      <%= f.text_field :text %>
+      <%= f.submit "Create" %>
+      <% end %>
+    </td>
+  </tr>
+</table>
+
