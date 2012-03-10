@@ -42,6 +42,6 @@ ActionController::Routing::Routes.draw do |map|
   map.root :controller=>"jp"
   map.connect ':controller/:action/:id'
   map.connect ':controller/:action/:id.:format'
-  # map.resources :cn_lexemes
+  map.resources :jp_lexeme_senses
 end
 

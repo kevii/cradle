@@ -63,10 +63,49 @@ class JpController < ApplicationController
     @lexeme = JpLexeme.find(params[:id].to_i)
   end
 
+  ## author: Kevin Cheng
+  ## content: show_trans, edit_trans, update_sense
   def show_trans
     @lexeme = JpLexeme.find(params[:id].to_i)
     @senses = @lexeme.senses
   end
+
+  def create_trans
+
+  end
+
+  def edit_trans
+    @lexeme = JpLexeme.find(params[:id].to_i)
+    @senses = @lexeme.senses
+    @sense = JpLexemeSense.new
+  end
+
+  def delete_trans
+
+  end
+
+  def create_sense
+    @lexeme = JpLexeme.find_by_id params["jp_lexeme_sense"].keys.first.to_i
+    if @lexeme.create_sense! params["jp_lexeme_sense"].values.first["text"]
+      flash[:success] = "Sense was created."
+      redirect_to :back
+    end
+  end
+
+  def update_sense
+    puts params[:id]
+    @sense = JpLexemeSense.find_by_id params["jp_lexeme_sense"].keys.first.to_i
+    if @sense.update_attributes(params["jp_lexeme_sense"].values.first)
+      flash[:success] = "Sense text was updated."
+      redirect_to :back
+    end
+  end
+
+  def delete_sense
+
+  end
+
+  ## end
 
   def show_desc
     render :update do |page|
@@ -228,6 +267,8 @@ class JpController < ApplicationController
 	    end
     end
   end
+
+
 
   def update
 		lexeme = {}

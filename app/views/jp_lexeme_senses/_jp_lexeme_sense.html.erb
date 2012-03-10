@@ -1,9 +1,0 @@
-<li>
-  <%= h jp_lexeme_sense.text %>
-  <% unless jp_lexeme_sense.translation_to_cn.empty? %>
-    <ul class="tanslations">
-      <%= render jp_lexeme_sense.get_translation_to_cn %>
-    </ul>
-  <% end %>
-</li>
-
