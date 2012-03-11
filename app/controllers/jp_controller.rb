@@ -81,28 +81,39 @@ class JpController < ApplicationController
   end
 
   def delete_trans
-
+    @sense = JpLexemeSense.find_by_id params[:sense_id].to_i
+    @sense.destroy_trans_to_cn! params[:id]
+    redirect_to :back
   end
 
   def create_sense
-    @lexeme = JpLexeme.find_by_id params["jp_lexeme_sense"].keys.first.to_i
-    if @lexeme.create_sense! params["jp_lexeme_sense"].values.first["text"]
+    @lexeme = JpLexeme.find_by_id params[:lexeme_id].to_i
+    if @lexeme.create_sense! params["jp_lexeme_sense"]["text"]
       flash[:success] = "Sense was created."
       redirect_to :back
     end
   end
 
   def update_sense
-    puts params[:id]
-    @sense = JpLexemeSense.find_by_id params["jp_lexeme_sense"].keys.first.to_i
-    if @sense.update_attributes(params["jp_lexeme_sense"].values.first)
+    @sense = JpLexemeSense.find_by_id params[:sense_id].to_i
+    if params["delete_button"]
+      @sense.destroy
+      redirect_to :back
+#      render :action => 'delete_sense', :params => {:sense_id => params["jp_lexeme_sense"].keys.first.to_i}
+    elsif params["jp_lexeme_sense"]["text"].blank?
+      flash[:error] = "Sense text is blank."
+      redirect_to :back
+    elsif @sense.update_attributes(params["jp_lexeme_sense"])
       flash[:success] = "Sense text was updated."
       redirect_to :back
     end
   end
 
+  # not in use
   def delete_sense
-
+    @sense = JpLexemeSense.find_by_id params[:sense_id]
+    @sense.destroy
+    redirect_to :back
   end
 
   ## end

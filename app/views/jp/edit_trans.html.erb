@@ -1,7 +1,7 @@
 <table>
   <tr>
     <th>         </th>
-    <td>中国語翻訳</td>
+    <td><h2>中国語翻訳</h2></td>
   <tr>
     <th>         </th>
     <td>
@@ -18,10 +18,10 @@
   <tr>
     <th>         </th>
     <td>
-      <% form_for @sense, :index => @lexeme.id, :url => {:controller => 'jp', :action => 'create_sense'} do |f|%>
+      <% form_for @sense, :url => {:controller => 'jp', :action => 'create_sense', :lexeme_id => @lexeme.id} do |f|%>
       <%= f.label :新しい意味 %><br />
       <%= f.text_field :text %>
-      <%= f.submit "Create" %>
+      <%= f.submit "Create", :confirm => "Are you sure to add a new sense?"%>
       <% end %>
     </td>
   </tr>

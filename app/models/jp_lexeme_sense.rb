@@ -7,7 +7,7 @@ class JpLexemeSense < ActiveRecord::Base
   has_many :translation_to_cn, :class_name=>"JpToCnTranslation", :foreign_key=>"jp_sense_ref_id", :dependent=>:destroy
   has_many :get_translation_to_cn, :through=>:translation_to_cn, :source=>:to_cn_sense
 
-  validates_presence_of :jp_lexeme_ref_id
+  validates_presence_of :jp_lexeme_ref_id, :text
 
   default_scope :order => 'created_at'
 
