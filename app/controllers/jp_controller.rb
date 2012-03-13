@@ -1,6 +1,7 @@
 class JpController < ApplicationController
   before_filter :set_title
-  before_filter :authorize, :only => [:input_base, :new, :create, :destroy, :edit, :update, :define_root, :save_roots]
+  before_filter :authorize, :only => [:input_base, :new, :create, :destroy, :edit, :update, :define_root, :save_roots,
+                                      :edit_trans, :delete_trans, :create_sense, :update_sense]
 
   include SearchModule
 
@@ -64,14 +65,23 @@ class JpController < ApplicationController
   end
 
   ## author: Kevin Cheng
-  ## content: show_trans, edit_trans, update_sense
+  ## content: :show_trans, :create_trans, :edit_trans, :search_senses, :delete_trans, :create_sense, :update_sense, :delete_sense
   def show_trans
     @lexeme = JpLexeme.find(params[:id].to_i)
     @senses = @lexeme.senses
   end
 
   def create_trans
+    @sense = JpLexemeSense.find_by_id params[:sense_id].to_i
+    puts @sense.text
+    @selected_sense = CnLexemeSense.find_by_id params[:selected_sense].to_i
+    @sense.create_trans_to_cn_by_id! params[:selected_sense].to_i
+    redirect_to :action => 'edit_trans', :id => @sense.jp_lexeme.id
+  end
 
+  def search_senses
+    @sense = JpLexemeSense.find_by_id params[:sense_id].to_i
+    render 'search_senses', :sense_id => params[:sense_id]
   end
 
   def edit_trans
@@ -82,15 +92,15 @@ class JpController < ApplicationController
 
   def delete_trans
     @sense = JpLexemeSense.find_by_id params[:sense_id].to_i
-    @sense.destroy_trans_to_cn! params[:id]
-    redirect_to :back
+    @sense.destroy_trans_to_cn! params[:tran_id]
+    redirect_to :action => 'edit_trans', :id => @sense.jp_lexeme.id
   end
 
   def create_sense
     @lexeme = JpLexeme.find_by_id params[:lexeme_id].to_i
     if @lexeme.create_sense! params["jp_lexeme_sense"]["text"]
       flash[:success] = "Sense was created."
-      redirect_to :back
+      redirect_to :action => 'edit_trans', :id => @lexeme.id
     end
   end
 
@@ -98,14 +108,14 @@ class JpController < ApplicationController
     @sense = JpLexemeSense.find_by_id params[:sense_id].to_i
     if params["delete_button"]
       @sense.destroy
-      redirect_to :back
+      redirect_to :action => 'edit_trans', :id => @sense.jp_lexeme.id
 #      render :action => 'delete_sense', :params => {:sense_id => params["jp_lexeme_sense"].keys.first.to_i}
     elsif params["jp_lexeme_sense"]["text"].blank?
       flash[:error] = "Sense text is blank."
       redirect_to :back
     elsif @sense.update_attributes(params["jp_lexeme_sense"])
       flash[:success] = "Sense text was updated."
-      redirect_to :back
+      redirect_to :action => 'edit_trans', :id => @sense.jp_lexeme.id
     end
   end
 
@@ -113,7 +123,7 @@ class JpController < ApplicationController
   def delete_sense
     @sense = JpLexemeSense.find_by_id params[:sense_id]
     @sense.destroy
-    redirect_to :back
+    redirect_to :action => 'edit_trans', :id => @sense.jp_lexeme.id
   end
 
   ## end

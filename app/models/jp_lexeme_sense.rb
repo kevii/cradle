@@ -19,6 +19,10 @@ class JpLexemeSense < ActiveRecord::Base
     translation_to_cn.create!(:cn_sense_ref_id => cnsense.id)
   end
 
+  def create_trans_to_cn_by_id!(cnsense_id)
+    translation_to_cn.create!(:cn_sense_ref_id => cnsense_id)
+  end
+
   def destroy_trans_to_cn!(cnsense)
     translation_to_cn.find_by_cn_sense_ref_id(cnsense).destroy
   end

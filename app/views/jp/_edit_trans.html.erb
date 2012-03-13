@@ -1,8 +1,0 @@
-<tr>
-  <th><%= link_to h(edit_trans.cn_lexeme.surface), :controller=>'cn', :action=>'show', :id=> edit_trans.cn_lexeme.id %></th>
-  <td><%= h edit_trans.cn_lexeme.pos_item.tree_string %></td>
-  <td><%= h edit_trans.cn_lexeme.dictionary_item.to_s %></td>
-  <td><%= link_to 'delete', :controller => 'jp', :action => 'delete_trans', :sense_id => :sense_id %></td>
-  <%= params[:sense_id] %>
-<tr>
-

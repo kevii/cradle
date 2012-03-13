@@ -1,11 +1,14 @@
 module SearchModule
   def search
     simple_search = "true"
+    unless params[:sense_id].nil?
+      sense_id = params[:sense_id]
+    end
     if params[:search_type].blank?	# for both jp and cn
       search_conditions, show_conditions, notice = verification( params )
       unless notice == ""
         flash[:notice_err] = notice
-        redirect_to :action => 'index'
+        redirect_to :action => 'index', :controller => params[:domain]
         return
       end
       static_condition = search_conditions[0].join(" and ")
@@ -29,14 +32,70 @@ module SearchModule
       dynamic_lexeme_condition = nil
       dynamic_synthetic_condition = nil
       flash[:notice] = flash[:notice]
+
+    ## author: Kevin Cheng
+    elsif params[:domain] == 'cn' and params[:search_type] == 'sense'
+      params.delete(:sense_id)
+      search_conditions, show_conditions, notice = verification( params )
+      unless notice == ""
+        flash[:notice_err] = notice
+        redirect_to :action => 'search_senses', :controller => params[:domain], :sense_id => params[:sense_id]
+        return
+      end
+      static_condition = search_conditions[0].join(" and ")
+      dynamic_lexeme_condition = search_conditions[1].join(" **and** ")
+      simple_search = "false" if search_conditions[1].size > 1
+      dynamic_synthetic_condition = search_conditions[2].join(" **and** ")
+      simple_search = "false" if search_conditions[2].size > 1
+    ## end
+
     end
-    redirect_to :action => "list", :static_condition=>static_condition,
+    action_name = ( (params[:domain] == 'cn' and params[:search_type] == 'sense') ? "list_sense" : "list")
+    redirect_to :action => action_name, :static_condition=>static_condition,
                                    :simple_search=>simple_search,
                                    :dynamic_lexeme_condition=>dynamic_lexeme_condition,
                                    :dynamic_synthetic_condition=>dynamic_synthetic_condition,
                                    :show_conditions => show_conditions,
-                                   :domain => params[:domain]
+                                   :domain => params[:domain],
+                                   :search_type => params[:search_type],
+                                   :sense_id => sense_id # add by Kevin Cheng
   end
+
+  ## author: Kevin Cheng
+  def list_sense
+    params[:page].blank? ? page = nil : page = params[:page].to_i
+    if params[:per_page].blank?
+      per_page = 30
+      params[:per_page] = "30"
+    else
+      per_page = params[:per_page].to_i
+    end
+
+    if session[:user_id].blank? or User.find_by_id(session[:user_id]).blank?
+      temp = session[(params[:domain]+"_dict_id").to_sym].inject([]){|condition_string, dict_id| condition_string <<
+                                                                      " ( #{params     [:domain]}_lexemes.dictionary like '%-#{dict_id}-%' ) "}
+      if temp.size == 1
+        params[:static_condition] << " and " + temp[0]
+      else
+        params[:static_condition] << " and ( " + temp.join(" or ") + " ) "
+      end
+    end
+		@lexemes = get_search_collection(:domain => params[:domain],
+																		 :static_condition => params[:static_condition],
+																		 :dynamic_lexeme_condition => params[:dynamic_lexeme_condition],
+																		 :dynamic_synthetic_condition => params[:dynamic_synthetic_condition],
+																		 :simple_search => params[:simple_search],
+																		 :per_page => per_page,
+																		 :page => page)
+    if @lexemes.total_entries == 0
+      flash[:notice] = params[:domain] == 'cn' ? '<ul><li>単語は見つかりませんでした！</li></ul>' : '<ul><li>所查找单词不存在！</li></ul>'
+      redirect_to :action => 'search_senses', :sense_id => params[:sense_id]
+      return
+    end
+    @pass=params
+    @list = session[(params[:domain]+"_section_list").to_sym]
+  end
+  ## end
 
   def list
     params[:page].blank? ? page = nil : page = params[:page].to_i
@@ -46,7 +105,7 @@ module SearchModule
     else
       per_page = params[:per_page].to_i
     end
-    
+
     if session[:user_id].blank? or User.find_by_id(session[:user_id]).blank?
       temp = session[(params[:domain]+"_dict_id").to_sym].inject([]){|condition_string, dict_id| condition_string << " ( #{params[:domain]}_lexemes.dictionary like '%-#{dict_id}-%' ) "}
       if temp.size == 1
@@ -78,7 +137,7 @@ module SearchModule
     #item1 is Lexeme and Synthetic properties
     #item2 is LexemeNewPropertyItem properties
     #item3 is SyntheticNewPropertyItem properties
-    condition = [[], [], []] 
+    condition = [[], [], []]
     ################################
     case params[:domain]
     when "jp"
@@ -98,7 +157,7 @@ module SearchModule
     	inner_reading_trans = "内部读音"
     	inner_pos_trans = "内部词性"
     end
-    
+
     unless params[:id][:value].blank?
     	if params[:id][:operator] != '='
     		return "", "", "<ul><li>"+error_msg_1+"</li></ul>" if (%r[^\d+$].match(params[:id][:value]) == nil)
@@ -106,7 +165,7 @@ module SearchModule
     		return "", "", "<ul><li>"+error_msg_1_1+"</li></ul>" unless (params[:id][:value] =~ /^(\d+(-\d+)?)(,\s*(\d+(-\d+)?))*$/)
     	end
     end
-    
+
     params.each{|key, value|
       case key
       when "commit", "authenticity_token", "controller", "action", "search_type", "domain" then next
@@ -222,7 +281,7 @@ module SearchModule
                   condition[0] << " #{params[:domain]}_synthetics.#{key} #{params[key][:operator]} (#{series.join(',')}) "
                 when "pos", "ctype", "cform", "tagging_state"
                   result << initial_property_name(params[:domain])[key] + operator0[params[key][:operator]] + temp.tree_string
-                  condition[0] << " #{params[:domain]}_lexemes.#{key} #{params[key][:operator]} (#{series.join(',')}) "  
+                  condition[0] << " #{params[:domain]}_lexemes.#{key} #{params[key][:operator]} (#{series.join(',')}) "
                 end
               end
             when "=", "!="
@@ -375,9 +434,9 @@ module SearchModule
 				  	WHERE ( #{temp_conditions} )
 				  	ORDER BY #{option[:domain]}_lexemes.id ASC
 				  SQL
-				  
+
 					lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find_by_sql(sql_st)
-				
+
 #		      lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :select=> 'id', :conditions=>temp_conditions, :include=>[:sub_structs])
 				end
 			else
@@ -399,9 +458,9 @@ module SearchModule
 				  	WHERE ( #{temp_conditions} )
 			  		ORDER BY #{option[:domain]}_lexemes.id ASC
 				  SQL
-				  
+
 		 			lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find_by_sql(sql_st)
-		 		
+
 #					lexemes = verify_domain(option[:domain])['Lexeme'].constantize.find(:all, :select=> 'id', :conditions=>temp_conditions, :include=>[:dynamic_properties, {:sub_structs=>[:other_properties]}])
 		 		end
 			end
@@ -447,7 +506,7 @@ module SearchModule
     end
     return lexemes
   end
-  
+
   ### :conditions, :domain, :section
   def get_lexeme_ids_from_new_property_items(fields={})
     return nil if fields[:conditions].blank? or fields[:domain].blank? or fields[:section].blank?
@@ -479,7 +538,7 @@ module SearchModule
       return temp_ids.uniq.sort
     end
   end
-  
+
   ### :ids, ;domain
   def install_by_dividing(fields={})
     if fields[:ids].blank?
@@ -503,3 +562,4 @@ module SearchModule
     return collection
   end
 end
+

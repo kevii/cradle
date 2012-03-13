@@ -17,14 +17,10 @@
           <th><%= link_to h(tran.cn_lexeme.surface), :controller=>'cn', :action=>'show', :id=> tran.cn_lexeme.id %></th>
           <td><%= h tran.cn_lexeme.pos_item.tree_string %></td>
           <td><%= h tran.cn_lexeme.dictionary_item.to_s %></td>
-          <td><%= link_to 'delete', :id => tran, :controller => 'jp', :action => 'delete_trans', :sense_id => edit_sense.id %></td>
+          <td><%= link_to 'delete', :tran_id => tran, :controller => 'jp', :action => 'delete_trans', :sense_id => edit_sense.id %></td>
         </tr>
       <% end %>
-<!--
-    <table class="tanslations">
-      <%= render :partial => 'edit_trans', :collection => edit_sense.get_translation_to_cn, :sense_id => edit_sense.id %>
-    </table>
--->
+
       </table>
     <% end %>
     </td>
@@ -32,7 +28,7 @@
 <tr>
     <th></th>
     <td>
-    <% form_for edit_sense, :url => {:controller => 'jp', :action => 'create_trans'}  do |f| %>
+    <% form_for edit_sense, :url => { :action => 'search_senses', :sense_id => edit_sense.id}  do |f| %>
     <%= f.submit 'add trans'%>
     <% end %>
     </td>

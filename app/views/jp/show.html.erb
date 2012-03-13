@@ -75,11 +75,15 @@
 
             <tr>
               <th>翻訳情報</th>
-              <td colspan=2>
+              <td >
                 <% unless @lexeme.senses.empty? %>
                   <%= link_to("中国語", :action => 'show_trans', :id => @lexeme.id) %>
                 <% end %>
               </td>
+
+              <th>
+                <%= link_to("新し", :action => 'show_trans', :id => @lexeme.id) %>
+              </th>
             <td>
 						<%	odd_or_even = 0
 						JpNewProperty.find(:all, :conditions=>["section='lexeme'"]).each{|item|
