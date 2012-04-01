@@ -1,0 +1,220 @@
+<h1>単語： <%= @sense.jp_lexeme.surface%></h1>
+<h2>意味：　<%= @sense.text%></h2>
+<div style="margin-left:2%;">
+	<% form_tag({ :action => "search", :search_type=>"sense", :domain=>'cn', :sense_id => @sense.id}, {:id => "main_input", :method=>"POST"}) do %>
+		<table CELLSPACING=0>
+			<tr height=40 style="background: #E5ECF9;color:#1e2078;padding: 0.2em 1em;">
+				<td align=center><strong style="font-size:125%;padding-left:180px;">单词属性</strong>	</td>
+				<td width="200" align=right>
+					<%= image_tag("load.gif", :id=>'spinner1', :style=>"vertical-align:middle;display:none;") %>
+					<%= button_to_function("重置", "Form.reset('main_input')") %>
+					<%= submit_tag "查找", :onclick=>"Element.show('spinner1');Element.show('spinner2');" %>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=2>
+					<table>
+						<tr>
+							<td width="55"><%= initial_property_name('cn')['id'] %></td>
+							<td width="80">
+								<select id="operator_id" name="id[operator]" style="width:100%;">
+									<%= options_for_select(operator, "=") %>
+								</select>
+							</td>
+							<td width="365"><%= text_field :id, :value, {:style=>"width:100%;", :class=>'text-field'} %></td>
+							<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td width="55"><%= initial_property_name('cn')['surface'] %></td>
+							<td width="80">
+								<select id="operator_surface" name="surface[operator]" style="width:100%;">
+									<%= options_for_select(operator1, "=") %>
+								</select>
+							</td>
+							<td width="365"><%= text_field :surface, :value , {:style=>"width:100%;", :class=>'text-field'} %></td>
+						</tr>
+						<tr>
+							<td><%= initial_property_name('cn')['reading'] %></td>
+							<td>
+								<select id="operator_reading" name="reading[operator]" style="width:100%;">
+									<%= options_for_select(operator1, "=") %>
+								</select>
+							</td>
+							<td><%= text_field :reading, :value , {:style=>"width:100%;", :class=>'text-field'} %></td>
+							<td></td>
+							<td><%= initial_property_name('cn')['pos'] %></td>
+							<td>
+								<select id="operator_pos" name="pos[operator]" style="width:100%;">
+									<%= options_for_select(operator2, "=") %>
+								</select>
+							</td>
+							<td><%= display_property_list(:type=>"pos", :domain=>"cn", :state=>"search") %></td>
+						</tr>
+						<tr>
+							<td rowspan=3><%= initial_property_name('cn')['dictionary'] %></td>
+							<td rowspan=3>
+								<select id="operator_dictionary" name="dictionary[operator]" style="width:100%;">
+									<%= options_for_select(operator5, "or") %>
+								</select>
+							</td>
+							<td rowspan=3>
+								<select id="value_dictionary" name="dictionary[value][]" multiple size=5 style="width:100%;">
+									<option selected value=''></option>
+									<%
+										temp = CnProperty.find_inside('dictionary', 'property_cat_id > 0').map{|dict| [dict.tree_string, dict.property_cat_id]}
+										temp.each_with_index{|item, index| temp.delete_at(index) unless session[:cn_dict_id].include?(item[1])}
+									%>
+									<%= options_for_select(temp) %>
+								</select>
+							</td>
+							<td rowspan=3></td>
+							<td><%= initial_property_name('cn')['character_number'] %></td>
+							<td>
+								<select id="operator_character_number" name="character_number[operator]" style="width:100%;">
+									<%= options_for_select(operator, "=") %>
+								</select>
+							</td>
+							<td>
+								<select id="value_character_number" name="character_number[value]" style="width:80px;">
+									<option selected value=''></option>
+									<%= options_for_select([["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"], ["5", "5"],
+																					["6", "6"], ["7", "7"], ["8", "8"], ["9", "9"], ["10", "10"],
+																					["11", "11"], ["12", "12"], ["13", "13"], ["14", "14"], ["15", "15"],
+																					["16", "16"], ["17", "17"], ["18", "18"], ["19", "19"], ["20", "20"]]) %>
+								</select>
+							</td>
+						</tr>
+						<% if User.find_by_id(session[:user_id]) %>
+							<tr>
+								<td><%= initial_property_name('cn')['tagging_state'] %></td>
+								<td>
+									<select id="operator_tagging_state" name="tagging_state[operator]" style="width:100%;">
+										<%= options_for_select(operator2, "=") %>
+									</select>
+								</td>
+								<td><%= display_property_list(:type=>"tagging_state", :domain=>"cn", :state=>"search") %></td>
+							</tr>
+							<tr>
+								<td><%= initial_property_name('cn')['created_by'] %></td>
+								<td>
+									<select id="operator_created_by" name="created_by[operator]" style="width:100%;">
+										<%= options_for_select(operator3, "=") %>
+									</select>
+								</td>
+								<td><%= collection_select("created_by", "value", User.find(:all), :id, :name, {:include_blank => true}) %></td>
+							</tr>
+							<tr>
+								<td><%= initial_property_name('cn')['updated_at'] %></td>
+								<td>
+									<select id='operator_updated_at' name='updated_at[operator]' style='width:100%;'>
+										<%= options_for_select(operator4, "<=") %>
+									</select>
+								</td>
+								<td><%= datetime_select("updated_at", "section", {:use_month_numbers => true, :include_blank => true}) %></td>
+								<td></td>
+								<td><%= initial_property_name('cn')['modified_by'] %></td>
+								<td>
+									<select id="operator_modified_by" name="modified_by[operator]" style="width:100%;">
+										<%= options_for_select(operator3, "=") %>
+									</select>
+								</td>
+								<td><%= collection_select("modified_by", "value", User.find(:all), :id, :name, {:include_blank => true}) %></td>
+							</tr>
+						<% else %>
+							<tr></tr><tr></tr>
+						<%
+							end
+							unless JpNewProperty.find(:all, :conditions=>["section='lexeme'"]).blank?
+						%>
+							<%= customize_field_html(:domain=>"cn", :section=>"lexeme", :state=>"search") %>
+						<% end %>
+					</table>
+				</td>
+			</tr>
+			<tr height=40 style="background: #E5ECF9;color:#1e2078;padding: 0.2em 1em;">
+				<td align=center><strong style="font-size:125%;padding-left:180px;">合成词属性</strong></td>
+				<td width="200" align=right>
+					<%= image_tag("load.gif", :id=>'spinner2', :style=>"vertical-align:middle;display:none;") %>
+					<%= button_to_function("重置", "Form.reset('main_input')") %>
+					<%= submit_tag "查找", :onclick=>"Element.show('spinner1');Element.show('spinner2');" %>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=2>
+					<table>
+						<tr>
+							<td>内部成分</td>
+							<td>
+								<select id="operator_sth_struct" name="sth_struct[operator]" style="width:100%;">
+									<option selected value='like'>include</option>
+								</select>
+							</td>
+							<td><%= text_field :sth_struct, :value, {:style=>"width:100%;", :class=>'text-field'}%></td>
+							<td></td>
+							<td>内部读音</td>
+							<td>
+								<select id="operator_sth_reading" name="sth_reading[operator]" style="width:100%;">
+									<option select value='like'>include</option>
+								</select>
+							</td>
+							<td><%= text_field :sth_reading, :value, {:style=>"width:100%;", :class=>'text-field'} %></td>
+						</tr>
+						<tr>
+							<td>内部词性</td>
+							<td>
+								<select id="operator_sth_pos" name="sth_pos[operator]" style="width:100%;">
+									<option select value='='>include</option>
+								</select>
+							</td>
+							<td><%= display_property_list(:type=>"pos", :domain=>"cn", :state=>"search", :prefix=>'sth') %></td>
+							<td></td>
+							<% if User.find_by_id(session[:user_id]) %>
+								<td><%= initial_property_name('cn')['sth_tagging_state'] %></td>
+								<td>
+									<select id="operator_sth_tagging_state" name="sth_tagging_state[operator]" style="width:100%;">
+										<%= options_for_select(operator2, "=") %>
+									</select>
+								</td>
+								<td><%= display_property_list(:type=>"sth_tagging_state", :domain=>"cn", :state=>"search") %></td>
+							</tr>
+							<tr>
+								<td><%= initial_property_name('cn')['modified_by'] %></td>
+								<td>
+									<select id="operator_sth_modified_by" name="sth_modified_by[operator]" style="width:100%;">
+										<%= options_for_select(operator3, "=") %>
+									</select>
+								</td>
+								<td><%= collection_select("sth_modified_by", "value", User.find(:all), :id, :name, {:include_blank => true}) %></td>
+								<td></td>
+								<td><%= initial_property_name('cn')['updated_at'] %></td>
+								<td>
+									<select id='operator_sth_updated_at' name='sth_updated_at[operator]' style='width:100%;'>
+										<%= options_for_select(operator4, "<=") %>
+									</select>
+								</td>
+								<td>
+									<%= datetime_select("sth_updated_at", "section", {:use_month_numbers => true, :include_blank => true}) %>
+								</td>
+							</tr>
+						<% else %>
+							</tr>
+						<%
+							end
+							unless JpNewProperty.find(:all, :conditions=>["section='synthetic'"]).blank?
+						%>
+							<%= customize_field_html(:domain=>"cn", :section=>"synthetic", :state=>"search") %>
+						<% end %>
+						<tr>
+							<td width="55"></td>
+							<td width="80"></td>
+							<td width="365"></td>
+							<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+							<td width="55"></td>
+							<td width="80"></td>
+							<td width="365"></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	<% end %>
+</div>
+

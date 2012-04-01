@@ -1,6 +1,6 @@
 class CreateJpLexemeSenses < ActiveRecord::Migration
   def self.up
-    create_table :jp_lexeme_senses do |t|
+    create_table (:jp_lexeme_senses, :options => 'DEFAULT CHARSET=utf8') do |t|
       t.column :jp_lexeme_ref_id, :ubigint
       t.text :text
       t.integer :category

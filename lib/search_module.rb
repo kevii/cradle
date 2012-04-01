@@ -34,7 +34,7 @@ module SearchModule
       flash[:notice] = flash[:notice]
 
     ## author: Kevin Cheng
-    elsif params[:domain] == 'cn' and params[:search_type] == 'sense'
+    elsif params[:search_type] == 'sense'
       params.delete(:sense_id)
       search_conditions, show_conditions, notice = verification( params )
       unless notice == ""
@@ -50,7 +50,7 @@ module SearchModule
     ## end
 
     end
-    action_name = ( (params[:domain] == 'cn' and params[:search_type] == 'sense') ? "list_sense" : "list")
+    action_name = ( (params[:search_type] == 'sense') ? "list_sense" : "list")
     redirect_to :action => action_name, :static_condition=>static_condition,
                                    :simple_search=>simple_search,
                                    :dynamic_lexeme_condition=>dynamic_lexeme_condition,

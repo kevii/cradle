@@ -84,8 +84,8 @@
               <th>
                 <%= link_to("新し", :action => 'show_trans', :id => @lexeme.id) %>
               </th>
-            <td>
-						<%	odd_or_even = 1
+            </tr>
+						<%	odd_or_even = 0
 						JpNewProperty.find(:all, :conditions=>["section='lexeme'"]).each{|item|
 							next unless session[:jp_dict_id].include?(item.dictionary_id)
 							odd_or_even = 1 - odd_or_even %>

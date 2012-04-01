@@ -1,4 +1,12 @@
-
+<tr>
+  <% form_for edit_sense, :url => {:controller => 'jp', :action => 'update_sense', :sense_id => edit_sense.id} do |f|%>
+  <%= f.error_messages %>
+  <th><%= f.label :意味 %></th>
+  <td><%= f.text_field :text %></td>
+  <td><%= f.submit 'Update', :confirm => "Are you sure to update the content of this sense?" %></td>
+  <td><%= f.submit 'Delete',:name => 'delete_button', :confirm => "Are you sure to delete this sense?"%></td>
+  <% end %>
+</tr>
 <tr>
     <th></th>
     <td>
@@ -17,3 +25,12 @@
     <% end %>
     </td>
 </tr>
+<tr>
+    <th></th>
+    <td>
+    <% form_for edit_sense, :url => { :action => 'search_senses', :sense_id => edit_sense.id}  do |f| %>
+    <%= f.submit 'add trans'%>
+    <% end %>
+    </td>
+</tr>
+

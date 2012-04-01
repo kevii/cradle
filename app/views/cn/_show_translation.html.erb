@@ -1,0 +1,6 @@
+<li>
+  <%= link_to h(show_translation.jp_lexeme.surface), :controller=>'jp', :action=>'show', :id=>show_translation.jp_lexeme.id %>
+  <%= h show_translation.jp_lexeme.pos_item.tree_string %>
+  <%= show_translation.jp_lexeme.dictionary_item %>
+</li>
+

@@ -1,0 +1,36 @@
+<tr>
+  <% form_for edit_sense, :url => {:controller => 'cn', :action => 'update_sense', :sense_id => edit_sense.id} do |f|%>
+  <%= f.error_messages %>
+  <th><%= f.label :词义 %></th>
+  <td><%= f.text_field :text %></td>
+  <td><%= f.submit 'Update', :confirm => "Are you sure to update the content of this sense?" %></td>
+  <td><%= f.submit 'Delete',:name => 'delete_button', :confirm => "Are you sure to delete this sense?"%></td>
+  <% end %>
+</tr>
+<tr>
+    <th></th>
+    <td>
+    <% unless edit_sense.translation_to_jp.empty? %>
+      <table class="tanslations">
+      <% edit_sense.get_translation_to_jp.each do |tran|%>
+        <tr>
+          <th><%= link_to h(tran.jp_lexeme.surface), :controller=>'jp', :action=>'show', :id=> tran.jp_lexeme.id %></th>
+          <td><%= h tran.jp_lexeme.pos_item.tree_string %></td>
+          <td><%= h tran.jp_lexeme.dictionary_item.to_s %></td>
+          <td><%= link_to 'delete', :tran_id => tran, :controller => 'cn', :action => 'delete_translation', :sense_id => edit_sense.id %></td>
+        </tr>
+      <% end %>
+
+      </table>
+    <% end %>
+    </td>
+</tr>
+<tr>
+    <th></th>
+    <td>
+    <% form_for edit_sense, :url => { :action => 'search_translations', :sense_id => edit_sense.id}  do |f| %>
+    <%= f.submit 'add trans'%>
+    <% end %>
+    </td>
+</tr>
+

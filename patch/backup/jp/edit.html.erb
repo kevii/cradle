@@ -1,0 +1,14 @@
+<div class="User-control"  style="margin-left:2%;">
+    <fieldset style="width:90%; background: #f7faff;">
+        <legend style="background: #1e2078;">単語編集</legend>
+        <% form_remote_tag  :url =>{:action => :edit},	:update=>"preview_edit" do %>
+			<%= hidden_field_tag :id, params[:id] %>
+            <%= render :partial => 'modification_form', :object=>JpLexeme.find(params[:id]) %>
+			<div style="padding-top:10px;padding-left:15px;padding-bottom:10px;">
+				<%= submit_tag "プレビュー" %>
+			</div>
+        <% end %>
+    </fieldset>
+	<p>
+	<div id="preview_edit"></div>
+</div>

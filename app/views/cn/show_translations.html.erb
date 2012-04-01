@@ -1,0 +1,25 @@
+<table>
+  <tr>
+    <th>中日翻译</th>
+    <td>
+      <% unless @lexeme.senses.empty? %>
+        <ul class="senses">
+          <%= render :partial => 'show_sense', :collection => @senses %>
+        </ul>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <th/>
+    <td>
+      <% if User.find_by_id(session[:user_id]) %>
+	      <table>
+		      <tr>
+			      <td><%= button_to '编辑', {:controller => 'cn', :action => 'edit_translations', :id => @lexeme.id}, :method => :get %></td>
+		      </tr>
+	      </table>
+      <% end %>
+    </td>
+  </tr>
+</table>
+

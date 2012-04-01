@@ -1,0 +1,9 @@
+<li>
+  <%= show_sense.text %>
+  <% unless show_sense.translation_to_jp.empty? %>
+    <ul class="tanslations">
+      <%= render :partial => 'show_translation', :collection => show_sense.get_translation_to_jp %>
+    </ul>
+  <% end %>
+</li>
+

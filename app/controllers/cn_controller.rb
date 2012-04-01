@@ -31,6 +31,83 @@ class CnController < ApplicationController
     @lexeme = CnLexeme.find(params[:id].to_i)
   end
 
+  ## author: Kevin Cheng
+  ## content: manipulation of senses and translations of a lexeme
+  ## methods:[:show_translations, :edit_translations, :search_translations,
+  ##          :create_sense, :update_sense, :delete_sense,
+  ##          :create_translation, :delete_translation]
+  def show_translations
+    @lexeme = CnLexeme.find(params[:id].to_i)
+    @senses = @lexeme.senses
+  end
+
+  def edit_translations
+    @lexeme = CnLexeme.find(params[:id].to_i)
+    @senses = @lexeme.senses
+    @sense = CnLexemeSense.new
+  end
+
+  def search_translations
+    @sense = CnLexemeSense.find_by_id params[:sense_id].to_i
+    render 'search_translations', :sense_id => params[:sense_id]
+  end
+
+  def create_sense
+    @lexeme = CnLexeme.find_by_id params[:lexeme_id].to_i
+    @sense = @lexeme.senses.build params["cn_lexeme_sense"]
+    if @sense.save
+      flash[:notice] = "New sense is created successfully."
+    else
+      flash[:notice_err] = "Sense can not be created."
+    end
+    redirect_to :action => 'edit_translations', :id => @lexeme.id
+  end
+
+  def update_sense
+    @sense = CnLexemeSense.find_by_id params[:sense_id].to_i
+    if params["delete_button"]
+      if @sense.destroy
+        flash[:notice] = "Sense has been deleted successfully."
+      else
+        flash[:notice_err] = "Sense can not be deleted."
+      end
+      redirect_to :action => 'edit_translations', :id => @sense.cn_lexeme.id
+#      render :action => 'delete_sense', :params => {:sense_id => params["jp_lexeme_sense"].keys.first.to_i}
+    elsif params["cn_lexeme_sense"]["text"].blank?
+      flash[:notice_err] = "Sense text is blank."
+      redirect_to :back
+    elsif @sense.update_attributes(params["cn_lexeme_sense"])
+      flash[:notice] = "Sense text was updated."
+      redirect_to :action => 'edit_translations', :id => @sense.cn_lexeme.id
+    end
+  end
+  # not in use
+  def delete_sense
+    @sense = CnLexemeSense.find_by_id params[:sense_id]
+    @sense.destroy
+    redirect_to :action => 'edit_trans', :id => @sense.cn_lexeme.id
+  end
+
+  def create_translation
+    @sense = CnLexemeSense.find_by_id params[:sense_id].to_i
+    #@selected_sense = JpLexemeSense.find_by_id params[:selected_sense].to_i
+    if @sense.create_trans_to_jp_by_id! params[:selected_sense].to_i
+      flash[:notice] = "New translation_to_jp is created successfully."
+    else
+      flash[:notice_err] = "Translation_to_jp can not be created."
+    end
+    redirect_to :action => 'edit_trans', :id => @sense.cn_lexeme.id
+  end
+
+  def delete_translation
+    @sense = CnLexemeSense.find_by_id params[:sense_id].to_i
+    @sense.destroy_trans_to_jp! params[:tran_id]
+    redirect_to :action => 'edit_trans', :id => @sense.cn_lexeme.id
+  end
+
+
+  ## end
+
   def show_desc
     render :update do |page|
       page["show_desc"].replace :partial=>"show_desc", :object=>CnLexeme.find(params[:id].to_i)
@@ -190,3 +267,4 @@ class CnController < ApplicationController
     return lexeme, nil
   end
 end
+

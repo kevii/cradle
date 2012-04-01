@@ -73,9 +73,12 @@ class JpController < ApplicationController
 
   def create_trans
     @sense = JpLexemeSense.find_by_id params[:sense_id].to_i
-    puts @sense.text
-    @selected_sense = CnLexemeSense.find_by_id params[:selected_sense].to_i
-    @sense.create_trans_to_cn_by_id! params[:selected_sense].to_i
+    #@selected_sense = CnLexemeSense.find_by_id params[:selected_sense].to_i
+    if @sense.create_trans_to_cn_by_id! params[:selected_sense].to_i
+      flash[:notice] = "New translation_to_cn is created successfully."
+    else
+      flash[:notice_err] = "Translation_to_cn can not be created."
+    end
     redirect_to :action => 'edit_trans', :id => @sense.jp_lexeme.id
   end
 
@@ -98,23 +101,30 @@ class JpController < ApplicationController
 
   def create_sense
     @lexeme = JpLexeme.find_by_id params[:lexeme_id].to_i
-    if @lexeme.create_sense! params["jp_lexeme_sense"]["text"]
-      flash[:success] = "Sense was created."
-      redirect_to :action => 'edit_trans', :id => @lexeme.id
+    @sense = @lexeme.senses.build params["jp_lexeme_sense"]
+    if @sense.save
+      flash[:notice] = "New sense is created successfully."
+    else
+      flash[:notice_err] = "Sense can not be created."
     end
+    redirect_to :action => 'edit_trans', :id => @lexeme.id
   end
 
   def update_sense
     @sense = JpLexemeSense.find_by_id params[:sense_id].to_i
     if params["delete_button"]
-      @sense.destroy
+      if @sense.destroy
+        flash[:notice] = "Sense has been deleted successfully."
+      else
+        flash[:notice_err] = "Sense can not be deleted."
+      end
       redirect_to :action => 'edit_trans', :id => @sense.jp_lexeme.id
 #      render :action => 'delete_sense', :params => {:sense_id => params["jp_lexeme_sense"].keys.first.to_i}
     elsif params["jp_lexeme_sense"]["text"].blank?
-      flash[:error] = "Sense text is blank."
+      flash[:notice_err] = "Sense text is blank."
       redirect_to :back
     elsif @sense.update_attributes(params["jp_lexeme_sense"])
-      flash[:success] = "Sense text was updated."
+      flash[:notice] = "Sense text was updated."
       redirect_to :action => 'edit_trans', :id => @sense.jp_lexeme.id
     end
   end

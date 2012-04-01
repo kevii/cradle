@@ -33,7 +33,7 @@
 							<tr>
 								<th><%= initial_property_name('cn')['reading'] %></th>
 								<td colspan=2><%= h(@lexeme.send("reading")) %></td>
-							</tr>					
+							</tr>
 							<tr class='odd'>
 								<th><%= initial_property_name('cn')['pos'] %></th>
 								<td colspan=2><%= h(@lexeme.pos_item.tree_string) unless @lexeme.send("pos").blank?  %></td>
@@ -72,6 +72,17 @@
 								</td>
 							</tr>
 							<% } %>
+              <tr>
+                <th>翻译信息</th>
+                <td colspan=2>
+                  <% unless @lexeme.senses.empty? %>
+                    <%= link_to("日语", :action => 'show_translations', :id => @lexeme.id) %>
+                  <% end %>
+                </td>
+                <th>
+                  <%= link_to("新建", :action => 'show_translations', :id => @lexeme.id) %>
+                </th>
+              <tr>
 							<% if User.find_by_id(session[:user_id]) %>
 							<tr <%= "class='odd'" if odd_or_even == 1 %>>
 								<th><%= initial_property_name('cn')['tagging_state'] %></th>
@@ -240,3 +251,4 @@
 <% unless @lexeme.struct.blank? %>
 	<script>window.onload=CreateTree();</script>
 <% end %>
+

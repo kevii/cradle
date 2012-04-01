@@ -1,7 +1,7 @@
 class CreateCnToJpTranslations < ActiveRecord::Migration
   ActiveRecord::Base.establish_connection :chinese
   def self.up
-    create_table :cn_to_jp_translations do |t|
+    create_table (:cn_to_jp_translations, :options => 'DEFAULT CHARSET=utf8') do |t|
       t.column :cn_sense_ref_id, :ubigint
       t.column :jp_sense_ref_id, :ubigint
       t.integer :lock_version
